@@ -5,28 +5,28 @@
 #GUSTAVO QUINTERO
 #ALKES - 
 ##########################################################################
-//include ($_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php');
+require_once("/app/9001/vendor/autoload.php");
 use Medoo\Medoo;
 
 session_start();
-
+$database = new Medoo();
 function getBackgrounds()
 {
-    $database = new Medoo();
+    global $database;
     $tema = $database->select('usuarios', 'backgrounds', ['id' => $_SESSION['idusuario']]);
     return $tema[0];
 }
 
 function getCard()
 {
-    $database = new Medoo();
+    global $database;
     $tema = $database->select('usuarios', 'cards', ['id' => $_SESSION['idusuario']]);
     return $tema[0];
 }
 
 function getProductos_tipos()
 {
-    $database = new Medoo();
+    global $database;
     $registros = $database->select("productos_tipos", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
@@ -40,7 +40,7 @@ function getProductos_tipos()
 
 function getCategorias()
 {
-    $database = new Medoo();
+    global $database;
     $registros = $database->select("categorias", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
@@ -55,7 +55,7 @@ function getCategorias()
 
 function getSubcategorias($categoria)
 {
-    $database = new Medoo();
+    global $database;
     $registros = $database->select("subcategorias", "*", [
         "idcategoria" => $categoria,
         "ORDER" => ["id" => "ASC"]
@@ -70,7 +70,7 @@ function getSubcategorias($categoria)
 
 function getSubsubcategorias($subcategoria)
 {
-    $database = new Medoo();
+    global $database;
     $registros = $database->select("subsubcategorias", "*", [
         "idsubcategoria" => $subcategoria,
         "ORDER" => ["id" => "ASC"]
@@ -98,7 +98,7 @@ function verificarLogueo()
 function verificaRegistroRepetido($tabla, $columna, $dato, $idb=0)
 {
     $bandera=false;
-    $database = new Medoo();
+    global $database;
     $registros = $database->select($tabla, "*", [
         $columna => $dato,
         "id[!]" => $idb // Excluye el registro con este id
@@ -218,7 +218,7 @@ function headHtml($modulo, $submodulo)
 
 function encabezado()
 {
-    $database = new Medoo();
+    global $database;
     $entidades = $database->select("entidades", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
@@ -399,7 +399,7 @@ function encabezadoContenido($modulo, $submodulo = false)
 function menu($modulo, $submodulo)
 {
     // Conexión a la base de datos con Medoo
-    $database = new Medoo();
+    global $database;
 
     // Obtener todos los módulos principales
     $modulos = $database->select('modulos', [
