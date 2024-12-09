@@ -100,7 +100,7 @@ function login($form)
             "usuario" => $user
         ]);
 
-        $response->redirect('Vistas/Dashboard/index.php');
+        $response->redirect('vistas/inicio/index.php');
     } else {
         // Credenciales inválidas
         if ($diferencia_minutos >= 15) {

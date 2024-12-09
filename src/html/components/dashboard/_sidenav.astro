@@ -75,15 +75,6 @@ const htmlPath = convertPathToHtml(path);
             </li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a
-            href={htmlPath + "/generate/theme.html"}
-            class:list={["nav-link", page === "theme-generate" && "active"]}
-          >
-            <i class="nav-icon bi bi-palette"></i>
-            <p>Theme Generate</p>
-          </a>
-        </li>
         <li class:list={["nav-item", mainPage === "widgets" && "menu-open"]}>
           <a
             href="#"
@@ -163,11 +154,11 @@ const htmlPath = convertPathToHtml(path);
             </li>
             <li class="nav-item">
               <a
-                href={htmlPath + "/layout/layout-custom-area.html"}
-                class:list={["nav-link", page === "layout-custom-area" && "active"]}
+                href={htmlPath + "/layout/fixed-complete.html"}
+                class:list={["nav-link", page === "fixed-complete" && "active"]}
               >
                 <i class="nav-icon bi bi-circle"></i>
-                <p>Layout <small>+ Custom Area </small></p>
+                <p>Fixed Complete</p>
               </a>
             </li>
             <li class="nav-item">
@@ -232,15 +223,6 @@ const htmlPath = convertPathToHtml(path);
               >
                 <i class="nav-icon bi bi-circle"></i>
                 <p>General</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                href={htmlPath + "/UI/icons.html"}
-                class:list={["nav-link", page === "icons" && "active"]}
-              >
-                <i class="nav-icon bi bi-circle"></i>
-                <p>Icons</p>
               </a>
             </li>
             <li class="nav-item">

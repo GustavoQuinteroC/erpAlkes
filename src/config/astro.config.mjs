@@ -15,17 +15,5 @@ export default defineConfig({
   integrations: [mdx()],
   srcDir: './src/html',
   cacheDir: './dist/pages',
-  outDir: './dist/pages',
-  vite: {
-    resolve: {
-      alias: {
-        '@components': '/src/html/components'
-      }
-    },
-    server: {
-      watch: {
-        ignored: ['!**/dist/**']
-      }
-    }
-  }
+  outDir: './dist/pages'
 })
