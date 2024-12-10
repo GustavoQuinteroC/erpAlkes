@@ -25,8 +25,6 @@ class alkesGlobal
         $this->response = jaxon()->newResponse();
     }
 
-    
-
     function cambiarEntidad($id)
     {
         $_SESSION['entidad'] = $id;

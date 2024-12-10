@@ -9,6 +9,28 @@ use Medoo\Medoo;
 
 session_start();
 $database = new Medoo();
+
+function cerrarSession()
+{
+    #mas o menos esta es la estructura:
+    session_start();
+    session_destroy();
+
+    if (isset($_COOKIE['remember_me'])) {
+        $database = new Medoo();
+        $database->update("usuarios", [
+            "token_recuerdame" => null
+        ], [
+            "token_recuerdame" => $_COOKIE['remember_me']
+        ]);
+
+        setcookie("remember_me", "", time() - 3600, "/"); // Expirar la cookie
+    }
+
+    header("Location: index.php");
+    exit;
+}
+
 function getBackgrounds()
 {
     global $database;
