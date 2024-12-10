@@ -1,5 +1,27 @@
 <?php
-include("/app/9001/controladores/Login.php");
+session_start();
+require_once("controladores/login.php");
+use Medoo\Medoo;
+if (!isset($_SESSION['usuario']))
+{
+  if (isset($_COOKIE['recuerdame_alkes'])) {
+    $database = new Medoo();
+    $token = $_COOKIE['recuerdame_alkes'];
+
+    $usuario = $database->select("usuarios", [
+        "id"
+    ], [
+        "token_recuerdame" => $token
+    ]);
+
+    if (!empty($usuario)) {
+        $_SESSION['idusuario'] = $usuario[0]['id'];
+        header("Location: vistas/inicio/index.php");
+        exit;
+    }
+  }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

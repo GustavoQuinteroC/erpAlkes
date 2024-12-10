@@ -5,7 +5,6 @@
 #GUSTAVO QUINTERO
 #ALKES - 
 ##########################################################################
-require_once("/app/9001/vendor/autoload.php");
 use Medoo\Medoo;
 
 session_start();

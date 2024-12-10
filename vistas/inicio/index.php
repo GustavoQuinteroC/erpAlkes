@@ -1,3 +1,35 @@
+<?php
+session_start();
+require_once("../../controladores/globales/jaxon/funciones.php");
+
+if (!isset($_SESSION['usuario']))
+{
+  if (isset($_COOKIE['recuerdame_alkes'])) {
+    global $database;
+    $token = $_COOKIE['recuerdame_alkes'];
+
+    $usuario = $database->select("usuarios", [
+        "id"
+    ], [
+        "token_recuerdame" => $token
+    ]);
+    if (!empty($usuario)) {
+        $_SESSION['idusuario'] = $usuario[0]['id'];
+    }
+    else
+    {
+      header("Location: ../index.php");
+    }
+  }
+  else
+  {
+    header("Location: ../index.php");
+  }
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en"> <!--begin::Head-->
 

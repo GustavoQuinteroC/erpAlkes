@@ -5,8 +5,8 @@
 #GUSTAVO QUINTERO
 #ALKES - 
 ##########################################################################
-include ($_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php');
-include ($_SERVER["DOCUMENT_ROOT"] . '/controladores/globales/funciones_php.php');
+require_once("/app/9001/vendor/autoload.php");
+require_once("/app/9001/controladores/globales/php/funciones.php");
 use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
@@ -24,6 +24,8 @@ class alkesGlobal
     {
         $this->response = jaxon()->newResponse();
     }
+
+    
 
     function cambiarEntidad($id)
     {
