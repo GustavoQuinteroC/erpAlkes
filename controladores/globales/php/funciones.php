@@ -10,7 +10,39 @@ use Medoo\Medoo;
 session_start();
 $database = new Medoo();
 
-function cerrarSession()
+function validarSesion()
+{
+    if (!isset($_SESSION['usuario'])) {
+        if (isset($_COOKIE['recuerdame_alkes'])) {
+            global $database;
+            $token = $_COOKIE['recuerdame_alkes'];
+            $usuario = $database->select("usuarios", [
+                "id"
+            ], [
+                "token_recuerdame" => $token
+            ]);
+            if (!empty($usuario)) {
+                $_SESSION['idusuario'] = $usuario[0]['id'];
+            } else {
+                // Redirección al login
+                $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+                $host = $_SERVER['HTTP_HOST'];
+                header("Location: $protocolo://$host");
+                exit;
+            }
+        } else {
+            // Redirección al login si no hay cookie
+            $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'];
+            header("Location: $protocolo://$host");
+            exit;
+        }
+    }
+}
+
+
+
+function cerrarSesion()
 {
     #mas o menos esta es la estructura:
     session_start();
@@ -105,28 +137,17 @@ function getSubsubcategorias($subcategoria)
 }
 
 
-function verificarLogueo()
+function verificaRegistroRepetido($tabla, $columna, $dato, $idb = 0)
 {
-    // Verificar si el usuario no está logueado
-    if (!isset($_SESSION['idusuario']) or !isset($_SESSION['identidad'])) {
-        // Redirigir al usuario a la página de inicio de sesión
-        header('Location: https://' . $_SERVER['HTTP_HOST'] . '/index.php');
-        exit(); // Asegurar que el script se detiene después de la redirección
-    }
-    return;
-}
-
-function verificaRegistroRepetido($tabla, $columna, $dato, $idb=0)
-{
-    $bandera=false;
+    $bandera = false;
     global $database;
     $registros = $database->select($tabla, "*", [
         $columna => $dato,
         "id[!]" => $idb // Excluye el registro con este id
     ]);
     // Verificar si el usuario no está logueado
-    if (count($registros)>0) {
-        $bandera=true;
+    if (count($registros) > 0) {
+        $bandera = true;
     }
     return $bandera;
 }
@@ -158,17 +179,23 @@ function validar_global($form, $reglas)
         $tipos = [
             'string' => 'is_string',
             'int' => function ($v) {
-                return filter_var($v, FILTER_VALIDATE_INT) !== false; },
+                return filter_var($v, FILTER_VALIDATE_INT) !== false;
+            },
             'float' => function ($v) {
-                return filter_var($v, FILTER_VALIDATE_FLOAT) !== false; },
+                return filter_var($v, FILTER_VALIDATE_FLOAT) !== false;
+            },
             'email' => function ($v) {
-                return filter_var($v, FILTER_VALIDATE_EMAIL) !== false; },
+                return filter_var($v, FILTER_VALIDATE_EMAIL) !== false;
+            },
             'url' => function ($v) {
-                return filter_var($v, FILTER_VALIDATE_URL) !== false; },
+                return filter_var($v, FILTER_VALIDATE_URL) !== false;
+            },
             'boolean' => function ($v) {
-                return is_bool(filter_var($v, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)); },
+                return is_bool(filter_var($v, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE));
+            },
             'date' => function ($v) {
-                return strtotime($v) !== false; }
+                return strtotime($v) !== false;
+            }
         ];
 
         if (isset($regla['tipo']) && isset($tipos[$regla['tipo']]) && !$tipos[$regla['tipo']]($valor)) {

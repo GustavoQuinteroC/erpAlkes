@@ -1,32 +1,7 @@
 <?php
 session_start();
 require_once("../../controladores/globales/jaxon/funciones.php");
-
-if (!isset($_SESSION['usuario']))
-{
-  if (isset($_COOKIE['recuerdame_alkes'])) {
-    global $database;
-    $token = $_COOKIE['recuerdame_alkes'];
-
-    $usuario = $database->select("usuarios", [
-        "id"
-    ], [
-        "token_recuerdame" => $token
-    ]);
-    if (!empty($usuario)) {
-        $_SESSION['idusuario'] = $usuario[0]['id'];
-    }
-    else
-    {
-      header("Location: ../index.php");
-    }
-  }
-  else
-  {
-    header("Location: ../index.php");
-  }
-}
-
+validarSesion();
 ?>
 
 
@@ -86,66 +61,7 @@ if (!isset($_SESSION['usuario']))
                         <li class="nav-item d-none d-md-block"> <a href="#" class="nav-link">Aprende</a> </li>
                     </ul> <!--end::Start Navbar Links--> <!--begin::End Navbar Links-->
                     <ul class="navbar-nav ms-auto"> <!--begin::Navbar Search-->
-                        <li class="nav-item"> <a class="nav-link" data-widget="navbar-search" href="#" role="button"> <i class="bi bi-search"></i> </a> </li> <!--end::Navbar Search--> <!--begin::Messages Dropdown Menu-->
-                        <li class="nav-item dropdown"> <a class="nav-link" data-bs-toggle="dropdown" href="#"> <i class="bi bi-chat-text"></i> <span class="navbar-badge badge text-bg-danger">3</span> </a>
-                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <a href="#" class="dropdown-item"> <!--begin::Message-->
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0"> <img src="../../../dist/assets/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 rounded-circle me-3"> </div>
-                                        <div class="flex-grow-1">
-                                            <h3 class="dropdown-item-title">
-                                                Brad Diesel
-                                                <span class="float-end fs-7 text-danger"><i class="bi bi-star-fill"></i></span>
-                                            </h3>
-                                            <p class="fs-7">Call me whenever you can...</p>
-                                            <p class="fs-7 text-secondary"> <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
-                                            </p>
-                                        </div>
-                                    </div> <!--end::Message-->
-                                </a>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"> <!--begin::Message-->
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0"> <img src="../../../dist/assets/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 rounded-circle me-3"> </div>
-                                        <div class="flex-grow-1">
-                                            <h3 class="dropdown-item-title">
-                                                John Pierce
-                                                <span class="float-end fs-7 text-secondary"> <i class="bi bi-star-fill"></i> </span>
-                                            </h3>
-                                            <p class="fs-7">I got your message bro</p>
-                                            <p class="fs-7 text-secondary"> <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
-                                            </p>
-                                        </div>
-                                    </div> <!--end::Message-->
-                                </a>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"> <!--begin::Message-->
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0"> <img src="../../../dist/assets/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 rounded-circle me-3"> </div>
-                                        <div class="flex-grow-1">
-                                            <h3 class="dropdown-item-title">
-                                                Nora Silvester
-                                                <span class="float-end fs-7 text-warning"> <i class="bi bi-star-fill"></i> </span>
-                                            </h3>
-                                            <p class="fs-7">The subject goes here</p>
-                                            <p class="fs-7 text-secondary"> <i class="bi bi-clock-fill me-1"></i> 4 Hours Ago
-                                            </p>
-                                        </div>
-                                    </div> <!--end::Message-->
-                                </a>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-                            </div>
-                        </li> <!--end::Messages Dropdown Menu--> <!--begin::Notifications Dropdown Menu-->
-                        <li class="nav-item dropdown"> <a class="nav-link" data-bs-toggle="dropdown" href="#"> <i class="bi bi-bell-fill"></i> <span class="navbar-badge badge text-bg-warning">15</span> </a>
-                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <span class="dropdown-item dropdown-header">15 Notifications</span>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"> <i class="bi bi-envelope me-2"></i> 4 new messages
-                                    <span class="float-end text-secondary fs-7">3 mins</span> </a>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"> <i class="bi bi-people-fill me-2"></i> 8 friend requests
-                                    <span class="float-end text-secondary fs-7">12 hours</span> </a>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"> <i class="bi bi-file-earmark-fill me-2"></i> 3 new reports
-                                    <span class="float-end text-secondary fs-7">2 days</span> </a>
-                                <div class="dropdown-divider"></div> <a href="#" class="dropdown-item dropdown-footer">
-                                    See All Notifications
-                                </a>
-                            </div>
-                        </li> <!--end::Notifications Dropdown Menu--> <!--begin::Fullscreen Toggle-->
+                        
                         <li class="nav-item"> <a class="nav-link" href="#" data-lte-toggle="fullscreen"> <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i> <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i> </a> </li> <!--end::Fullscreen Toggle--> <!--begin::User Menu Dropdown-->
                         <li class="nav-item dropdown user-menu"> <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> <img src="../../../dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> <span class="d-none d-md-inline">Alexander Pierce</span> </a>
                             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> <!--begin::User Image-->
@@ -220,29 +136,7 @@ if (!isset($_SESSION['usuario']))
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=" crossorigin="anonymous"></script> <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8=" crossorigin="anonymous"></script> <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     <script src="../../../dist/js/adminlte.js"></script> <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-    <script>
-        const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
-        const Default = {
-            scrollbarTheme: "os-theme-light",
-            scrollbarAutoHide: "leave",
-            scrollbarClickScroll: true,
-        };
-        document.addEventListener("DOMContentLoaded", function() {
-            const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-            if (
-                sidebarWrapper &&
-                typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
-            ) {
-                OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-                    scrollbars: {
-                        theme: Default.scrollbarTheme,
-                        autoHide: Default.scrollbarAutoHide,
-                        clickScroll: Default.scrollbarClickScroll,
-                    },
-                });
-            }
-        });
-    </script> <!--end::OverlayScrollbars Configure--> <!--end::Script-->
+    
 </body><!--end::Body-->
 
 </html>

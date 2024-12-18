@@ -5,8 +5,8 @@
 #GUSTAVO QUINTERO
 #ALKES - 
 ##########################################################################
-require_once("/app/9001/vendor/autoload.php");
-require_once("/app/9001/controladores/globales/php/funciones.php");
+require_once(__DIR__ ."/../../../vendor/autoload.php");
+require_once(__DIR__ ."/../php/funciones.php");
 use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;

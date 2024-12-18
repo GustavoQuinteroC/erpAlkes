@@ -1,43 +1,21 @@
-# build output
+# Archivos de entorno
+.env
+.env.*.local
 
+# Cachés
+.cache/
 
-# generated types
-.astro/
-
-# unwanted types
-**/env.d.ts
-
-# System / Log files
-*.DS_Store
+# Archivo de log
 *.log
 
-# Archives
-*.zip
-
-# Sass Cache
-.sass-cache
-
-# Project files
-.idea
-nbproject
-nbproject/private
+# Archivos del editor/IDE
 .vscode/
 .vs/
 
-# Node / Bower
-node_modules/
-bower_components/
+# Archivos temporales
+*.swp
+*.swo
+*.tmp
+*.pid
+*.bak
 
-# Docs
-/docs/_site/
-/docs/vendor/
-/docs/.bundle/
-/docs_html/
-.jekyll-cache/
-.jekyll-metadata
-
-# ETC
-TODO
-test.html
-ad.js
-/.cache/

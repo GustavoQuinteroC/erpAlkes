@@ -200,17 +200,8 @@ class Medoo
      * @codeCoverageIgnore
      */
 
-    public function __construct()
+    public function __construct(array $options)
     {
-        $options = [
-            'type' => 'mysql',
-            'host' => '192.168.100.2',
-            'port' => '20002',
-            'database' => 'erpalkes',
-            'username' => 'erpalkes',
-            'password' => 'erpalkes.1124',
-            'charset' => 'utf8mb4',
-        ];
         if (isset($options['prefix'])) {
             $this->prefix = $options['prefix'];
         }
