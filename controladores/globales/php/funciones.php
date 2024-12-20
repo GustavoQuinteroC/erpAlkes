@@ -56,6 +56,23 @@ function validarSesion()
     }
 }
 
+function getBackground()
+{
+    // Acceder a la variable global $database
+    global $database;
+
+    // Ejecutar la consulta usando Medoo
+    $background = $database->select("usuarios", ["backgrounds"], ["id" => $_SESSION['idusuario']]);
+
+    // Verificar si se encontró un resultado
+    if (!empty($background) && isset($background[0]['backgrounds'])) {
+        return $background[0]['backgrounds'];
+    }
+
+    return "";
+}
+
+
 
 function headHtml($modulo, $submodulo)
 {
@@ -84,7 +101,7 @@ function headHtml($modulo, $submodulo)
     print $html;
 }
 
-function printSidebar()
+function menuLateral()
 {
     $html = "
     <div class=\"app-wrapper\"> <!--begin::Sidebar-->
@@ -120,6 +137,53 @@ function printSidebar()
     ";
     print $html;
 }
+
+function scriptsHtml()
+{
+	$html = "<!-- jQuery -->
+    <script src=\"/plugins/jquery/jquery.min.js\"></script>
+	<script src=\"/_js/jquery-ui-1.14.0.custom/jquery-ui.min.js\" type=\"text/javascript\"></script>
+    <!-- Bootstrap 4 -->
+    <script src=\"/plugins/bootstrap/js/bootstrap.bundle.min.js\"></script>
+    <!-- DataTables  & Plugins -->
+    <script src=\"/plugins/datatables/jquery.dataTables.min.js\"></script>
+    <script src=\"/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js\"></script>
+    <script src=\"/plugins/datatables-responsive/js/dataTables.responsive.min.js\"></script>
+    <script src=\"/plugins/datatables-responsive/js/responsive.bootstrap4.min.js\"></script>
+    <script src=\"/plugins/datatables-buttons/js/dataTables.buttons.min.js\"></script>
+    <script src=\"/plugins/datatables-buttons/js/buttons.bootstrap4.min.js\"></script>
+    <script src=\"/plugins/jszip/jszip.min.js\"></script>
+    <script src=\"/plugins/pdfmake/pdfmake.min.js\"></script>
+    <script src=\"/plugins/pdfmake/vfs_fonts.js\"></script>
+    <script src=\"/plugins/datatables-buttons/js/buttons.html5.min.js\"></script>
+    <script src=\"/plugins/datatables-buttons/js/buttons.print.min.js\"></script>
+    <script src=\"/plugins/datatables-buttons/js/buttons.colVis.min.js\"></script>
+    <!-- AdminLTE App -->
+    <script src=\"/dist/js/adminlte.min.js\"></script>
+    <script src=\"/plugins/select2/js/select2.full.min.js\"></script>
+    <script src=\"/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js\"></script>
+    <script src=\"/plugins/moment/moment.min.js\"></script>
+    <script src=\"/plugins/inputmask/jquery.inputmask.min.js\"></script>
+    <script src=\"/plugins/daterangepicker/daterangepicker.js\"></script>
+    <script src=\"/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js\"></script>
+    <script src=\"/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js\"></script>
+    <script src=\"/plugins/bootstrap-switch/js/bootstrap-switch.min.js\"></script>
+    <script src=\"/plugins/bs-stepper/js/bs-stepper.min.js\"></script>
+    <script src=\"/plugins/dropzone/min/dropzone.min.js\"></script>
+    <link rel=\"stylesheet\" href=\"/plugins/sweetalert2/sweetalert2.min.css\">
+    <script src=\"/plugins/sweetalert2/sweetalert2.min.js\"></script>
+    <script src=\"https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/browser/overlayscrollbars.browser.es6.min.js\"></script>
+    <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script src=\"https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js\"></script>
+    <!--Plugin(Bootstrap 5)-->
+    <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js\"></script>";
+	print $html;
+}
+
+
+
+
+
 
 
 
@@ -526,141 +590,7 @@ function encabezadoContenido($modulo, $submodulo = false)
 }
 
 
-function menu($modulo, $submodulo)
-{
-    // Conexión a la base de datos con Medoo
-    global $database;
 
-    // Obtener todos los módulos principales
-    $modulos = $database->select('modulos', [
-        'id',
-        'nombre',
-        'ruta',
-        'icono',
-        'orden'
-    ], [
-        'padre_id' => null,
-        'ORDER' => ['orden' => 'ASC']
-    ]);
-
-    $usuario = $database->select('usuarios', '*', [
-        'id' => $_SESSION['idusuario']
-    ]);
-
-    // Consulta en Medoo sin abreviaciones
-    $datos_empresa = $database->select('entidades', [
-        '[>]empresas' => ['idempresa' => 'id']
-    ], [
-        'empresas.nombre_comercial',
-        'entidades.descripcion'
-    ], [
-        'entidades.id' => $_SESSION['identidad']
-    ]);
-
-
-
-    // Construcción del menú
-    $menu = '<aside class="main-sidebar sidebar-dark-primary elevation-4">
-                <a href="/Vistas/Dashboard/index.php" class="brand-link">
-                    <img src="/assets/images/logoMinimal.jpg" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                    <span class="brand-text font-weight-light">' . $datos_empresa[0]['nombre_comercial'] . '</span>
-                </a>
-                <div class="sidebar">
-                    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                        <div class="info">
-                            <a href="#" class="d-block">' . $usuario[0]['nombre'] . ' - ' . $datos_empresa[0]['descripcion'] . '</a>
-                        </div>
-                    </div>
-                    <nav class="mt-2">
-                        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">';
-
-    // Iterar sobre los módulos principales
-    foreach ($modulos as $mod) {
-        // Reemplazar "_" por " " en el nombre del módulo
-        $mod['nombre'] = str_replace('_', ' ', $mod['nombre']);
-        $isActiveModulo = ($modulo == $mod['nombre']) ? ' active bg-' . getCard() . '' : '';
-        $isOpenModulo = ($modulo == $mod['nombre']) ? ' menu-open' : '';
-        $hasSubmodulos = $database->has('modulos', ['padre_id' => $mod['id']]);
-
-        $menu .= '<li class="nav-item' . ($hasSubmodulos ? ' has-treeview' : '') . $isOpenModulo . '">
-                    <a href="' . $mod['ruta'] . '" class="nav-link' . $isActiveModulo . '">
-                        <i class="nav-icon fas ' . $mod['icono'] . '"></i>
-                        <p>' . ucwords($mod['nombre']) . ($hasSubmodulos ? '<i class="right fas fa-angle-left"></i>' : '') . '</p>
-                    </a>';
-
-        if ($hasSubmodulos) {
-            $submodulos = $database->select('modulos', [
-                'nombre',
-                'ruta',
-                'icono'
-            ], [
-                'padre_id' => $mod['id'],
-                'ORDER' => ['orden' => 'ASC']
-            ]);
-
-            $menu .= '<ul class="nav nav-treeview">';
-            foreach ($submodulos as $submod) {
-                // Reemplazar "_" por " " en el nombre del submódulo
-                $submod['nombre'] = str_replace('_', ' ', $submod['nombre']);
-                $isActiveSubmodulo = ($submodulo == $submod['nombre']) ? ' active' : '';
-                $menu .= '<li class="nav-item">
-                            <a href="' . $submod['ruta'] . '" class="nav-link' . $isActiveSubmodulo . '">
-                                <i class="fas ' . $submod['icono'] . ' nav-icon"></i>
-                                <p>' . ucwords($submod['nombre']) . '</p>
-                            </a>
-                        </li>';
-            }
-            $menu .= '</ul>';
-        }
-
-        $menu .= '</li>';
-    }
-
-    $menu .= '        </ul>
-                    </nav>
-                </div>
-            </aside>';
-
-    echo $menu;
-}
-
-
-function scriptHtml()
-{
-    $html =
-        '<!-- jQuery -->
-        <script src="/plugins/jquery/jquery.min.js"></script>
-        <!-- Bootstrap 4 -->
-        <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-        <!-- DataTables  & Plugins -->
-        <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
-        <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-        <script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-        <script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-        <script src="/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-        <script src="/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-        <script src="/plugins/jszip/jszip.min.js"></script>
-        <script src="/plugins/pdfmake/pdfmake.min.js"></script>
-        <script src="/plugins/pdfmake/vfs_fonts.js"></script>
-        <script src="/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-        <script src="/plugins/datatables-buttons/js/buttons.print.min.js"></script>
-        <script src="/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-        <!-- AdminLTE App -->
-        <script src="/dist/js/adminlte.min.js"></script>
-        <script src="/plugins/select2/js/select2.full.min.js"></script>
-        <script src="/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
-        <script src="/plugins/moment/moment.min.js"></script>
-        <script src="/plugins/inputmask/jquery.inputmask.min.js"></script>
-        <script src="/plugins/daterangepicker/daterangepicker.js"></script>
-        <script src="/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
-        <script src="/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
-        <script src="/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-        <script src="/plugins/bs-stepper/js/bs-stepper.min.js"></script>
-        <script src="/plugins/dropzone/min/dropzone.min.js"></script>
-		<script src="/plugins/sweetalert2/sweetalert2.min.js"></script>
-		<link rel="stylesheet" href="/plugins/sweetalert2/sweetalert2.min.css">';
-    print $html;
-}
 
 
 
