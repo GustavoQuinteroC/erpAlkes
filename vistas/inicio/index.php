@@ -24,7 +24,7 @@ validarSesion();
 
 <body class="layout-fixed-complete sidebar-expand-lg bg-body-tertiary"> <!--begin::App Wrapper-->
     <div class="app-wrapper"> <!--begin::Sidebar-->
-        <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
+        <aside class="app-sidebar bg-body shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
             <div class="sidebar-brand"> <!--begin::Brand Link--> <a href="../index.html" class="brand-link"> <!--begin::Brand Image--> <img src="../../../dist/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow"> <!--end::Brand Image--> <!--begin::Brand Text--> <span class="brand-text fw-light">AdminLTE 4</span> <!--end::Brand Text--> </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
             <div class="sidebar-wrapper">
                 <nav class="mt-2"> <!--begin::Sidebar Menu-->
@@ -89,13 +89,13 @@ validarSesion();
                     <div class="container-fluid"> <!--begin::Row-->
                         <div class="row">
                             <div class="col-sm-8">
-                                <h3 class="mb-0">Fixed Complete <small>(Sidebar, Header & Footer)</small></h3>
+                                <h3 class="mb-0">Ventas - Facturas <small>(FAA00001)</small></h3>
                             </div>
                             <div class="col-sm-4">
                                 <ol class="breadcrumb float-sm-end">
-                                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="#">Ventas</a></li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Fixed Layout
+                                        Facturas
                                     </li>
                                 </ol>
                             </div>

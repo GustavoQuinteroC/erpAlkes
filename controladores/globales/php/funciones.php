@@ -6,9 +6,25 @@
 #ALKES - 
 ##########################################################################
 use Medoo\Medoo;
+use Dotenv\Dotenv;
 
 session_start();
-$database = new Medoo();
+
+// Cargar las variables de entorno
+$dotenv = Dotenv::createImmutable(__DIR__."/../../..");
+$dotenv->load();
+
+// Conectar a la base de datos con Medoo utilizando las variables de entorno
+$database = new Medoo([
+    'type' => $_ENV['DB_CONNECTION'],   // Tipo de base de datos (mysql)
+    'host' => $_ENV['DB_HOST'],         // Dirección del host
+    'port' => $_ENV['DB_PORT'],         // Puerto
+    'database' => $_ENV['DB_DATABASE'], // Nombre de la base de datos
+    'username' => $_ENV['DB_USERNAME'], // Usuario
+    'password' => $_ENV['DB_PASSWORD'], // Contraseña
+    'charset' => 'utf8mb4',             // Codificación de caracteres
+]);
+
 
 function validarSesion()
 {
