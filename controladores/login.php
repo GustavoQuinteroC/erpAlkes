@@ -4,11 +4,29 @@ require_once("/app/9001/vendor/autoload.php");
 use Jaxon\Jaxon;
 use function Jaxon\jaxon;
 use Jaxon\Response\Response;
+use Dotenv\Dotenv;
 use Medoo\Medoo;
+
+// Cargar las variables de entorno
+$dotenv = Dotenv::createImmutable(__DIR__."/..");
+$dotenv->load();
 
 $url_base = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $jaxon = jaxon();
 $jaxon->setOption('core.request.uri', $url_base);
+
+
+// Conectar a la base de datos con Medoo utilizando las variables de entorno
+$database = new Medoo([
+    'type' => $_ENV['DB_CONNECTION'],   // Tipo de base de datos (mysql)
+    'host' => $_ENV['DB_HOST'],         // Dirección del host
+    'port' => $_ENV['DB_PORT'],         // Puerto
+    'database' => $_ENV['DB_DATABASE'], // Nombre de la base de datos
+    'username' => $_ENV['DB_USERNAME'], // Usuario
+    'password' => $_ENV['DB_PASSWORD'], // Contraseña
+    'charset' => 'utf8mb4',             // Codificación de caracteres
+]);
+
 
 function alerta($icono, $titulo, $texto, $focus = "", $funcion = "")
 {
@@ -18,18 +36,18 @@ function alerta($icono, $titulo, $texto, $focus = "", $funcion = "")
     $enfoqueScript = !empty($focus) ? 'setTimeout(function() { document.getElementById("' . addslashes($focus) . '").focus(); }, 2);' : '';
     $funcionScript = !empty($funcion) ? $funcion . ';' : '';
     $script = <<<SCRIPT
-Swal.fire({
-    title: "{$titulo}",
-    text: "{$texto}",
-    icon: "{$icono}",
-    showConfirmButton: true
-}).then((result) => {
-    if (result.isConfirmed) {
-        {$enfoqueScript}
-        {$funcionScript}
-    }
-});
-SCRIPT;
+    Swal.fire({
+        title: "{$titulo}",
+        text: "{$texto}",
+        icon: "{$icono}",
+        showConfirmButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            {$enfoqueScript}
+            {$funcionScript}
+        }
+    });
+    SCRIPT;
 
     // Agregar el script al response
     $respuesta->script($script);
@@ -44,10 +62,10 @@ function login($form)
     $pass = str_replace("'", "", $form['clave']);
     $pass = str_replace('"', '', $pass);
     $pass = sha1($pass);
-
-    $database = new Medoo();
+    
 
     // Obtener información del usuario
+    global $database;
     $usuario = $database->select("usuarios", [
         "id",
         "identidad",

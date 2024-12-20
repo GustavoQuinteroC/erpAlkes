@@ -1,11 +1,10 @@
 <?php
 session_start();
 require_once("controladores/login.php");
-use Medoo\Medoo;
 if (!isset($_SESSION['usuario']))
 {
   if (isset($_COOKIE['recuerdame_alkes'])) {
-    $database = new Medoo();
+    global $database;
     $token = $_COOKIE['recuerdame_alkes'];
 
     $usuario = $database->select("usuarios", [
