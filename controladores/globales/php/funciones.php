@@ -103,10 +103,30 @@ function headHtml($modulo, $submodulo)
 
 function menuLateral()
 {
+    // Acceder a la variable global $database
+    global $database;
+
+    // Consulta simple para obtener el nombre comercial
+    $resultado = $database->select(
+        "usuarios", // Tabla principal
+        [
+            "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+            "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+        ],
+        "empresas.nombre_comercial", // Columna seleccionada
+        [
+            "usuarios.id" => $_SESSION['idusuario'] // Condición WHERE
+        ]
+    );
+
+    // Si no hay resultados, usar un valor por defecto
+    $nombreComercial = $resultado[0] ?? "Mi Empresa";
+
+    // Generar el HTML del menú lateral
     $html = "
     <div class=\"app-wrapper\"> <!--begin::Sidebar-->
         <aside class=\"app-sidebar bg-body shadow\" data-bs-theme=\"dark\"> <!--begin::Sidebar Brand-->
-            <div class=\"sidebar-brand\"> <!--begin::Brand Link--> <a href=\"../index.html\" class=\"brand-link\"> <!--begin::Brand Image--> <img src=\"../../../dist/assets/img/AdminLTELogo.png\" alt=\"AdminLTE Logo\" class=\"brand-image opacity-75 shadow\"> <!--end::Brand Image--> <!--begin::Brand Text--> <span class=\"brand-text fw-light\">AdminLTE 4</span> <!--end::Brand Text--> </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
+            <div class=\"sidebar-brand\"> <!--begin::Brand Link--> <a href=\"../index.html\" class=\"brand-link\"> <!--begin::Brand Image--> <img src=\"../../../dist/assets/img/AdminLTELogo.png\" alt=\"AdminLTE Logo\" class=\"brand-image opacity-75 shadow\"> <!--end::Brand Image--> <!--begin::Brand Text--> <span class=\"brand-text fw-light\">$nombreComercial</span> <!--end::Brand Text--> </a> <!--end::Brand Link--> </div> <!--end::Sidebar Brand--> <!--begin::Sidebar Wrapper-->
             <div class=\"sidebar-wrapper\">
                 <nav class=\"mt-2\"> <!--begin::Sidebar Menu-->
                     <ul class=\"nav sidebar-menu flex-column\" data-lte-toggle=\"treeview\" role=\"menu\" data-accordion=\"false\">
@@ -135,8 +155,12 @@ function menuLateral()
         </aside> <!--end::Sidebar-->
     </div>
     ";
+
+    // Imprimir el HTML
     print $html;
 }
+
+
 
 function scriptsHtml()
 {
