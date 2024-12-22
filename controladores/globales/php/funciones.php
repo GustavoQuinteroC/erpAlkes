@@ -101,6 +101,93 @@ function headHtml($modulo, $submodulo)
     print $html;
 }
 
+function encabezado()
+{
+    global $database;
+
+    // Asegúrate de que $_SESSION['idusuario'] está configurada.
+    if (!isset($_SESSION['idusuario'])) {
+        return '<p>Error: No se ha establecido la sesión del usuario.</p>';
+    }
+
+    // Consultar datos del usuario desde la base de datos.
+    $usuarioId = $_SESSION['idusuario'];
+    $usuario = $database->get("usuarios", ["nombre", "departamento"], ["id" => $usuarioId]);
+
+    // Verificar si la consulta devolvió resultados.
+    if (!$usuario) {
+        return '<p>Error: Usuario no encontrado en la base de datos.</p>';
+    }
+
+    $nombreUsuario = htmlspecialchars($usuario['nombre']);
+    $departamento = htmlspecialchars($usuario['departamento'] ?? 'Sin departamento');
+
+    $html = '
+    <nav class="app-header navbar navbar-expand bg-body">
+        <div class="container-fluid">
+            <ul class="navbar-nav">
+                <li class="nav-item"> 
+                    <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> 
+                        <i class="bi bi-list"></i> 
+                    </a> 
+                </li>
+                <li class="nav-item d-none d-md-block"> 
+                    <a href="https://alkes.xyz/soporte" class="nav-link">Soporte</a> 
+                </li>
+                <li class="nav-item d-none d-md-block"> 
+                    <a href="https://alkes.xyz/aprende" class="nav-link">Aprende</a> 
+                </li>
+            </ul> 
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"> 
+                    <a class="nav-link" href="#" data-lte-toggle="fullscreen"> 
+                        <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i> 
+                        <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i> 
+                    </a> 
+                </li> 
+                <!--begin::User Menu Dropdown-->
+                <li class="nav-item dropdown user-menu"> 
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
+                        <img src="../../../dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
+                        <span class="d-none d-md-inline">' . $nombreUsuario . '</span> 
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> 
+                        <!--begin::User Image-->
+                        <li class="user-header text-bg-primary"> 
+                            <img src="../../../dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
+                            <p>
+                                ' . $nombreUsuario . ' - ' . $departamento . '
+                                <small>Member since Nov. 2023</small>
+                            </p>
+                        </li> 
+                        <li class="user-body"> 
+                            <div class="row">
+                                <div class="col-4 text-center"> 
+                                    <a href="#">Followers</a> 
+                                </div>
+                                <div class="col-4 text-center"> 
+                                    <a href="#">Sales</a> 
+                                </div>
+                                <div class="col-4 text-center"> 
+                                    <a href="#">Friends</a> 
+                                </div>
+                            </div> 
+                        </li>
+                        <li class="user-footer"> 
+                            <a href="#" class="btn btn-default btn-flat">Profile</a> 
+                            <a href="#" class="btn btn-default btn-flat float-end">Sign out</a> 
+                        </li> 
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>';
+
+    return $html;
+}
+
+
+
 function menuLateral() {
     global $database;
 
@@ -189,8 +276,7 @@ function menuLateral() {
             </div>
             <div class=\"sidebar-wrapper\">
                 <nav class=\"mt-2\">
-                    <ul class=\"nav sidebar-menu flex-column\" data-lte-toggle=\"treeview\" role=\"menu\" data-accordion=\"false\">
-                        <li class=\"nav-header\">EXAMPLES</li>";
+                    <ul class=\"nav sidebar-menu flex-column\" data-lte-toggle=\"treeview\" role=\"menu\" data-accordion=\"false\">";
 
     // Generar el menú dinámico
     $html .= generarMenu(null, $modulos);
@@ -505,184 +591,6 @@ function validar_global($form, $reglas)
 
 
 
-function encabezado()
-{
-    global $database;
-    $entidades = $database->select("entidades", "*", [
-        "ORDER" => ["id" => "ASC"]
-    ]);
-
-    // Obtener el id de entidad actual desde la sesión
-    $entidad_actual = isset($_SESSION['identidad']) ? $_SESSION['identidad'] : null;
-
-    // Verificar permiso para cambiar de entidad
-    $permiso_cambiar_entidad = false; // Por defecto, no tiene permiso
-    if (isset($_SESSION['idusuario'])) {
-        $resultado = $database->select("usuarios", ["cambiar_entidad"], [
-            "id" => $_SESSION['idusuario']
-        ]);
-        $permiso_cambiar_entidad = ($resultado[0]['cambiar_entidad'] == 'Si') ? true : false;
-    }
-
-    $options = '';
-    foreach ($entidades as $entidad) {
-        // Verificar si esta entidad es la entidad actual
-        $active_class = ($entidad['id'] == $entidad_actual) ? 'active' : '';
-
-        $options .= '<a class="dropdown-item ' . $active_class . '" href="#" data-id="' . $entidad['id'] . '" onclick="JaxonvivoERP.cambiarEntidad(' . $entidad['id'] . ');">' . $entidad['descripcion'] . '</a>';
-    }
-
-    // Lista de colores disponibles con sus traducciones
-    $colors = [
-        'primary' => 'Primario',
-        'secondary' => 'Secundario',
-        'info' => 'Información',
-        'success' => 'Verde',
-        'warning' => 'Advertencia',
-        'danger' => 'Rojo',
-        'black' => 'Negro',
-        'gray-dark' => 'Gris Oscuro',
-        'gray' => 'Gris',
-        'light' => 'Claro',
-        'indigo' => 'Índigo',
-        'lightblue' => 'Azul Claro',
-        'navy' => 'Azul Marino',
-        'purple' => 'Púrpura',
-        'fuchsia' => 'Fucsia',
-        'pink' => 'Rosa',
-        'maroon' => 'Granate',
-        'orange' => 'Naranja',
-        'lime' => 'Lima',
-        'teal' => 'Verde Azulado',
-        'olive' => 'Oliva'
-    ];
-
-    // Opciones de color para el dropdown
-    $color_options = '';
-    foreach ($colors as $color_en => $color_es) {
-        $color_options .= '<a class="dropdown-item" href="#" onclick="JaxonalkesGlobal.cambiarCards(\'' . $color_en . '\');">
-            <span class="badge bg-' . $color_en . '" style="width: 20px; height: 20px; display: inline-block;"></span> ' . $color_es . '
-        </a>';
-    }
-
-    // Construir el HTML del encabezado
-    $html = '<nav class="main-header navbar navbar-expand navbar-' . getBackgrounds() . '">
-        <!-- Left navbar links -->
-        <ul class="navbar-nav">
-        <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="/Vistas/Dashboard/index.php" class="nav-link">Inicio</a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="https://soporte.redgq.uk" class="nav-link" target="_blank">Soporte</a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="https://aprende.redgq.uk" class="nav-link" target="_blank">Aprende</a>
-        </li>
-        </ul>
-
-        <!-- Right navbar links -->
-        <ul class="navbar-nav ml-auto">
-
-        <!-- Messages Dropdown Menu -->
-        <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
-            <i class="far fa-comments"></i>
-            <span class="badge badge-danger navbar-badge">3</span>
-            </a>
-            <!-- Rest of the dropdown menu code -->
-        </li>
-        <!-- Notifications Dropdown Menu -->
-        <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
-            <i class="far fa-bell"></i>
-            <span class="badge badge-warning navbar-badge">15</span>
-            </a>
-            <!-- Rest of the dropdown menu code -->
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
-            </a>
-        </li>';
-
-    // Añadir el menú de cambio de entidad solo si tiene permiso
-    if ($permiso_cambiar_entidad) {
-        $html .= '<!-- Entity Change Dropdown Menu -->
-            <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#" id="toggleEntityMenu">
-                    <i class="fas fa-building"></i>
-                </a>
-                <div class="dropdown-menu p-0" aria-labelledby="toggleEntityMenu">
-                    <div class="dropdown-header bg-dark text-white" style="font-size: 1.1rem;">Entidades</div>
-                    ' . $options . '
-                </div>
-            </li>';
-    }
-
-    // Agregar menú para cambiar el color de las cards
-    $html .= '<li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#">
-                    <i class="fas fa-paint-brush"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                    ' . $color_options . '
-                </div>
-              </li>';
-
-    // Agregar botón para cambiar tema
-    $html .= '<li class="nav-item">
-            <a class="nav-link" href="#" role="button" onclick="JaxonalkesGlobal.cambiarBackgrounds();">
-            <i class="fas fa-sun"></i>
-            </a>
-        </li>';
-
-    // Continuar con el resto del HTML del encabezado
-    $html .= '<li class="nav-item">
-            <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-            <i class="fas fa-th-large"></i>
-            </a>
-        </li>
-        </ul>
-        </nav>
-        <!-- /.navbar -->';
-
-    print $html;
-}
-
-
-
-function encabezadoContenido($modulo, $submodulo = false)
-{
-
-    // Construir la ruta para el botón "Nuevo"
-    $newPage = 'formulario.php?accion=0&id=0'; ##== para que es dirname?
-    ##==   $newPage = 'formulario.php?accion=0&id=0';
-
-    $html = '    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 id="tituloEncabezado">' . $modulo . '</h1>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-            </ol>';
-
-    // Verificar si $submodulo es true para decidir si mostrar el botón "Nuevo"
-    if (!$submodulo) {
-        $html .= '<a href="' . $newPage . '" class="btn btn-primary float-right mr-3">Nuevo</a>';
-    }
-
-    $html .= '</div>
-        </div>
-      </div><!-- /.container-fluid -->
-    </section>';
-    print $html;
-}
 
 
 
