@@ -112,7 +112,7 @@ function encabezado()
 
     // Consultar datos del usuario desde la base de datos.
     $usuarioId = $_SESSION['idusuario'];
-    $usuario = $database->get("usuarios", ["nombre", "departamento"], ["id" => $usuarioId]);
+    $usuario = $database->get("usuarios", ["nombre", "departamento", "ingreso"], ["id" => $usuarioId]);
 
     // Verificar si la consulta devolvió resultados.
     if (!$usuario) {
@@ -121,6 +121,22 @@ function encabezado()
 
     $nombreUsuario = htmlspecialchars($usuario['nombre']);
     $departamento = htmlspecialchars($usuario['departamento'] ?? 'Sin departamento');
+
+    // Formatear la fecha de ingreso en español en formato numérico.
+    $ingreso = $usuario['ingreso'];
+    if ($ingreso) {
+        $formatter = new IntlDateFormatter(
+            'es_ES', // Configuración regional para español.
+            IntlDateFormatter::SHORT,
+            IntlDateFormatter::NONE,
+            'UTC', // Zona horaria.
+            IntlDateFormatter::GREGORIAN,
+            'MM/yyyy' // Formato deseado.
+        );
+        $fechaIngreso = $formatter->format(strtotime($ingreso));
+    } else {
+        $fechaIngreso = 'Fecha no disponible';
+    }
 
     $html = '
     <nav class="app-header navbar navbar-expand bg-body">
@@ -148,35 +164,22 @@ function encabezado()
                 <!--begin::User Menu Dropdown-->
                 <li class="nav-item dropdown user-menu"> 
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
-                        <img src="../../../dist/assets/img/user2-160x160.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
+                        <img src="/src/assets/img/users/'.$usuarioId.'.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
                         <span class="d-none d-md-inline">' . $nombreUsuario . '</span> 
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> 
                         <!--begin::User Image-->
                         <li class="user-header text-bg-primary"> 
-                            <img src="../../../dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image">
+                            <img src="/src/assets/img/users/'.$usuarioId.'.jpg" class="rounded-circle shadow" alt="User Image">
                             <p>
                                 ' . $nombreUsuario . ' - ' . $departamento . '
-                                <small>Member since Nov. 2023</small>
+                                <small>Miembro desde ' . $fechaIngreso . '</small>
                             </p>
                         </li> 
-                        <li class="user-body"> 
-                            <div class="row">
-                                <div class="col-4 text-center"> 
-                                    <a href="#">Followers</a> 
-                                </div>
-                                <div class="col-4 text-center"> 
-                                    <a href="#">Sales</a> 
-                                </div>
-                                <div class="col-4 text-center"> 
-                                    <a href="#">Friends</a> 
-                                </div>
-                            </div> 
-                        </li>
                         <li class="user-footer"> 
-                            <a href="#" class="btn btn-default btn-flat">Profile</a> 
-                            <a href="#" class="btn btn-default btn-flat float-end">Sign out</a> 
-                        </li> 
+                            <button class="btn btn-primary btn-flat" type="button" onclick="xajax_mi_perfil();">Mi perfil</button> 
+                            <button class="btn btn-danger btn-flat float-end" type="button" onclick="xajax_logout();">Cerrar sesión</button> 
+                        </li> <!--end::Menu Footer-->
                     </ul>
                 </li>
             </ul>
@@ -185,6 +188,7 @@ function encabezado()
 
     return $html;
 }
+
 
 
 
