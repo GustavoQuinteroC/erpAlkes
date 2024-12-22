@@ -182,7 +182,7 @@ function menuLateral() {
     <div class=\"app-wrapper\">
         <aside class=\"app-sidebar bg-body shadow\" data-bs-theme=\"dark\">
             <div class=\"sidebar-brand\">
-                <a href=\"../index.html\" class=\"brand-link\">
+                <a href=\"/vistas/inicio/index.php\" class=\"brand-link\">
                     <img src=\"../../../dist/assets/img/AdminLTELogo.png\" alt=\"AdminLTE Logo\" class=\"brand-image opacity-75 shadow\">
                     <span class=\"brand-text fw-light\">$nombreComercial</span>
                 </a>
