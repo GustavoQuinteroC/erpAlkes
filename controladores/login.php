@@ -11,7 +11,7 @@ use Medoo\Medoo;
 $dotenv = Dotenv::createImmutable(__DIR__."/..");
 $dotenv->load();
 
-$url_base = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$url_base = $_SERVER['HTTP_X_FORWARDED_PROTO']."://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $jaxon = jaxon();
 $jaxon->setOption('core.request.uri', $url_base);
 
@@ -110,7 +110,7 @@ function login($form)
         // Credenciales válidas: reiniciar intentos y guardar sesión
         session_start();
         $_SESSION['idusuario'] = $usuario_valido[0]['id'];
-
+        $_SESSION['identidad'] = $usuario_valido[0]['identidad'];
         $database->update("usuarios", [
             "intentos" => 0,
             "ultimo_intento" => null

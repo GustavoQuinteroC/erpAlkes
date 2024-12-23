@@ -14,9 +14,11 @@ use Jaxon\Jaxon;
 use Medoo\Medoo;
 
 // Inicializa Jaxon
+$url_base = $_SERVER['HTTP_X_FORWARDED_PROTO']."://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $jaxon = jaxon();
 $jaxon->setOption('core.request.mode', 'asynchronous');
 $jaxon->setOption('core.request.method', 'POST');
+$jaxon->setOption('core.request.uri', $url_base);
 //$jaxon->setOption('core.prefix.function', 'JaxonalkesGlobal.');
 
 class alkesGlobal
@@ -34,24 +36,27 @@ class alkesGlobal
         return $this->response;
     }
 
-    function cambiarBackgrounds()
+    function cambiarBackgrounds($tema)
     {
-        $database = new Medoo();
-        $tema = $database->select('usuarios', 'backgrounds', ['id' => $_SESSION['idusuario']]);
-        if ($tema[0] == 'dark') {
-            // Cambiar a tema claro
-            $database->update('usuarios', ['backgrounds' => 'light'], ['id' => $_SESSION['idusuario']]);
-            $this->response->script("document.querySelector('.main-header').classList.replace('navbar-dark', 'navbar-light');");
-            $this->response->script("document.body.classList.replace('dark-mode', 'light-mode');");
-        } else {
-            // Cambiar a tema oscuro
-            $database->update('usuarios', ['backgrounds' => 'dark'], ['id' => $_SESSION['idusuario']]);
-            $this->response->script("document.querySelector('.main-header').classList.replace('navbar-light', 'navbar-dark');");
-            $this->response->script("document.body.classList.replace('light-mode', 'dark-mode');");
+        global $database;
+
+        // Validar el tema recibido por parámetro.
+        if (!in_array($tema, ['dark', 'light'])) {
+            return $this->response->alert('Tema inválido.');
         }
+
+        // Actualizar el tema en la base de datos.
+        $database->update('usuarios', ['backgrounds' => $tema], ['id' => $_SESSION['idusuario']]);
+
+        // Cambiar el atributo data-bs-theme y el icono del tema dinámicamente.
+        $nuevoIcono = $tema === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+        $this->response->script("document.documentElement.setAttribute('data-bs-theme', '$tema');");
+        $this->response->script("document.getElementById('iconoTema').className = '$nuevoIcono';");
 
         return $this->response;
     }
+
+
 
     function cambiarCards($color)
     {

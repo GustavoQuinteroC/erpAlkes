@@ -1,10 +1,11 @@
 <?php
 session_start();
-require_once("../../controladores/globales/jaxon/funciones.php");
+require_once("../../controladores/individuales/jaxon/inicio.php");
 validarSesion();
 $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
 $modulo = $ruta[(count($ruta) - 2)];
 $submodulo = $ruta[(count($ruta) - 1)];
+echo $jaxon->getScript(true);
 ?>
 
 

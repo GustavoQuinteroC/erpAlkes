@@ -33,12 +33,14 @@ function validarSesion()
             global $database;
             $token = $_COOKIE['recuerdame_alkes'];
             $usuario = $database->select("usuarios", [
-                "id"
+                "id",
+                "identidad"
             ], [
                 "token_recuerdame" => $token
             ]);
             if (!empty($usuario)) {
                 $_SESSION['idusuario'] = $usuario[0]['id'];
+                $_SESSION['identidad'] = $usuario[0]['identidad'];
             } else {
                 // Redirección al login
                 $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
@@ -112,7 +114,7 @@ function encabezado()
 
     // Consultar datos del usuario desde la base de datos.
     $usuarioId = $_SESSION['idusuario'];
-    $usuario = $database->get("usuarios", ["nombre", "departamento", "ingreso"], ["id" => $usuarioId]);
+    $usuario = $database->get("usuarios", ["nombre", "departamento", "ingreso", "backgrounds"], ["id" => $usuarioId]);
 
     // Verificar si la consulta devolvió resultados.
     if (!$usuario) {
@@ -122,16 +124,20 @@ function encabezado()
     $nombreUsuario = htmlspecialchars($usuario['nombre']);
     $departamento = htmlspecialchars($usuario['departamento'] ?? 'Sin departamento');
 
+    // Determinar el icono según el tema del usuario.
+    $tema = $usuario['backgrounds'] ?? 'light';
+    $iconoTema = $tema === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+
     // Formatear la fecha de ingreso en español en formato numérico.
     $ingreso = $usuario['ingreso'];
     if ($ingreso) {
         $formatter = new IntlDateFormatter(
-            'es_ES', // Configuración regional para español.
+            'es_ES',
             IntlDateFormatter::SHORT,
             IntlDateFormatter::NONE,
-            'UTC', // Zona horaria.
+            'UTC',
             IntlDateFormatter::GREGORIAN,
-            'MM/yyyy' // Formato deseado.
+            'MM/yyyy'
         );
         $fechaIngreso = $formatter->format(strtotime($ingreso));
     } else {
@@ -143,7 +149,7 @@ function encabezado()
         <div class="container-fluid">
             <ul class="navbar-nav">
                 <li class="nav-item"> 
-                    <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> 
+                    <a class="nav-link" data-lte-toggle="sidebar" role="button"> 
                         <i class="bi bi-list"></i> 
                     </a> 
                 </li>
@@ -155,15 +161,33 @@ function encabezado()
                 </li>
             </ul> 
             <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown"> 
+                    <!-- Botón de selección de tema -->
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="' . $iconoTema . '" id="iconoTema"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="width: auto; min-width: 100px;">
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarBackgrounds(\'light\');">
+                                <i class="bi bi-sun-fill"></i> Claro
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarBackgrounds(\'dark\');">
+                                <i class="bi bi-moon-fill"></i> Oscuro
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="nav-item"> 
-                    <a class="nav-link" href="#" data-lte-toggle="fullscreen"> 
+                    <a class="nav-link" data-lte-toggle="fullscreen"> 
                         <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i> 
                         <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i> 
                     </a> 
                 </li> 
                 <!--begin::User Menu Dropdown-->
                 <li class="nav-item dropdown user-menu"> 
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
                         <img src="/src/assets/img/users/'.$usuarioId.'.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
                         <span class="d-none d-md-inline">' . $nombreUsuario . '</span> 
                     </a>
@@ -188,6 +212,8 @@ function encabezado()
 
     return $html;
 }
+
+
 
 
 
@@ -252,18 +278,18 @@ function menuLateral() {
         return $html;
     }
 
-    // Consulta simple para obtener el nombre comercial
+    // Consulta simplificada para obtener el nombre comercial
     $resultado = $database->select(
-        "usuarios", // Tabla principal
+        "entidades", // Tabla principal
         [
-            "[>]entidades" => ["identidad" => "id"], // Unión con entidades
-            "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+            "[>]empresas" => ["idempresa" => "id"] // Unión con empresas
         ],
         "empresas.nombre_comercial", // Columna seleccionada
         [
-            "usuarios.id" => $_SESSION['idusuario'] // Condición WHERE
+            "entidades.id" => $_SESSION['identidad'] // Condición WHERE
         ]
     );
+
 
     // Si no hay resultados, usar un valor por defecto
     $nombreComercial = $resultado[0] ?? "Mi Empresa";
