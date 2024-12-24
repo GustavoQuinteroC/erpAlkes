@@ -62,7 +62,6 @@ function login($form)
     $pass = str_replace("'", "", $form['clave']);
     $pass = str_replace('"', '', $pass);
     $pass = sha1($pass);
-    
 
     // Obtener información del usuario
     global $database;
@@ -70,7 +69,8 @@ function login($form)
         "id",
         "identidad",
         "intentos",
-        "ultimo_intento"
+        "ultimo_intento",
+        "estado"
     ], [
         "usuario" => $user
     ]);
@@ -82,9 +82,16 @@ function login($form)
 
     $intentos = $usuario[0]['intentos'];
     $ultimo_intento = $usuario[0]['ultimo_intento'];
+    $estado_usuario = $usuario[0]['estado'];
     $tiempo_actual = strtotime(date("Y-m-d H:i:s"));
     $tiempo_ultimo_intento = strtotime($ultimo_intento);
     $diferencia_minutos = ($tiempo_actual - $tiempo_ultimo_intento) / 60;
+
+    // Verificar si el usuario está inactivo
+    if ($estado_usuario === "Inactivo") {
+        $response->appendResponse(alerta("error", "Cuenta inactiva", "El usuario está inactivo. Contacte al administrador."));
+        return $response;
+    }
 
     // Verificar si se superó el número máximo de intentos
     if ($intentos >= 3 && $diferencia_minutos < 15) {
@@ -95,22 +102,44 @@ function login($form)
     }
 
     // Validar credenciales
-    $usuario_valido = $database->select("usuarios", [
-        "id",
-        "identidad"
-    ], [
+    $usuario_valido = $database->select("usuarios", 
+    [
+        "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+        "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+    ],
+    [
+        "empresas.id(empresa_id)",
+        "empresas.estado(empresa_estado)",
+        "entidades.estado(entidad_estado)",
+        "usuarios.id(usuario_id)",
+        "usuarios.identidad",
+        "usuarios.estado(usuario_estado)"
+    ], 
+    [
         "AND" => [
-            "estado" => "Activo",
-            "usuario" => $user,
-            "password" => $pass
+            "usuarios.estado" => "Activo",
+            "usuarios.usuario" => $user,
+            "usuarios.password" => $pass
         ]
     ]);
 
     if (!empty($usuario_valido)) {
+        // Verificar si la entidad o la empresa están inactivas
+        if ($usuario_valido[0]['entidad_estado'] === "Inactivo") {
+            $response->appendResponse(alerta("error", "Entidad inactiva", "La entidad asociada a esta cuenta está inactiva. Contacte al administrador."));
+            return $response;
+        }
+
+        if ($usuario_valido[0]['empresa_estado'] === "Inactivo") {
+            $response->appendResponse(alerta("error", "Empresa inactiva", "La empresa asociada a esta cuenta está inactiva. Contacte al administrador."));
+            return $response;
+        }
+
         // Credenciales válidas: reiniciar intentos y guardar sesión
         session_start();
-        $_SESSION['idusuario'] = $usuario_valido[0]['id'];
+        $_SESSION['idusuario'] = $usuario_valido[0]['usuario_id'];
         $_SESSION['identidad'] = $usuario_valido[0]['identidad'];
+        $_SESSION['idempresa'] = $usuario_valido[0]['empresa_id'];
         $database->update("usuarios", [
             "intentos" => 0,
             "ultimo_intento" => null
@@ -154,6 +183,8 @@ function login($form)
 
     return $response;
 }
+
+
 
 
 $jaxon = jaxon();

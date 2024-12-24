@@ -25,38 +25,88 @@ $database = new Medoo([
     'charset' => 'utf8mb4',             // Codificación de caracteres
 ]);
 
-
 function validarSesion()
 {
-    if (!isset($_SESSION['usuario'])) {
+    session_start();
+    global $database;
+
+    if (!isset($_SESSION['idusuario'])) {
         if (isset($_COOKIE['recuerdame_alkes'])) {
-            global $database;
             $token = $_COOKIE['recuerdame_alkes'];
             $usuario = $database->select("usuarios", [
                 "id",
-                "identidad"
+                "identidad",
+                "estado"
             ], [
                 "token_recuerdame" => $token
             ]);
+
             if (!empty($usuario)) {
+                $estado_usuario = $usuario[0]['estado'];
+
+                // Verificar si el usuario está inactivo
+                if ($estado_usuario === "Inactivo") {
+                    cerrarSesion();
+                }
+
+                // Actualizar la sesión
                 $_SESSION['idusuario'] = $usuario[0]['id'];
                 $_SESSION['identidad'] = $usuario[0]['identidad'];
+
+                // Verificar estado de la entidad y empresa
+                $entidad = $database->select("entidades", [
+                    "[>]empresas" => ["idempresa" => "id"]
+                ], [
+                    "entidades.estado(entidad_estado)",
+                    "empresas.estado(empresa_estado)"
+                ], [
+                    "entidades.id" => $usuario[0]['identidad']
+                ]);
+
+                if (!empty($entidad)) {
+                    if ($entidad[0]['entidad_estado'] === "Inactivo" || $entidad[0]['empresa_estado'] === "Inactivo") {
+                        cerrarSesion();
+                    }
+                }
             } else {
                 // Redirección al login
-                $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
-                $host = $_SERVER['HTTP_HOST'];
-                header("Location: $protocolo://$host");
+                header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
                 exit;
             }
         } else {
             // Redirección al login si no hay cookie
-            $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'];
-            header("Location: $protocolo://$host");
+            header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
             exit;
+        }
+    } else {
+        // Validar sesión activa
+        $usuario = $database->select("usuarios", [
+            "estado"
+        ], [
+            "id" => $_SESSION['idusuario']
+        ]);
+
+        if (!empty($usuario) && $usuario[0]['estado'] === "Inactivo") {
+            cerrarSesion();
+        }
+
+        $entidad = $database->select("entidades", [
+            "[>]empresas" => ["idempresa" => "id"]
+        ], [
+            "entidades.estado(entidad_estado)",
+            "empresas.estado(empresa_estado)"
+        ], [
+            "entidades.id" => $_SESSION['identidad']
+        ]);
+
+        if (!empty($entidad)) {
+            if ($entidad[0]['entidad_estado'] === "Inactivo" || $entidad[0]['empresa_estado'] === "Inactivo") {
+                cerrarSesion();
+            }
         }
     }
 }
+
 
 function getBackground()
 {
@@ -422,24 +472,25 @@ function scriptsHtml()
 
 function cerrarSesion()
 {
-    #mas o menos esta es la estructura:
     session_start();
     session_destroy();
 
-    if (isset($_COOKIE['remember_me'])) {
-        $database = new Medoo();
+    if (isset($_COOKIE['recuerdame_alkes'])) {
+        global $database;
         $database->update("usuarios", [
             "token_recuerdame" => null
         ], [
-            "token_recuerdame" => $_COOKIE['remember_me']
+            "token_recuerdame" => $_COOKIE['recuerdame_alkes']
         ]);
 
-        setcookie("remember_me", "", time() - 3600, "/"); // Expirar la cookie
+        setcookie("recuerdame_alkes", "", time() - 3600, "/"); // Expirar la cookie
     }
 
-    header("Location: index.php");
+    // Redirección al login
+    header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
     exit;
 }
+
 
 function getBackgrounds()
 {
