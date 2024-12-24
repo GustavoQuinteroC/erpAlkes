@@ -263,11 +263,6 @@ function encabezado()
     return $html;
 }
 
-
-
-
-
-
 function menuLateral() {
     global $database;
 
@@ -372,9 +367,6 @@ function menuLateral() {
     print $html;
 }
 
-
-
-
 function scriptsHtml()
 {
 	$html = "<!-- jQuery -->
@@ -440,36 +432,6 @@ function scriptsHtml()
 	print $html;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function cerrarSesion()
 {
     session_start();
@@ -490,6 +452,36 @@ function cerrarSesion()
     header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
     exit;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function getBackgrounds()
