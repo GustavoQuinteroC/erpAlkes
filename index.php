@@ -1,25 +1,38 @@
 <?php
 session_start();
 require_once("controladores/login.php");
-if (!isset($_SESSION['usuario']))
-{
+if (!isset($_SESSION['usuario'])) {
   if (isset($_COOKIE['recuerdame_alkes'])) {
-    global $database;
-    $token = $_COOKIE['recuerdame_alkes'];
+      global $database;
+      $token = $_COOKIE['recuerdame_alkes'];
 
-    $usuario = $database->select("usuarios", [
-        "id"
-    ], [
-        "token_recuerdame" => $token
-    ]);
+      // Realizamos la consulta unificada
+      $usuario = $database->select("usuarios", [
+          "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+          "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+      ], [
+          "usuarios.id(idusuario)",
+          "usuarios.identidad",
+          "empresas.id(empresa_id)"
+      ], [
+          "usuarios.token_recuerdame" => $token
+      ]);
 
-    if (!empty($usuario)) {
-        $_SESSION['idusuario'] = $usuario[0]['id'];
-        header("Location: vistas/inicio/index.php");
-        exit;
-    }
+      if (!empty($usuario)) {
+          // Asignamos las variables de sesión
+          $_SESSION['idusuario'] = $usuario[0]['idusuario'];
+          $_SESSION['identidad'] = $usuario[0]['identidad'];
+          $_SESSION['idempresa'] = $usuario[0]['empresa_id'];
+
+          // Redirigir al inicio
+          header("Location: vistas/inicio/index.php");
+          exit;
+      }
   }
 }
+
+
+
 
 ?>
 <!DOCTYPE html>

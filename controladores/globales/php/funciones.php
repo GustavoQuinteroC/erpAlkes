@@ -49,27 +49,33 @@ function validarSesion()
                     cerrarSesion();
                 }
 
-                // Actualizar la sesión
-                $_SESSION['idusuario'] = $usuario[0]['id'];
-                $_SESSION['identidad'] = $usuario[0]['identidad'];
-
-                // Verificar estado de la entidad y empresa
+                // Obtener información adicional de la entidad y la empresa
                 $entidad = $database->select("entidades", [
                     "[>]empresas" => ["idempresa" => "id"]
                 ], [
                     "entidades.estado(entidad_estado)",
+                    "empresas.id(empresa_id)",
                     "empresas.estado(empresa_estado)"
                 ], [
                     "entidades.id" => $usuario[0]['identidad']
                 ]);
 
                 if (!empty($entidad)) {
+                    // Verificar si la entidad o empresa están inactivas
                     if ($entidad[0]['entidad_estado'] === "Inactivo" || $entidad[0]['empresa_estado'] === "Inactivo") {
                         cerrarSesion();
                     }
+
+                    // Actualizar la sesión con idempresa
+                    $_SESSION['idusuario'] = $usuario[0]['id'];
+                    $_SESSION['identidad'] = $usuario[0]['identidad'];
+                    $_SESSION['idempresa'] = $entidad[0]['empresa_id']; // Actualizamos idempresa aquí
+                } else {
+                    // Si no hay entidad válida, cerrar sesión
+                    cerrarSesion();
                 }
             } else {
-                // Redirección al login
+                // Redirección al login si no se encuentra el usuario
                 header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
                 exit;
             }
@@ -90,22 +96,31 @@ function validarSesion()
             cerrarSesion();
         }
 
+        // Verificar la entidad y la empresa de la sesión activa
         $entidad = $database->select("entidades", [
             "[>]empresas" => ["idempresa" => "id"]
         ], [
             "entidades.estado(entidad_estado)",
+            "empresas.id(empresa_id)",
             "empresas.estado(empresa_estado)"
         ], [
             "entidades.id" => $_SESSION['identidad']
         ]);
 
         if (!empty($entidad)) {
+            // Verificar si la entidad o empresa están inactivas
             if ($entidad[0]['entidad_estado'] === "Inactivo" || $entidad[0]['empresa_estado'] === "Inactivo") {
                 cerrarSesion();
             }
+
+            // Asegurarnos de que idempresa esté en la sesión
+            $_SESSION['idempresa'] = $entidad[0]['empresa_id'];
+        } else {
+            cerrarSesion();
         }
     }
 }
+
 
 
 function getBackground()
@@ -147,9 +162,7 @@ function headHtml($modulo, $submodulo)
     <!--end::Fonts-->
     <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/styles/overlayscrollbars.min.css\">
     <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css\">
-    <link rel=\"stylesheet\" href=\"/dist/css/adminlte.css\">
-    <!-- Jquery Ui -->
-    <link rel=\"stylesheet\" href=\"/_js/jquery-ui-1.11.4.custom/jquery-ui.css\" type=\"text/css\" media=\"screen\"/>";
+    <link rel=\"stylesheet\" href=\"/dist/css/adminlte.css\">";
     print $html;
 }
 
@@ -229,6 +242,56 @@ function encabezado()
                         </li>
                     </ul>
                 </li>
+                <!-- Icono para cambiar colores -->
+                <li class="nav-item dropdown"> 
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-brush" id="iconoColor"></i> <!-- Icono de pincel -->
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="width: auto; min-width: 100px;">
+                        <!-- Opciones de colores -->
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'primary\');">
+                                <i class="bi bi-circle" style="color: #007bff;"></i> Azul
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'secondary\');">
+                                <i class="bi bi-circle" style="color: #6c757d;"></i> Gris
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'info\');">
+                                <i class="bi bi-circle" style="color: #17a2b8;"></i> Cian
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'success\');">
+                                <i class="bi bi-circle" style="color: #28a745;"></i> Verde
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'warning\');">
+                                <i class="bi bi-circle" style="color: #ffc107;"></i> Amarillo
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'danger\');">
+                                <i class="bi bi-circle" style="color: #dc3545;"></i> Rojo
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'dark\');">
+                                <i class="bi bi-circle" style="color: #343a40;"></i> Oscuro
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" onclick="JaxonalkesGlobal.cambiarEnfasis(\'light\');">
+                                <i class="bi bi-circle" style="color: #f8f9fa;"></i> Claro
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Botón de pantalla completa -->
                 <li class="nav-item"> 
                     <a class="nav-link" data-lte-toggle="fullscreen"> 
                         <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i> 
@@ -252,7 +315,7 @@ function encabezado()
                         </li> 
                         <li class="user-footer"> 
                             <button class="btn btn-primary btn-flat" type="button" onclick="xajax_mi_perfil();">Mi perfil</button> 
-                            <button class="btn btn-danger btn-flat float-end" type="button" onclick="xajax_logout();">Cerrar sesión</button> 
+                            <button class="btn btn-danger btn-flat float-end" type="button" onclick="JaxonalkesGlobal.unionCerrarSesion();">Cerrar sesión</button> 
                         </li> <!--end::Menu Footer-->
                     </ul>
                 </li>
@@ -262,6 +325,7 @@ function encabezado()
 
     return $html;
 }
+
 
 function menuLateral() {
     global $database;
@@ -371,7 +435,6 @@ function scriptsHtml()
 {
 	$html = "<!-- jQuery -->
     <script src=\"/plugins/jquery/jquery.min.js\"></script>
-	<script src=\"/_js/jquery-ui-1.14.0.custom/jquery-ui.min.js\" type=\"text/javascript\"></script>
     <!-- Bootstrap 4 -->
     <script src=\"/plugins/bootstrap/js/bootstrap.bundle.min.js\"></script>
     <!-- DataTables  & Plugins -->
@@ -432,7 +495,7 @@ function scriptsHtml()
 	print $html;
 }
 
-function cerrarSesion()
+function cerrarSesion($redirigir = true)
 {
     session_start();
     session_destroy();
@@ -448,41 +511,65 @@ function cerrarSesion()
         setcookie("recuerdame_alkes", "", time() - 3600, "/"); // Expirar la cookie
     }
 
-    // Redirección al login
-    header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
-    exit;
+    if ($redirigir) {
+        // Redirección al login
+        header("Location: " . $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST']);
+        exit;
+    }
+}
+
+function titulos($modulo, $submodulo = null, $subsubmodulo = null)
+{
+    // Normalizar y capitalizar las cadenas de los módulos
+    $normalizedModulo = ucwords(str_replace('_', ' ', strtolower($modulo)));
+    $normalizedSubmodulo = $submodulo ? ucwords(str_replace('_', ' ', strtolower($submodulo))) : '';
+    $normalizedSubsubmodulo = $subsubmodulo ? ucwords(str_replace('_', ' ', strtolower($subsubmodulo))) : '';
+
+    // Construir el título dinámico
+    $titulo = $normalizedModulo;
+    if ($normalizedSubmodulo) {
+        $titulo .= " - $normalizedSubmodulo";
+    }
+    if ($normalizedSubsubmodulo) {
+        $titulo .= " - $normalizedSubsubmodulo";
+    }
+
+    // Subtítulo de referencia adicional
+    $referencia = "<small>(FAA00001)</small>";
+
+    // Generar el HTML con la estructura correcta
+    $html = "
+        <div class=\"app-content-header\"> <!-- Contenedor principal -->
+            <div class=\"container-fluid\">
+                <div class=\"row\">
+                    <h4 class=\"mb-0\">$titulo $referencia</h4>
+                </div>
+            </div>
+        </div>
+    ";
+
+    // Imprimir el HTML generado
+    print $html;
 }
 
 
+function botones()
+{
+    // Generar el HTML de la botonera
+    $html = "
+        <div class=\"app-content-bottom-area\"> <!-- Contenedor principal -->
+            <div class=\"row\">
+                <!-- Botonera alineada a la derecha -->
+                <div class=\"col-12 text-end\" id=\"botonera-contenedor\">
+                    <button type=\"submit\" class=\"btn btn-primary btn-sm\" name=\"save\" value=\"create\">Create Admin</button>
+                </div>
+            </div>
+        </div>
+    ";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // Imprimir el HTML generado
+    print $html;
+}
 
 function getBackgrounds()
 {
@@ -491,12 +578,63 @@ function getBackgrounds()
     return $tema[0];
 }
 
-function getCard()
+function getEnfasis()
 {
     global $database;
-    $tema = $database->select('usuarios', 'cards', ['id' => $_SESSION['idusuario']]);
-    return $tema[0];
+    $enfasis = $database->select('usuarios', 'enfasis', ['id' => $_SESSION['idusuario']]);
+    return $enfasis[0];
 }
+
+function getTextColor()
+{
+    // Obtener el énfasis del usuario desde la base de datos
+    $enfasis = getEnfasis();
+
+    // Lista de colores oscuros que requieren texto claro
+    $darkColors = ['primary', 'secondary', 'dark', 'success', 'danger', 'black'];
+
+    // Determinar el color del texto
+    if (in_array($enfasis, $darkColors)) {
+        return 'text-light';
+    }
+
+    // Para colores claros o no listados, usar texto oscuro
+    return 'text-dark';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function getProductos_tipos()
 {

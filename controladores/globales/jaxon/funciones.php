@@ -28,8 +28,14 @@ class alkesGlobal
     {
         $this->response = jaxon()->newResponse();
     }
+    public function unionCerrarSesion()
+    {
+        cerrarSesion(false); // Llama a cerrarSesion pero evita la redirección interna
+        $this->response->script('window.location.href = "/"'); // Redirige desde el frontend
+        return $this->response;
+    }
 
-    function cambiarEntidad($id)
+    public function cambiarEntidad($id)
     {
         $_SESSION['entidad'] = $id;
         $this->response->script('location.reload();');
@@ -55,6 +61,36 @@ class alkesGlobal
 
         return $this->response;
     }
+
+    function cambiarEnfasis($color)
+{
+    global $database;
+
+    // Validar el color recibido por parámetro
+    if (!in_array($color, ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'dark', 'light'])) {
+        return $this->response->alert('Color de énfasis inválido.');
+    }
+
+    // Actualizar el color de énfasis en la base de datos
+    $database->update('usuarios', ['enfasis' => $color], ['id' => $_SESSION['idusuario']]);
+
+    // Cambiar dinámicamente el color de fondo y el color de texto en el navegador
+    // Determinamos si el color de fondo es oscuro o claro
+    $textColorClass = in_array($color, ['primary', 'secondary', 'dark', 'success', 'danger', 'black']) ? 'text-light' : 'text-dark';
+
+    // Actualizar las tarjetas en la página
+    $this->response->script("
+        document.querySelectorAll('.card-header').forEach(function(cardHeader) {
+            // Eliminar las clases de fondo y texto previas
+            cardHeader.classList.remove('bg-primary', 'bg-secondary', 'bg-info', 'bg-success', 'bg-warning', 'bg-danger', 'bg-dark', 'bg-light', 'text-light', 'text-dark');
+            
+            // Añadir las nuevas clases de fondo y texto
+            cardHeader.classList.add('bg-$color', '$textColorClass');
+        });
+    ");
+
+    return $this->response;
+}
 
 
 
