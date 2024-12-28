@@ -63,34 +63,79 @@ class alkesGlobal
     }
 
     function cambiarEnfasis($color)
-{
-    global $database;
+    {
+        global $database;
 
-    // Validar el color recibido por parámetro
-    if (!in_array($color, ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'dark', 'light'])) {
-        return $this->response->alert('Color de énfasis inválido.');
+        // Validar el color recibido por parámetro
+        if (!in_array($color, ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'dark', 'light'])) {
+            return $this->response->alert('Color de énfasis inválido.');
+        }
+
+        // Actualizar el color de énfasis en la base de datos
+        $database->update('usuarios', ['enfasis' => $color], ['id' => $_SESSION['idusuario']]);
+
+        // Actualizar dinámicamente los elementos que dependen del énfasis
+        $this->response->script("
+            // Actualizar user-header en el menú del usuario
+            document.querySelectorAll('.user-header').forEach(function(userHeader) {
+                userHeader.classList.remove('text-bg-primary', 'text-bg-secondary', 'text-bg-info', 'text-bg-success', 'text-bg-warning', 'text-bg-danger', 'text-bg-dark', 'text-bg-light');
+                userHeader.classList.add('text-bg-$color');
+            });
+
+            // Actualizar el bg-* en los encabezados de las tarjetas
+            document.querySelectorAll('.card-header').forEach(function(cardHeader) {
+                cardHeader.classList.remove('text-bg-primary', 'text-bg-secondary', 'text-bg-info', 'text-bg-success', 'text-bg-warning', 'text-bg-danger', 'text-bg-dark', 'text-bg-light');
+                cardHeader.classList.add('text-bg-$color');
+            });
+
+            // Actualizar los botones dentro de card-tools
+            document.querySelectorAll('.card-tools .btn').forEach(function(toolButton) {
+                // Eliminar las clases de texto previas
+                toolButton.classList.remove('text-light', 'text-dark');
+                
+                // Añadir la nueva clase de texto
+                toolButton.classList.add('".getTextColor()."');
+            });
+        ");
+
+        return $this->response;
     }
 
-    // Actualizar el color de énfasis en la base de datos
-    $database->update('usuarios', ['enfasis' => $color], ['id' => $_SESSION['idusuario']]);
 
-    // Cambiar dinámicamente el color de fondo y el color de texto en el navegador
-    // Determinamos si el color de fondo es oscuro o claro
-    $textColorClass = in_array($color, ['primary', 'secondary', 'dark', 'success', 'danger', 'black']) ? 'text-light' : 'text-dark';
+    function pruebaSmall()
+    {
+        // Actualizar el contenido del <small> con el ID especificado
+        $this->response->assign('smallTitulos', 'innerHTML', 'Prueba1');
 
-    // Actualizar las tarjetas en la página
-    $this->response->script("
-        document.querySelectorAll('.card-header').forEach(function(cardHeader) {
-            // Eliminar las clases de fondo y texto previas
-            cardHeader.classList.remove('bg-primary', 'bg-secondary', 'bg-info', 'bg-success', 'bg-warning', 'bg-danger', 'bg-dark', 'bg-light', 'text-light', 'text-dark');
-            
-            // Añadir las nuevas clases de fondo y texto
-            cardHeader.classList.add('bg-$color', '$textColorClass');
-        });
-    ");
+        return $this->response;
+    }
 
-    return $this->response;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

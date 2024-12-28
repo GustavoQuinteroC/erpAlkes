@@ -62,7 +62,7 @@ if (file_exists($pathControlador)) {
         <div class="app-main-wrapper">
             <?= encabezado(); ?>
             <main class="app-main">
-                <?= titulos("Ventas", "Facturas", "Remisiones"); ?>
+                <?= titulos($modulo, $submodulo, $subsubmodulo); ?>
                 <div class="app-content">
                     <div class="container-fluid">
                         <div class="row">

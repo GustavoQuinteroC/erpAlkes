@@ -306,7 +306,7 @@ function encabezado()
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> 
                         <!--begin::User Image-->
-                        <li class="user-header text-bg-primary"> 
+                        <li class="user-header text-bg-'.getEnfasis().'"> 
                             <img src="/src/assets/img/users/'.$usuarioId.'.jpg" class="rounded-circle shadow" alt="User Image">
                             <p>
                                 ' . $nombreUsuario . ' - ' . $departamento . '
@@ -409,7 +409,7 @@ function menuLateral() {
         <aside class=\"app-sidebar bg-body shadow\" data-bs-theme=\"dark\">
             <div class=\"sidebar-brand\">
                 <a href=\"/vistas/inicio/index.php\" class=\"brand-link\">
-                    <img src=\"../../../dist/assets/img/AdminLTELogo.png\" alt=\"AdminLTE Logo\" class=\"brand-image opacity-75 shadow\">
+                    <img src=\"/dist/assets/img/AdminLTELogo.png\" alt=\"AdminLTE Logo\" class=\"brand-image opacity-75 shadow\">
                     <span class=\"brand-text fw-light\">$nombreComercial</span>
                 </a>
             </div>
@@ -534,15 +534,18 @@ function titulos($modulo, $submodulo = null, $subsubmodulo = null)
         $titulo .= " - $normalizedSubsubmodulo";
     }
 
-    // Subtítulo de referencia adicional
-    $referencia = "<small>(FAA00001)</small>";
+    // Generar un identificador único para el <small>
+    $smallId = 'smallTitulos';
+
+    // Verificar si existe la variable 'id' en $_GET
+    $puntos = isset($_GET['id']) ? ':' : '';
 
     // Generar el HTML con la estructura correcta
     $html = "
         <div class=\"app-content-header\"> <!-- Contenedor principal -->
             <div class=\"container-fluid\">
-                <div class=\"row\">
-                    <h4 class=\"mb-0\">$titulo $referencia</h4>
+                <div class=\"row justify-content-center align-items-center\"> <!-- Centrar horizontal y vertical -->
+                    <h5 class=\"mb-0 text-center\"><strong>$titulo$puntos</strong> <small id=\"$smallId\"></small></h5>
                 </div>
             </div>
         </div>
@@ -551,6 +554,10 @@ function titulos($modulo, $submodulo = null, $subsubmodulo = null)
     // Imprimir el HTML generado
     print $html;
 }
+
+
+
+
 
 
 function botones()
