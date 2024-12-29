@@ -6,7 +6,7 @@ $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
 
 //calcular nombres de modulos semidinamicamente
 $modulo = $ruta[(count($ruta) - 1)];
-$pathControlador=__DIR__."/../../controladores/individuales/jaxon/$modulo.php";
+$pathControlador=__DIR__."/../../controladores/individuales/$modulo.php";
 
 // Verifica si el archivo existe antes de incluirlo
 if (file_exists($pathControlador)) {

@@ -5,8 +5,8 @@
 #GUSTAVO QUINTERO
 #ALKES - 
 ##########################################################################
-require_once(__DIR__ ."/../../../vendor/autoload.php");
-require_once(__DIR__ ."/../php/funciones.php");
+require_once(__DIR__ ."/../../vendor/autoload.php");
+require_once(__DIR__ ."/funcionesPhp.php");
 
 
 use function Jaxon\jaxon;
@@ -83,6 +83,31 @@ class alkesGlobal
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     function pruebaSmall()
     {

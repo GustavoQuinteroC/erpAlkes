@@ -11,7 +11,7 @@ use Dotenv\Dotenv;
 session_start();
 
 // Cargar las variables de entorno
-$dotenv = Dotenv::createImmutable(__DIR__."/../../..");
+$dotenv = Dotenv::createImmutable(__DIR__."/../..");
 $dotenv->load();
 
 // Conectar a la base de datos con Medoo utilizando las variables de entorno
@@ -633,6 +633,10 @@ function getTextColor()
     // Para colores claros o no listados, usar texto oscuro
     return 'text-dark';
 }
+
+
+
+
 
 
 
