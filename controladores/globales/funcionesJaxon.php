@@ -19,7 +19,7 @@ $jaxon = jaxon();
 $jaxon->setOption('core.request.mode', 'asynchronous');
 $jaxon->setOption('core.request.method', 'POST');
 $jaxon->setOption('core.request.uri', $url_base);
-//$jaxon->setOption('core.prefix.function', 'JaxonalkesGlobal.');
+
 
 class alkesGlobal
 {

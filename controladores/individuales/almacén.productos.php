@@ -1,6 +1,6 @@
 <?php
 // controlador.php
-include (__DIR__ .'/../globales/funcionesJaxon.php');
+require_once(__DIR__ .'/../globales/funcionesJaxon.php');
 use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
