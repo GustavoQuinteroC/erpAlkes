@@ -74,32 +74,14 @@ class alkesGlobal
         // Actualizar el color de énfasis en la base de datos
         $database->update('usuarios', ['enfasis' => $color], ['id' => $_SESSION['idusuario']]);
 
-        // Actualizar dinámicamente los elementos que dependen del énfasis
-        $this->response->script("
-            // Actualizar user-header en el menú del usuario
-            document.querySelectorAll('.user-header').forEach(function(userHeader) {
-                userHeader.classList.remove('text-bg-primary', 'text-bg-secondary', 'text-bg-info', 'text-bg-success', 'text-bg-warning', 'text-bg-danger', 'text-bg-dark', 'text-bg-light');
-                userHeader.classList.add('text-bg-$color');
-            });
-
-            // Actualizar el bg-* en los encabezados de las tarjetas
-            document.querySelectorAll('.card-header').forEach(function(cardHeader) {
-                cardHeader.classList.remove('text-bg-primary', 'text-bg-secondary', 'text-bg-info', 'text-bg-success', 'text-bg-warning', 'text-bg-danger', 'text-bg-dark', 'text-bg-light');
-                cardHeader.classList.add('text-bg-$color');
-            });
-
-            // Actualizar los botones dentro de card-tools
-            document.querySelectorAll('.card-tools .btn').forEach(function(toolButton) {
-                // Eliminar las clases de texto previas
-                toolButton.classList.remove('text-light', 'text-dark');
-                
-                // Añadir la nueva clase de texto
-                toolButton.classList.add('".getTextColor()."');
-            });
-        ");
+        // Hacer un reload parcial de la página usando Jaxon
+        // Esto hará que se recargue todo el contenido que depende del color de énfasis
+        $this->response->script('location.reload();');
 
         return $this->response;
     }
+
+
 
 
     function pruebaSmall()
