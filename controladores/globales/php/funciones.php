@@ -327,14 +327,14 @@ function encabezado()
 }
 
 
-function menuLateral($modulo = null, $submodulo = null, $subsubmodulo = null) {
+function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmoduloActivo = null) {
     global $database;
 
     // Obtener los módulos disponibles para el usuario (con sus permisos)
     $resultado = $database->select(
-        "modulos",
+        "modulos", // Tabla de módulos
         [
-            "[>]usuarios_modulos" => ["id" => "idmodulo"]
+            "[>]usuarios_modulos" => ["id" => "idmodulo"] // Unir con permisos del usuario
         ],
         [
             "modulos.id", 
@@ -346,45 +346,44 @@ function menuLateral($modulo = null, $submodulo = null, $subsubmodulo = null) {
         ],
         [
             "usuarios_modulos.idusuario" => $_SESSION['idusuario'],
-            "usuarios_modulos.ver" => 1
+            "usuarios_modulos.ver" => 1 // Solo mostrar los módulos que el usuario puede ver
         ]
     );
 
     // Agrupar los módulos por su padre_id
     $modulos = [];
-    foreach ($resultado as $mod) {
-        $modulos[$mod['padre_id']][] = $mod;
+    foreach ($resultado as $modulo) {
+        $modulos[$modulo['padre_id']][] = $modulo;
     }
 
     // Función recursiva para generar el menú
-    function generarMenu($padre_id, $modulos, $modulo, $submodulo, $subsubmodulo) {
+    function generarMenu($padre_id, $modulos, $moduloActivo, $submoduloActivo, $subsubmoduloActivo) {
         if (!isset($modulos[$padre_id])) return '';
 
         $html = '';
-        foreach ($modulos[$padre_id] as $mod) {
-            // Determinar si es el módulo activo
-            $isActive = ($mod['nombre'] === $modulo) ||
-                        ($mod['nombre'] === $submodulo) ||
-                        ($mod['nombre'] === $subsubmodulo);
-
+        foreach ($modulos[$padre_id] as $modulo) {
             // Verificar si tiene submódulos (hijos)
-            $hasChildren = isset($modulos[$mod['id']]);
+            $hasChildren = isset($modulos[$modulo['id']]);
             
+            // Determinar si este módulo es el activo
+            $isActive = (strtolower($modulo['nombre']) === strtolower($moduloActivo)) ? 'active' : '';
+
             // Si tiene hijos, es un item "select" (ul con li)
             if ($hasChildren) {
-                $html .= "<li class=\"nav-item has-treeview" . ($isActive ? ' menu-open' : '') . "\">";
-                $html .= "<a href=\"#\" class=\"nav-link" . ($isActive ? ' active' : '') . "\">";
-                $html .= "<i class=\"nav-icon bi {$mod['icono']}\"></i>";
-                $html .= "<p>{$mod['nombre']}<i class=\"nav-arrow bi bi-chevron-right\"></i></p>";
+                $html .= "<li class=\"nav-item has-treeview " . ($isActive ? 'menu-open' : '') . "\">";
+                $html .= "<a href=\"#\" class=\"nav-link {$isActive}\">";
+                $html .= "<i class=\"nav-icon bi {$modulo['icono']}\"></i>";
+                $html .= "<p>{$modulo['nombre']}<i class=\"nav-arrow bi bi-chevron-right\"></i></p>";
                 $html .= "</a>";
-                $html .= "<ul class=\"nav nav-treeview\">" . generarMenu($mod['id'], $modulos, $modulo, $submodulo, $subsubmodulo) . "</ul>";
+                $html .= "<ul class=\"nav nav-treeview\">" . generarMenu($modulo['id'], $modulos, $moduloActivo, $submoduloActivo, $subsubmoduloActivo) . "</ul>";
                 $html .= "</li>";
             } else {
                 // Si no tiene hijos, es un enlace directo
+                $isActiveSub = (strtolower($modulo['nombre']) === strtolower($submoduloActivo)) ? 'active text-bg-'.getEnfasis() : '';
                 $html .= "<li class=\"nav-item\">";
-                $html .= "<a href=\"{$mod['ruta']}\" class=\"nav-link" . ($isActive ? ' active' : '') . "\">";
-                $html .= "<i class=\"nav-icon bi {$mod['icono']}\"></i>";
-                $html .= "<p>{$mod['nombre']}</p>";
+                $html .= "<a href=\"{$modulo['ruta']}\" class=\"nav-link {$isActiveSub}\">";
+                $html .= "<i class=\"nav-icon bi {$modulo['icono']}\"></i>";
+                $html .= "<p>{$modulo['nombre']}</p>";
                 $html .= "</a>";
                 $html .= "</li>";
             }
@@ -392,18 +391,19 @@ function menuLateral($modulo = null, $submodulo = null, $subsubmodulo = null) {
         return $html;
     }
 
-    // Obtener el nombre comercial
+    // Consulta simplificada para obtener el nombre comercial
     $resultado = $database->select(
-        "entidades",
+        "entidades", // Tabla principal
         [
-            "[>]empresas" => ["idempresa" => "id"]
+            "[>]empresas" => ["idempresa" => "id"] // Unión con empresas
         ],
-        "empresas.nombre_comercial",
+        "empresas.nombre_comercial", // Columna seleccionada
         [
-            "entidades.id" => $_SESSION['identidad']
+            "entidades.id" => $_SESSION['identidad'] // Condición WHERE
         ]
     );
 
+    // Si no hay resultados, usar un valor por defecto
     $nombreComercial = $resultado[0] ?? "Mi Empresa";
 
     // HTML del menú lateral
@@ -421,7 +421,7 @@ function menuLateral($modulo = null, $submodulo = null, $subsubmodulo = null) {
                     <ul class=\"nav sidebar-menu flex-column\" data-lte-toggle=\"treeview\" role=\"menu\" data-accordion=\"false\">";
 
     // Generar el menú dinámico
-    $html .= generarMenu(null, $modulos, $modulo, $submodulo, $subsubmodulo);
+    $html .= generarMenu(null, $modulos, $moduloActivo, $submoduloActivo, $subsubmoduloActivo);
 
     $html .= "
                     </ul>
