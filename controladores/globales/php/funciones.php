@@ -327,14 +327,14 @@ function encabezado()
 }
 
 
-function menuLateral() {
+function menuLateral($modulo = null, $submodulo = null, $subsubmodulo = null) {
     global $database;
 
     // Obtener los módulos disponibles para el usuario (con sus permisos)
     $resultado = $database->select(
-        "modulos", // Tabla de módulos
+        "modulos",
         [
-            "[>]usuarios_modulos" => ["id" => "idmodulo"] // Unir con permisos del usuario
+            "[>]usuarios_modulos" => ["id" => "idmodulo"]
         ],
         [
             "modulos.id", 
@@ -346,40 +346,45 @@ function menuLateral() {
         ],
         [
             "usuarios_modulos.idusuario" => $_SESSION['idusuario'],
-            "usuarios_modulos.ver" => 1 // Solo mostrar los módulos que el usuario puede ver
+            "usuarios_modulos.ver" => 1
         ]
     );
 
-    // Agrupar los módulos por su `padre_id`
+    // Agrupar los módulos por su padre_id
     $modulos = [];
-    foreach ($resultado as $modulo) {
-        $modulos[$modulo['padre_id']][] = $modulo;
+    foreach ($resultado as $mod) {
+        $modulos[$mod['padre_id']][] = $mod;
     }
 
     // Función recursiva para generar el menú
-    function generarMenu($padre_id, $modulos) {
+    function generarMenu($padre_id, $modulos, $modulo, $submodulo, $subsubmodulo) {
         if (!isset($modulos[$padre_id])) return '';
 
         $html = '';
-        foreach ($modulos[$padre_id] as $modulo) {
+        foreach ($modulos[$padre_id] as $mod) {
+            // Determinar si es el módulo activo
+            $isActive = ($mod['nombre'] === $modulo) ||
+                        ($mod['nombre'] === $submodulo) ||
+                        ($mod['nombre'] === $subsubmodulo);
+
             // Verificar si tiene submódulos (hijos)
-            $hasChildren = isset($modulos[$modulo['id']]);
+            $hasChildren = isset($modulos[$mod['id']]);
             
             // Si tiene hijos, es un item "select" (ul con li)
             if ($hasChildren) {
-                $html .= "<li class=\"nav-item has-treeview\">";
-                $html .= "<a href=\"#\" class=\"nav-link\">";
-                $html .= "<i class=\"nav-icon bi {$modulo['icono']}\"></i>";
-                $html .= "<p>{$modulo['nombre']}<i class=\"nav-arrow bi bi-chevron-right\"></i></p>";
+                $html .= "<li class=\"nav-item has-treeview" . ($isActive ? ' menu-open' : '') . "\">";
+                $html .= "<a href=\"#\" class=\"nav-link" . ($isActive ? ' active' : '') . "\">";
+                $html .= "<i class=\"nav-icon bi {$mod['icono']}\"></i>";
+                $html .= "<p>{$mod['nombre']}<i class=\"nav-arrow bi bi-chevron-right\"></i></p>";
                 $html .= "</a>";
-                $html .= "<ul class=\"nav nav-treeview\">" . generarMenu($modulo['id'], $modulos) . "</ul>";
+                $html .= "<ul class=\"nav nav-treeview\">" . generarMenu($mod['id'], $modulos, $modulo, $submodulo, $subsubmodulo) . "</ul>";
                 $html .= "</li>";
             } else {
                 // Si no tiene hijos, es un enlace directo
                 $html .= "<li class=\"nav-item\">";
-                $html .= "<a href=\"{$modulo['ruta']}\" class=\"nav-link\">";
-                $html .= "<i class=\"nav-icon bi {$modulo['icono']}\"></i>";
-                $html .= "<p>{$modulo['nombre']}</p>";
+                $html .= "<a href=\"{$mod['ruta']}\" class=\"nav-link" . ($isActive ? ' active' : '') . "\">";
+                $html .= "<i class=\"nav-icon bi {$mod['icono']}\"></i>";
+                $html .= "<p>{$mod['nombre']}</p>";
                 $html .= "</a>";
                 $html .= "</li>";
             }
@@ -387,20 +392,18 @@ function menuLateral() {
         return $html;
     }
 
-    // Consulta simplificada para obtener el nombre comercial
+    // Obtener el nombre comercial
     $resultado = $database->select(
-        "entidades", // Tabla principal
+        "entidades",
         [
-            "[>]empresas" => ["idempresa" => "id"] // Unión con empresas
+            "[>]empresas" => ["idempresa" => "id"]
         ],
-        "empresas.nombre_comercial", // Columna seleccionada
+        "empresas.nombre_comercial",
         [
-            "entidades.id" => $_SESSION['identidad'] // Condición WHERE
+            "entidades.id" => $_SESSION['identidad']
         ]
     );
 
-
-    // Si no hay resultados, usar un valor por defecto
     $nombreComercial = $resultado[0] ?? "Mi Empresa";
 
     // HTML del menú lateral
@@ -418,7 +421,7 @@ function menuLateral() {
                     <ul class=\"nav sidebar-menu flex-column\" data-lte-toggle=\"treeview\" role=\"menu\" data-accordion=\"false\">";
 
     // Generar el menú dinámico
-    $html .= generarMenu(null, $modulos);
+    $html .= generarMenu(null, $modulos, $modulo, $submodulo, $subsubmodulo);
 
     $html .= "
                     </ul>
@@ -430,6 +433,7 @@ function menuLateral() {
     // Imprimir el HTML
     print $html;
 }
+
 
 function scriptsHtml()
 {
@@ -537,8 +541,11 @@ function titulos($modulo, $submodulo = null, $subsubmodulo = null)
     // Generar un identificador único para el <small>
     $smallId = 'smallTitulos';
 
-    // Verificar si existe la variable 'id' en $_GET
-    $puntos = isset($_GET['id']) ? ':' : '';
+    // Obtener la ruta actual
+    $ruta_actual = basename($_SERVER['PHP_SELF']); // Obtener el nombre del archivo actual
+
+    // Evaluar si la ruta es formulario.php y si existe la variable 'id'
+    $puntos = ($ruta_actual == "formulario.php" && isset($_GET['id'])) ? ':' : '';
 
     // Generar el HTML con la estructura correcta
     $html = "
@@ -556,27 +563,45 @@ function titulos($modulo, $submodulo = null, $subsubmodulo = null)
 }
 
 
-
-
-
-
 function botones()
 {
-    // Generar el HTML de la botonera
-    $html = "
-        <div class=\"app-content-bottom-area\"> <!-- Contenedor principal -->
-            <div class=\"row\">
-                <!-- Botonera alineada a la derecha -->
-                <div class=\"col-12 text-end\" id=\"botonera-contenedor\">
-                    <button type=\"submit\" class=\"btn btn-primary btn-sm\" name=\"save\" value=\"create\">Create Admin</button>
+    // Obtener la ruta actual y la variable GET id
+    $ruta_actual = basename($_SERVER['PHP_SELF']); // Obtener el nombre del archivo actual
+    $id = isset($_GET['id']) ? $_GET['id'] : null;
+
+    // Evaluar si la ruta es formulario.php y existe la variable GET id
+    if ($ruta_actual == "formulario.php" && $id !== null) {
+        // Contenedor vacío
+        $html = "
+            <div class=\"app-content-bottom-area\"> <!-- Contenedor principal -->
+                <div class=\"row\">
+                    <!-- Botonera vacía -->
+                    <div class=\"col-12 text-end\" id=\"botonera-contenedor\">
+                    </div>
                 </div>
             </div>
-        </div>
-    ";
+        ";
+    } else {
+        // Generar un número aleatorio de 4 dígitos
+        $random_number = rand(1000, 9999);
+
+        // Botón con el enlace a formulario.php con parámetros
+        $html = "
+            <div class=\"app-content-bottom-area\"> <!-- Contenedor principal -->
+                <div class=\"row\">
+                    <!-- Botonera alineada a la derecha -->
+                    <div class=\"col-12 text-end\" id=\"botonera-contenedor\">
+                        <a href=\"formulario.php?id=0&rand={$random_number}\" class=\"btn btn-primary btn-sm\">Nuevo</a>
+                    </div>
+                </div>
+            </div>
+        ";
+    }
 
     // Imprimir el HTML generado
     print $html;
 }
+
 
 function getBackgrounds()
 {

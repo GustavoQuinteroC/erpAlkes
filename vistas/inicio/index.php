@@ -4,37 +4,9 @@ session_start();
 // Obtén la ruta actual dividida en segmentos
 $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
 
-// Busca el índice donde comienza el módulo relevante
-// Asumimos que los módulos relevantes están después de "vistas"
-$indiceInicio = array_search("vistas", $ruta);
-if ($indiceInicio === false) {
-    die("No se encontró el directorio 'vistas' en la ruta actual.");
-}
-
-// Extrae los segmentos relevantes después de "vistas"
-$segmentosRelevantes = array_slice($ruta, $indiceInicio + 1);
-
-// Determina los niveles dinámicamente (modulo, submodulo, subsubmodulo)
-$modulo = isset($segmentosRelevantes[0]) ? $segmentosRelevantes[0] : '';
-$submodulo = isset($segmentosRelevantes[1]) ? $segmentosRelevantes[1] : '';
-$subsubmodulo = isset($segmentosRelevantes[2]) ? $segmentosRelevantes[2] : '';
-
-// Determina cuántos niveles hacia atrás necesitas
-$numRetrocesos = count($segmentosRelevantes) + 1; // +1 para salir de "vistas"
-$retroceso = str_repeat('../', $numRetrocesos);
-
-// Construye dinámicamente la ruta del archivo controlador
-$pathControlador = $retroceso . "controladores/individuales/jaxon";
-if ($modulo) {
-    $pathControlador .= "/$modulo";
-}
-if ($submodulo) {
-    $pathControlador .= "/$submodulo";
-}
-if ($subsubmodulo) {
-    $pathControlador .= "/$subsubmodulo";
-}
-$pathControlador .= ".php";
+//calcular nombres de modulos semidinamicamente
+$modulo = $ruta[(count($ruta) - 1)];
+$pathControlador=__DIR__."/../../controladores/individuales/jaxon/$modulo.php";
 
 // Verifica si el archivo existe antes de incluirlo
 if (file_exists($pathControlador)) {
@@ -58,11 +30,11 @@ if (file_exists($pathControlador)) {
 
 <body class="layout-fixed-complete sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?= menuLateral(); ?>
+        <?= menuLateral($modulo, $submodulo, $subsubmodulo); ?>
         <div class="app-main-wrapper">
             <?= encabezado(); ?>
             <main class="app-main">
-                <?= titulos("Ventas", "Facturas", "Remisiones"); ?>
+                <?= titulos($modulo, $submodulo, $subsubmodulo); ?>
                 <div class="app-content">
                     <div class="container-fluid">
                         <div class="row">
