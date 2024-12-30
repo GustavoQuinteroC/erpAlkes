@@ -11,8 +11,8 @@ $pathControlador=__DIR__."/../../controladores/individuales/$modulo.php";
 // Verifica si el archivo existe antes de incluirlo
 if (file_exists($pathControlador)) {
     require_once($pathControlador);
-    echo $jaxon->getScript(true);
     validarSesion();
+    echo $jaxon->getScript(true);
 } else {
     // Manejo de errores si el archivo controlador no existe
     die("No se encontró el archivo del controlador en: $pathControlador");

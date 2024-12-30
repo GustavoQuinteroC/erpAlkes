@@ -637,6 +637,123 @@ function getTextColor()
     return 'text-dark';
 }
 
+function filtrosTablas($modulo, $submodulo, $subsubmodulo)
+{
+    global $database;
+
+    // Obtener la tabla correspondiente al módulo, submódulo y subsubmódulo
+    $tabla = $database->select("tablas", ["id"], [
+        "modulo" => $modulo,
+        "submodulo" => $submodulo,
+        "subsubmodulo" => $subsubmodulo
+    ]);
+
+    if (empty($tabla)) {
+        return []; // Retornar vacío si no se encuentra la tabla
+    }
+
+    // Obtener los filtros asociados a la tabla
+    $filtros = $database->select("tablas_filtros", ["nombre", "condicion"], [
+        "idtabla" => $tabla[0]['id']
+    ]);
+
+    // Construir el array de retorno con los nombres de los filtros
+    $filtrosReturn = [];
+    foreach ($filtros as $filtro) {
+        $filtrosReturn[] = [
+            'nombre' => $filtro['nombre'],
+        ];
+    }
+
+    return $filtrosReturn;
+}
+
+function columnasTablas($modulo, $submodulo, $subsubmodulo, $uso)
+{
+    global $database;
+    // Obtener la tabla correspondiente al módulo, submódulo y subsubmódulo
+    $tabla = $database->select('tablas', "*", [
+        "modulo" => $modulo,
+        "submodulo" => $submodulo,
+        "subsubmodulo" => $subsubmodulo
+    ]);
+
+    if (empty($tabla)) {
+        echo "<th>No hay datos disponibles</th>";
+        return;
+    }
+
+    // Obtener las columnas asociadas al uso y la tabla
+    $columnas = $database->select("tablas_columnas", "*", [
+        "uso" => $uso,
+        "idtabla" => $tabla[0]['id']
+    ]);
+
+    if (empty($columnas)) {
+        echo "<th>No hay columnas disponibles</th>";
+        return;
+    }
+
+    // Convertir la cadena de columnas en un array
+    $columnNames = explode(',', $columnas[0]['columnas']);
+
+    // Mapear las columnas al formato DataTables
+    $columns = [];
+    foreach ($columnNames as $index => $column) {
+        $columns[] = ['db' => $column, 'dt' => $index];
+    }
+
+    // Generar los elementos <th> basados en el array $columns
+    $html = "";
+    foreach ($columns as $column) {
+        // Obtener el nombre de la columna
+        $columnName = htmlspecialchars($column['db']); // Escapar nombre de la columna por seguridad
+
+        // Reemplazar guiones bajos por espacios y capitalizar el texto
+        $columnName = str_replace('_', ' ', $columnName);
+        $columnName = ucwords(strtolower($columnName));
+
+        // Añadir el elemento <th> al HTML
+        $html .= "<th>{$columnName}</th>";
+    }
+
+    return $html;
+}
+
+
+function ordenTablas($modulo, $submodulo, $subsubmodulo, $uso)
+{
+    global $database;
+
+    // Obtener la tabla correspondiente al módulo, submódulo y subsubmódulo
+    $tabla = $database->select("tablas", "*", [
+        "modulo" => $modulo,
+        "submodulo" => $submodulo,
+        "subsubmodulo" => $subsubmodulo
+    ]);
+
+    if (empty($tabla)) {
+        return;
+    }
+
+    // Obtener las columnas asociadas al uso y la tabla
+    $resultado = $database->select("tablas_columnas", ["orden", "indice_orden"], [
+        "uso" => $uso,
+        "idtabla" => $tabla[0]['id']
+    ]);
+
+    if (empty($resultado)) {
+        return;
+    }
+
+    // Crear el array con los valores de orden e índice
+    $orden = [
+        'orden' => $resultado[0]['orden'],         // Orden obtenido de la base de datos
+        'indice' => $resultado[0]['indice_orden']  // Índice del orden
+    ];
+
+    return $orden;
+}
 
 
 

@@ -24,10 +24,11 @@ if (empty($tabla)) {
     echo "<th>No hay datos disponibles</th>";
     return;
 } else {
-    $campos = $database->select("tablas_columnas", "campos", [
+    $campos = $database->select("tablas_columnas", "columnas", [
         "uso" => $uso,
         "idtabla" => $tabla[0]['id']
     ]);
+
 }
 
 // Verificar si se encontraron los campos necesarios
@@ -40,7 +41,7 @@ if (empty($campos)) {
 $primaryKey = 'id';
 
 // Convertir la cadena de columnas en un array
-$columnNames = explode(', ', $campos[0]);
+$columnNames = explode(',', $campos[0]);
 
 // Mapear las columnas al formato de DataTables
 $columns = array();
@@ -49,7 +50,7 @@ foreach ($columnNames as $index => $column) {
 }
 
 // Obtener el filtro de la tabla
-$filtroData = $database->select("tablas_filtros", "filtro", [
+$filtroData = $database->select("tablas_filtros", "condicion", [
     "idtabla" => $tabla[0]['id'],
     "nombre" => $filtro
 ]);
@@ -60,7 +61,7 @@ if (empty($filtroData)) {
 }
 
 // Construir la condición WHERE
-$baseWhere = $tabla[0]['condiciones'];
+$baseWhere = $tabla[0]['condicion_principal'];
 $where = str_replace('{empresa}', "idempresa=" . addslashes($_SESSION['idempresa']), $baseWhere);
 $where = str_replace('{entidad}', "identidad=" . addslashes($_SESSION['entidad']), $baseWhere);
 $where = str_replace('{almacen}', "idalmacen=" . addslashes($_SESSION['almacen']), $where);
