@@ -115,8 +115,8 @@ class alkesGlobal
         $botonera = 'buttons: ["copy", "excel", "print", "colvis"],';
     
         // Script para inicializar DataTable
-        $this->response->script("\n        if ($.fn.DataTable.isDataTable('#tablaListado')) {\n            $('#tablaListado').DataTable().destroy();\n        }\n        $('#tablaListado').DataTable({\n            ajax: '$ajaxUrl',\n            responsive: true,\n            processing: true,\n            serverSide: true,\n            pageLength: $pageLength,\n            lengthMenu: $lengthMenu,\n            $dom\n            $botonera\n            language: {\n                url: \"/plugins/datatables/es-ES.json\"\n            },\n            order: [[" . $orden['indice'] . ", '" . $orden['orden'] . "']]\n        });\n    ");
-    
+        $this->response->script("\n        if ($.fn.DataTable.isDataTable('#tablaListado')) {\n            $('#tablaListado').DataTable().destroy();\n        }\n        $('#tablaListado').DataTable({\n            ajax: '$ajaxUrl',\n            responsive: true,\n            processing: true,\n            serverSide: true,\n            pageLength: $pageLength,\n            lengthMenu: $lengthMenu,\n            info: false,  // Aquí desactivamos la visualización de la información de los registros\n            $dom\n            $botonera\n            language: {\n                url: \"/plugins/datatables/es-ES.json\"\n            },\n            order: [[" . $orden['indice'] . ", '" . $orden['orden'] . "']]\n        });\n    ");
+
         // Aplicar o remover clases 'active' en pestañas
         foreach ($filtros as $filtro) {
             $nombre = $filtro['nombre'];
