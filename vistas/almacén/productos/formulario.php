@@ -4,7 +4,7 @@ session_start();
 // Obtén la ruta actual dividida en segmentos
 $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
 
-// Calcular nombres de módulos semidinámicamente
+//calcular nombres de modulos semidinamicamente
 $modulo = $ruta[(count($ruta) - 2)];
 $submodulo = $ruta[(count($ruta) - 1)];
 $subsubmodulo = null;
@@ -20,174 +20,428 @@ if (file_exists($pathControlador)) {
     die("No se encontró el archivo del controlador en: $pathControlador");
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="<?= getBackground(); ?>">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select2 con Tema Dinámico y Bootstrap</title>
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-
-    <style>
-        /* Estilo adicional para corregir bordes y colores */
-        .select2-container--bootstrap-5 .select2-selection--single {
-            height: calc(2.375rem + 2px);
-            /* Ajuste para altura de Bootstrap */
-            padding: 0.375rem 0.75rem;
-            border: 1px solid var(--bs-border-color, #ced4da);
-            border-radius: var(--bs-border-radius, 0.375rem);
-            background-color: var(--bs-body-bg, #ffffff);
-            color: var(--bs-body-color, #212529);
-        }
-
-        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
-            line-height: 1.5;
-        }
-
-        /* Ajustes para el dropdown de opciones */
-        .select2-container--bootstrap-5 .select2-dropdown {
-            border-radius: var(--bs-border-radius, 0.375rem);
-            border: 1px solid var(--bs-border-color, #ced4da);
-            background-color: var(--bs-body-bg, #ffffff);
-        }
-
-        .select2-container--bootstrap-5 .select2-results__option {
-            color: var(--bs-body-color, #212529);
-        }
-
-        .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            background-color: var(--bs-primary-bg-subtle, #e9ecef);
-            color: var(--bs-primary-color-emphasis, #0d6efd);
-        }
-
-        /* Tema oscuro */
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single {
-            border: 1px solid #495057;
-            background-color: #343a40;
-            color: #ffffff;
-        }
-
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option {
-            background-color: #343a40;
-            color: #ffffff;
-        }
-
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            background-color: #495057;
-            color: #ffffff;
-        }
-
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
-            border: 1px solid #6c757d;
-            background-color: #343a40;
-            color: #ffffff;
-        }
-
-        /* Ajustar el color del texto en el campo de búsqueda */
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
-            background-color: #343a40;
-            /* Fondo oscuro acorde al tema */
-            color: #ffffff;
-            /* Texto blanco para visibilidad */
-            border: 1px solid #6c757d;
-            /* Borde acorde al tema oscuro */
-        }
-
-        /* Ajustar el texto del elemento seleccionado */
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__rendered {
-            color: #ffffff;
-            /* Texto blanco para el tema oscuro */
-        }
-    </style>
+    <?= headHtml($modulo, $submodulo); ?>
 </head>
 
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Select2 con Tema Dinámico y Bootstrap</h2>
-        <form>
-            <!-- Primer Select2 con nombres mexicanos -->
-            <div class="mb-3">
-                <label for="select1" class="form-label">Nombres Mexicanos - Select 1:</label>
-                <select class="form-select select2-field" id="select1" data-placeholder="Seleccione un nombre">
-                    <option></option>
-                    <option value="Alejandro">Alejandro</option>
-                    <option value="Antonio">Antonio</option>
-                    <option value="Benito">Benito</option>
-                    <option value="Carlos">Carlos</option>
-                    <option value="Diego">Diego</option>
-                    <option value="Emiliano">Emiliano</option>
-                    <option value="Francisco">Francisco</option>
-                    <option value="Gabriela">Gabriela</option>
-                    <option value="Guadalupe">Guadalupe</option>
-                    <option value="Héctor">Héctor</option>
-                    <option value="Ignacio">Ignacio</option>
-                    <option value="Javier">Javier</option>
-                    <option value="José">José</option>
-                    <option value="Juan">Juan</option>
-                    <option value="Laura">Laura</option>
-                    <option value="Luz">Luz</option>
-                    <option value="Manuel">Manuel</option>
-                    <option value="María">María</option>
-                    <option value="Miguel">Miguel</option>
-                    <option value="Patricia">Patricia</option>
-                    <option value="Pedro">Pedro</option>
-                    <option value="Ricardo">Ricardo</option>
-                    <option value="Rosa">Rosa</option>
-                    <option value="Santiago">Santiago</option>
-                    <option value="Silvia">Silvia</option>
-                    <option value="Teresa">Teresa</option>
-                    <option value="Valeria">Valeria</option>
-                </select>
-            </div>
+<body class="layout-fixed-complete sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <?= menuLateral($modulo, $submodulo, $subsubmodulo); ?>
+        <div class="app-main-wrapper">
+            <?= encabezado(); ?>
+            <main class="app-main">
+                <?= titulos($modulo, $submodulo, $subsubmodulo); ?>
+                <div class="app-content">
+                    <div class="container-fluid">
+                        <form action="#" id="formProducto<?= $_GET['rand']; ?>" name="formProducto" method="post">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card mb-4">
+                                        <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                            <h3 class="card-title">Datos generales</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-collapse" title="Collapse">
+                                                    <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                                    <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-remove" title="Remove">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <!-- Primera columna -->
+                                                <div class="col-md-5">
+                                                    <div class="form-group row mb-3">
+                                                        <label for="codigo"
+                                                            class="col-sm-3 col-form-label text-start">Código</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-upc"></i></span>
+                                                                <input type="text" class="form-control" id="codigo"
+                                                                    name="codigo" placeholder="Código del producto">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row mb-3">
+                                                        <label for="catalogo"
+                                                            class="col-sm-3 col-form-label text-start">Cátalogo</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-journal-text"></i></span>
+                                                                <input type="text" class="form-control" id="catalogo"
+                                                                    name="catalogo" placeholder="Cátalogo del producto">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row mb-3">
+                                                        <label for="marca"
+                                                            class="col-sm-3 col-form-label text-start">Marca</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-shop"></i></span>
+                                                                <input type="text" class="form-control" id="marca"
+                                                                    name="marca" placeholder="Marca del producto">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group row mb-3">
+                                                        <label for="descripcion"
+                                                            class="col-sm-3 col-form-label text-start">Descripción</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-pencil-fill"></i></span>
+                                                                <textarea class="form-control" id="descripcion"
+                                                                    name="descripcion" rows="6"
+                                                                    placeholder="Descripción del producto"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-            <!-- Segundo Select2 con apellidos mexicanos -->
-            <div class="mb-3">
-                <label for="select2" class="form-label">Apellidos Mexicanos - Select 2:</label>
-                <select class="form-select select2-field" id="select2" data-placeholder="Seleccione un apellido">
-                    <option></option>
-                    <option value="Aguilar">Aguilar</option>
-                    <option value="Alvarado">Alvarado</option>
-                    <option value="Álvarez">Álvarez</option>
-                    <option value="Camacho">Camacho</option>
-                    <option value="Castillo">Castillo</option>
-                    <option value="Cervantes">Cervantes</option>
-                    <option value="Chávez">Chávez</option>
-                    <option value="Cruz">Cruz</option>
-                    <option value="Domínguez">Domínguez</option>
-                    <option value="Fernández">Fernández</option>
-                    <option value="García">García</option>
-                    <option value="Gómez">Gómez</option>
-                    <option value="González">González</option>
-                    <option value="Hernández">Hernández</option>
-                    <option value="López">López</option>
-                    <option value="Martínez">Martínez</option>
-                    <option value="Mendoza">Mendoza</option>
-                    <option value="Morales">Morales</option>
-                    <option value="Ortiz">Ortiz</option>
-                    <option value="Pérez">Pérez</option>
-                    <option value="Ramírez">Ramírez</option>
-                    <option value="Ramos">Ramos</option>
-                    <option value="Reyes">Reyes</option>
-                    <option value="Rodríguez">Rodríguez</option>
-                    <option value="Sánchez">Sánchez</option>
-                    <option value="Torres">Torres</option>
-                    <option value="Vázquez">Vázquez</option>
-                    <option value="Zamora">Zamora</option>
-                </select>
-            </div>
-        </form>
+                                                <!-- Segunda columna -->
+                                                <div class="col-md-7">
+                                                    <div class="row">
+                                                        <!-- Primera subcolumna de la segunda columna -->
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group row mb-3">
+                                                                <label for="estado"
+                                                                    class="col-sm-4 col-form-label text-start">Estado</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-toggle-on"></i></span>
+                                                                        <select id="estado" name="estado"
+                                                                            class="form-select">
+                                                                            <option value="activo" selected>Activo
+                                                                            </option>
+                                                                            <option value="inactivo">Inactivo</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="idtipo"
+                                                                    class="col-sm-4 col-form-label text-start">Tipo</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-list"></i></span>
+                                                                        <select id="idtipo" name="idtipo"
+                                                                            class="form-select">
+                                                                            <?php getProductos_tipos(); ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="idcategoria"
+                                                                    class="col-sm-4 col-form-label text-start">Categoría</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-box"></i></span>
+                                                                        <select id="idcategoria" name="idcategoria"
+                                                                            class="form-select"
+                                                                            onchange="Jaxon<?php echo $modulo . $submodulo; ?>.actualizaSubCategorias(this.value)">
+                                                                            <?php getCategorias(); ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="idsubcategoria"
+                                                                    class="col-sm-4 col-form-label text-start">Subcategoría</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-box-seam"></i></span>
+                                                                        <select id="idsubcategoria"
+                                                                            name="idsubcategoria" class="form-select"
+                                                                            onchange="Jaxon<?php echo $modulo . $submodulo; ?>.actualizaSubSubCategorias(this.value)">
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="idsubsubcategoria"
+                                                                    class="col-sm-4 col-form-label text-start">Subsubcategoría</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-box2"></i></span>
+                                                                        <select id="idsubsubcategoria"
+                                                                            name="idsubsubcategoria"
+                                                                            class="form-select">
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="lote_serie"
+                                                                    class="col-sm-4 col-form-label text-start">Lote o
+                                                                    Serie</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-list-check"></i></span>
+                                                                        <select id="lote_serie" name="lote_serie"
+                                                                            class="form-select">
+                                                                            <option value="si" selected>Sí</option>
+                                                                            <option value="no">No</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Segunda subcolumna de la segunda columna -->
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group row mb-3">
+                                                                <label for="costo"
+                                                                    class="col-sm-4 col-form-label text-start">Costo</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-currency-dollar"></i></span>
+                                                                        <input type="text" class="form-control"
+                                                                            id="costo" name="costo" placeholder="Costo">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="costo2"
+                                                                    class="col-sm-4 col-form-label text-start">Costo
+                                                                    2</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-currency-dollar"></i></span>
+                                                                        <input type="text" class="form-control"
+                                                                            id="costo2" name="costo2"
+                                                                            placeholder="Costo 2">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="costo3"
+                                                                    class="col-sm-4 col-form-label text-start">Costo
+                                                                    3</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-currency-dollar"></i></span>
+                                                                        <input type="text" class="form-control"
+                                                                            id="costo3" name="costo3"
+                                                                            placeholder="Costo 3">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="precio"
+                                                                    class="col-sm-4 col-form-label text-start">Precio</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-tag"></i></span>
+                                                                        <input type="text" class="form-control"
+                                                                            id="precio" name="precio"
+                                                                            placeholder="Precio">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="precio2"
+                                                                    class="col-sm-4 col-form-label text-start">Precio
+                                                                    2</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-tag"></i></span>
+                                                                        <input type="text" class="form-control"
+                                                                            id="precio2" name="precio2"
+                                                                            placeholder="Precio 2">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="precio3"
+                                                                    class="col-sm-4 col-form-label text-start">Precio
+                                                                    3</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-tag"></i></span>
+                                                                        <input type="text" class="form-control"
+                                                                            id="precio3" name="precio3"
+                                                                            placeholder="Precio 3">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card mb-4">
+                                        <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                            <h3 class="card-title">Datos fiscales</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-collapse" title="Collapse">
+                                                    <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                                    <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-remove" title="Remove">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <!-- Primera columna -->
+                                                <div class="col-md-6">
+                                                    <!-- Unidad -->
+                                                    <div class="form-group row mb-3">
+                                                        <label for="idunidad"
+                                                            class="col-sm-3 col-form-label text-start">Unidad</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-box"></i></span>
+                                                                <select id="idunidad" name="idunidad"
+                                                                    class="form-select">
+                                                                    <option value="unidad1">Unidad 1</option>
+                                                                    <option value="unidad2">Unidad 2</option>
+                                                                    <!-- Agrega más opciones según corresponda -->
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Clave Producto o Servicio -->
+                                                    <div class="form-group row mb-3">
+                                                        <label for="idclave_producto_servicio"
+                                                            class="col-sm-3 col-form-label text-start">Clave
+                                                            Producto/Servicio</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-key"></i></span>
+                                                                <select id="idclave_producto_servicio"
+                                                                    name="idclave_producto_servicio"
+                                                                    class="form-select">
+                                                                    <option value="clave1">Clave 1</option>
+                                                                    <option value="clave2">Clave 2</option>
+                                                                    <!-- Agrega más opciones según corresponda -->
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <!-- Moneda -->
+                                                    <div class="form-group row mb-3">
+                                                        <label for="idmoneda"
+                                                            class="col-sm-3 col-form-label text-start">Moneda</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-currency-dollar"></i></span>
+                                                                <select id="idmoneda" name="idmoneda"
+                                                                    class="form-select">
+                                                                    <option value="mxn">MXN - Peso Mexicano</option>
+                                                                    <option value="usd">USD - Dólar Estadounidense
+                                                                    </option>
+                                                                    <!-- Agrega más opciones según corresponda -->
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card mb-4">
+                                        <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                            <h3 class="card-title">Asignacion de impuestos</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-collapse" title="Collapse">
+                                                    <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                                    <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-remove" title="Remove">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                    
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row mb-3">
+                                <label for="notas" class="col-sm-4 col-form-label text-start">Notas del
+                                    desarrollador:</label>
+                                <div class="col-sm-8">
+                                    <p id="notas" class="form-text text-muted">
+                                        1- que cuando se active lote o serie se desactrive kit y cuando se active
+                                        kit se
+                                        desactive lote o serie.
+                                    </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        2- al guardar validar si si era lote entonces confirmar que todos los lotes
+                                        de
+                                        ese producto se iran a 0, tambien si desactrivado lotes y se quiere activar
+                                        lanzar antes una alerta sobre que primero se tiene que bajar todas las
+                                        xexistencias en todos los almacenes a 0 antes de poder activar lotes.
+                                    </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        3- Si el producto se quiere cambiar en cuestion a la configuracion de kit,
+                                        validar si ya hay movimientos con ese idproducto y si lo hay mandar una
+                                        alerta
+                                        de que no se puede cambiar la configuracion por que hay movimientos ya con
+                                        kit.
+                                    </p>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+            <?= botones(); ?>
+        </div>
     </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <?= scriptsHtml(); ?>
+    <script>
+        JaxonalkesGlobal.listadosIndex("<?= $modulo; ?>", "<?= $submodulo; ?>", "<?= $subsubmodulo; ?>", 'Principal', 'Index');
+    </script>
     <script>
         $(document).ready(function () {
             // Inicializar Select2 con tema Bootstrap 5
