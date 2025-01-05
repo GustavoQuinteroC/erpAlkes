@@ -153,15 +153,16 @@ class almacenProductos extends alkesGlobal
 
     function tablaImpuestos()
     {
-        $impuestos = $_SESSION['partidasImpuestos'.$_GET['rand']] ?? [];
+        $impuestos = $_SESSION['partidasImpuestos' . $_GET['rand']] ?? [];
 
         // Verificar si hay impuestos para mostrar
         if (empty($impuestos)) {
             $html = '<p class="text-muted text-center">No hay impuestos registrados.</p>';
         } else {
             // Construir la tabla
-            $html = '<table class="table table-borderless table-striped">';
-            $html .= '<thead>';
+            $html = '<div class="table-responsive">'; // Contenedor responsivo
+            $html .= '<table class="table table-borderless table-striped table-hover">';
+            $html .= '<thead class="text-bg-secondary">';
             $html .= '<tr>';
             $html .= '<th>CFDI Impuesto</th>';
             $html .= '<th>Tipo de Impuesto</th>';
@@ -173,8 +174,7 @@ class almacenProductos extends alkesGlobal
             $html .= '<tbody>';
 
             foreach ($impuestos as $index => $impuesto) {
-                if($impuesto['estado']=='Activo')
-                {
+                if ($impuesto['estado'] == 'Activo') {
                     $html .= '<tr>';
                     $html .= '<td>' . htmlspecialchars($impuesto['impuesto']) . '</td>';
                     $html .= '<td>' . htmlspecialchars($impuesto['tipoImpuesto']) . '</td>';
@@ -194,6 +194,7 @@ class almacenProductos extends alkesGlobal
 
             $html .= '</tbody>';
             $html .= '</table>';
+            $html .= '</div>'; // Cierre del contenedor responsivo
         }
 
         // Asignar el HTML generado al contenedor en el card-body
@@ -211,7 +212,6 @@ class almacenProductos extends alkesGlobal
             $_SESSION['partidasImpuestos'.$_GET['rand']][$index]['estado'] = 'Inactivo';
 
             // Devolver una respuesta con éxito (esto puede ser útil para notificaciones o actualizaciones)
-            $this->response->script('Swal.fire("Éxito", "El impuesto se ha marcado como inactivo.", "success");');
             $this->alerta(
                 "Éxito",
                 "El impuesto se ha marcado como inactivo.",
@@ -222,7 +222,6 @@ class almacenProductos extends alkesGlobal
             );
         } else {
             // Si no se encuentra el índice, mostrar un mensaje de error
-            $this->response->script('Swal.fire("Error", "No se encontró el impuesto.", "error");');
             $this->alerta(
                 "Error",
                 "No se encontró el impuesto.",
@@ -342,7 +341,14 @@ class almacenProductos extends alkesGlobal
         ];
     
         // Mostrar un mensaje de éxito
-        $this->response->script('Swal.fire("Éxito", "El impuesto se ha actualizado correctamente.", "success");');
+        $this->alerta(
+            "Éxito",
+            "El impuesto se ha actualizado correctamente.",
+            "success",
+            null,
+            false,
+            true
+        );
     
         // Actualizar la tabla en la vista
         $this->tablaImpuestos();
