@@ -9,7 +9,7 @@ $modulo = $ruta[(count($ruta) - 2)];
 $submodulo = $ruta[(count($ruta) - 1)];
 $subsubmodulo = null;
 $pathControlador = __DIR__ . "/../../../controladores/individuales/$modulo.$submodulo.php";
-
+$_SESSION['partidasImpuestos'.$_GET['rand']] = array();
 // Verifica si el archivo existe antes de incluirlo
 if (file_exists($pathControlador)) {
     require_once($pathControlador);
@@ -97,7 +97,7 @@ if (file_exists($pathControlador)) {
                                 <div class="col-12">
                                     <div class="card mb-4">
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                            <h3 class="card-title">Datos generales2</h3>
+                                            <h3 class="card-title">Datos generales</h3>
                                             <div class="card-tools">
                                                 <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
                                                     data-lte-toggle="card-collapse" title="Collapse">
@@ -403,7 +403,7 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-currency-dollar"></i></span>
                                                                 <select id="idmoneda" name="idmoneda"
                                                                     class="form-select select2-field">
-                                                                        <?php echo getCfdiMoneda(); ?>
+                                                                    <?php echo getCfdiMoneda(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -414,8 +414,7 @@ if (file_exists($pathControlador)) {
                                             <div class="row mb-3">
                                                 <!-- Etiqueta -->
                                                 <label for="idclave_producto_servicio"
-                                                    class="col-sm-2 col-form-label text-start">Clave
-                                                    Producto/Servicio</label>
+                                                    class="col-sm-2 col-form-label text-start">Clave SAT</label>
 
                                                 <!-- Input de clave -->
                                                 <div class="col-md-3">
@@ -423,7 +422,7 @@ if (file_exists($pathControlador)) {
                                                         <span class="input-group-text"><i class="bi bi-key"></i></span>
                                                         <input type="text" id="idclave_producto_servicio"
                                                             name="idclave_producto_servicio" class="form-control"
-                                                            placeholder="Ingresa la clave SAT"
+                                                            placeholder="Ingresa la clave del producto o servicio"
                                                             onchange="JaxonalmacenProductos.validarClaveSat(this.value)">
                                                     </div>
                                                 </div>
@@ -445,8 +444,14 @@ if (file_exists($pathControlador)) {
                                 <div class="col-12">
                                     <div class="card mb-4">
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                            <h3 class="card-title">Asignacion de impuestos</h3>
-                                            <div class="card-tools">
+                                            <h3 class="card-title">Impuestos</h3>
+                                            <div class="card-tools d-flex align-items-center gap-2">
+                                                <button tabindex="400" id="addImpuesto"
+                                                    class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
+                                                    onclick="JaxonalmacenProductos.modalAddImpuesto();"
+                                                    type="button">
+                                                    <span class="bi bi-plus-lg me-1"></span> Agregar
+                                                </button>
                                                 <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
                                                     data-lte-toggle="card-collapse" title="Collapse">
                                                     <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
@@ -458,14 +463,16 @@ if (file_exists($pathControlador)) {
                                                 </button>
                                             </div>
                                         </div>
+
                                         <div class="card-body">
                                             <div class="row">
-
+                                                <!-- Contenido -->
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="form-group row mb-3">
                                 <label for="notas" class="col-sm-4 col-form-label text-start">Notas del
                                     desarrollador:</label>
@@ -494,6 +501,7 @@ if (file_exists($pathControlador)) {
                         </form>
                     </div>
                 </div>
+                <div id="modales"></div>
             </main>
             <?= botones(); ?>
         </div>
