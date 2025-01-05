@@ -129,7 +129,134 @@ class alkesGlobal
     
         return $this->response;
     }
+
+    public function modalFormulario($campos, $titulo, $funcionCallBack, $parametrosAdicionales = '')
+    {
+        // Crear el HTML de la ventana modal
+        $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalFormularioLabel" aria-hidden="true">';
+        $html .= '<div class="modal-dialog">';
+        $html .= '<div class="modal-content">';
+        $html .= '<div class="modal-header text-bg-'.getEnfasis().'">';
+        $html .= '<h5 class="modal-title" id="modalFormularioLabel">' . $titulo . '</h5>';
+        $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+        $html .= '</div>';
+        $html .= '<div class="modal-body">';
+        $html .= '<!-- Aquí van los campos para la modal -->';
+        $html .= '<form id="formModalFormulario">';
+
+        foreach ($campos as $campo) {
+            $html .= '<div class="mb-3">';
+            $html .= '<label for="' . $campo['id'] . '" class="form-label">' . $campo['label'] . '</label>';
+
+            $readOnly = isset($campo['readOnly']) && $campo['readOnly'] ? ' readonly' : '';
+            $disabled = isset($campo['disabled']) && $campo['disabled'] ? ' disabled' : '';
+
+            switch ($campo['type']) {
+                case 'textarea':
+                    $html .= '<textarea class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $readOnly . '>' . $campo['value'] . '</textarea>';
+                    break;
+                case 'select':
+                    $html .= '<select class="form-select" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $disabled . '>';
+                    $html .= $campo['options'];
+                    $html .= '</select>';
+                    break;
+                default:
+                    $html .= '<input type="' . $campo['type'] . '" class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '" value="' . $campo['value'] . '"' . $readOnly . '>';
+                    break;
+            }
+
+            $html .= '</div>';
+        }
+
+        $html .= '</form>';
+        $html .= '</div>';
+        $html .= '<div class="modal-footer">';
+        $html .= '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>';
+        $html .= '<button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="' . $funcionCallBack . '(jaxon.getFormValues(\'formModalFormulario\')' . $parametrosAdicionales . ');">Guardar</button>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Remover cualquier modal previo
+        $this->response->remove('modalFormulario');
+
+        // Insertar el nuevo modal
+        $this->response->append("modales", "innerHTML", $html);
+
+        // Mostrar el modal con Bootstrap 5
+        $this->response->script('new bootstrap.Modal(document.getElementById("modalFormulario")).show();');
+
+        //Eliminar el elemento si es que se cierra
+        $this->response->script('
+        if (!$("#modalFormulario").data("evento-registrado")) {
+            $("#modalFormulario").on("hidden.bs.modal", function () {
+                $(this).remove();
+            });
+            $("#modalFormulario").data("evento-registrado", true);
+        }
+        ');
+
+        return $this->response;
+    }
+
+    public function alerta($titulo, $mensaje, $icono, $elementoEnfocar = null, $boton = true, $timer = false, $redireccion = null)
+    {
+        //quitar el foco de todo el documento
+        $this->response->script('$(document.activeElement).blur();');
+        $mostrarTimer = $timer ? 'timer: 2000,' : '';
+        $enfoqueScript = $elementoEnfocar !== null ? 'setTimeout(function() { $("#' . $elementoEnfocar . '").focus(); }, 2);' : '';
+        $redireccionScript = $redireccion !== null ? 'window.location.href = "' . $redireccion . '";' : '';
+
+        $script = 'Swal.fire({
+        title: "' . $titulo . '",
+        text: "' . $mensaje . '",
+        showConfirmButton: "' . $boton . '",
+        ' . $mostrarTimer . '
+        icon: "' . $icono . '"
+        }).then((result) => {
+            ' . $enfoqueScript . '
+            ' . $redireccionScript . '
+        });';
+
+        // Agregar el script de SweetAlert2 a la response
+        $this->response->script($script);
+
+        // Devolver la response a Jaxon
+        return $this->response;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
+
 
 
 
@@ -203,55 +330,8 @@ class alkesGlobal
     }
 
 
-    public function modalFormulario($campos, $titulo, $funcionCallBack, $parametrosAdicionales = '')
-    {
-        // Crea el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">';
-        $html .= '<div class="modal-dialog" role="document">';
-        $html .= '<div class="modal-content">';
-        $html .= '<div class="modal-header bg-secondary">';
-        $html .= '<h5 class="modal-title" id="exampleModalLabel">' . $titulo . '</h5>';
-        $html .= '</div>';
-        $html .= '<div class="modal-body">';
-        $html .= '<!-- Aquí van los campos para la modal -->';
-        $html .= '<form id="formModalFormulario">';
-        foreach ($campos as $campo) {
-            $html .= '<div class="form-group">';
-            $html .= '<label for="' . $campo['id'] . '">' . $campo['label'] . '</label>';
+    
 
-            $readOnly = isset($campo['readOnly']) && $campo['readOnly'] ? ' readonly' : '';
-            $disabled = isset($campo['disabled']) && $campo['disabled'] ? ' disabled' : '';
-
-            switch ($campo['type']) {
-                case 'textarea':
-                    $html .= '<textarea class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $readOnly . '>' . $campo['value'] . '</textarea>';
-                    break;
-                case 'select':
-                    $html .= '<select class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $disabled . '>';
-                    $html .= $campo['options'];
-                    $html .= '</select>';
-                    break;
-                default:
-                    $html .= '<input type="' . $campo['type'] . '" class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '" value="' . $campo['value'] . '"' . $readOnly . '>';
-                    break;
-            }
-
-            $html .= '</div>';
-        }
-        $html .= '</form>';
-        $html .= '</div>';
-        $html .= '<div class="modal-footer">';
-        $html .= '<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>';
-        $html .= '<button type="button" class="btn btn-primary" onclick="' . $funcionCallBack . '(jaxon.getFormValues(\'formModalFormulario\')' . $parametrosAdicionales . ');" data-dismiss="modal">Guardar</button>';
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</div>';
-        $this->response->remove('modalFormulario');
-        $this->response->append("footer", "innerHTML", $html);
-        $this->response->script('$( "#modalFormulario" ).modal("show");');
-        return $this->response;
-    }
 
 
     public function modalSeleccion($titulo, $columnas, $data, $funcionCallBack, $multiple = false, $parametrosAdicionales = '')
@@ -324,31 +404,7 @@ class alkesGlobal
         return $this->response;
     }
 
-    public function alerta($titulo, $mensaje, $icono, $elementoEnfocar = null, $boton = true, $timer = false, $redireccion = null)
-    {
-        //quitar el foco de todo el documento
-        $this->response->script('$(document.activeElement).blur();');
-        $mostrarTimer = $timer ? 'timer: 2000,' : '';
-        $enfoqueScript = $elementoEnfocar !== null ? 'setTimeout(function() { $("#' . $elementoEnfocar . '").focus(); }, 2);' : '';
-        $redireccionScript = $redireccion !== null ? 'window.location.href = "' . $redireccion . '";' : '';
-
-        $script = 'Swal.fire({
-        title: "' . $titulo . '",
-        text: "' . $mensaje . '",
-        showConfirmButton: "' . $boton . '",
-        ' . $mostrarTimer . '
-        icon: "' . $icono . '"
-        }).then((result) => {
-            ' . $enfoqueScript . '
-            ' . $redireccionScript . '
-        });';
-
-        // Agregar el script de SweetAlert2 a la response
-        $this->response->script($script);
-
-        // Devolver la response a Jaxon
-        return $this->response;
-    }
+    
 
 
     public function alertaConfirmacion($titulo, $mensaje, $icono, $confirmCallback)
