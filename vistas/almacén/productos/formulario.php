@@ -9,12 +9,12 @@ $modulo = $ruta[(count($ruta) - 2)];
 $submodulo = $ruta[(count($ruta) - 1)];
 $subsubmodulo = null;
 $pathControlador = __DIR__ . "/../../../controladores/individuales/$modulo.$submodulo.php";
-$_SESSION['partidasImpuestos'.$_GET['rand']] = array();
 // Verifica si el archivo existe antes de incluirlo
 if (file_exists($pathControlador)) {
     require_once($pathControlador);
     validarSesion();
     echo $jaxon->getScript(true);
+    $_SESSION['partidasImpuestos'.$_GET['rand']] = array();
 } else {
     // Manejo de errores si el archivo controlador no existe
     die("No se encontró el archivo del controlador en: $pathControlador");
