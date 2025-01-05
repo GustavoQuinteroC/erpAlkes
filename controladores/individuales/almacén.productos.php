@@ -13,6 +13,19 @@ class almacenProductos extends alkesGlobal
         return $this->response;
     }
 
+    function actualizaSubCategorias($idcategoria)
+    {
+        $this->response->assign("idsubcategoria", "innerHTML", getSubcategorias($idcategoria));
+        return $this->response;
+    }
+
+    function actualizaSubSubCategorias($idsubcategoria)
+    {
+        $this->response->assign("idsubsubcategoria", "innerHTML", getSubsubcategorias($idsubcategoria));
+        return $this->response;
+    }
+    
+
 }
 
 
