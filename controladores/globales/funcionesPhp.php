@@ -27,7 +27,6 @@ $database = new Medoo([
 
 function validarSesion()
 {
-    session_start();
     global $database;
 
     if (!isset($_SESSION['idusuario'])) {
@@ -503,7 +502,6 @@ function scriptsHtml()
 
 function cerrarSesion($redirigir = true)
 {
-    session_start();
     session_destroy();
 
     if (isset($_COOKIE['recuerdame_alkes'])) {

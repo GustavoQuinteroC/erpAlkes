@@ -1,4 +1,5 @@
 <?php
+session_start();
 // controlador.php
 require_once(__DIR__ .'/../globales/funcionesJaxon.php');
 use function Jaxon\jaxon;
@@ -138,7 +139,7 @@ class almacenProductos extends alkesGlobal
         }
 
         // Si la validación es exitosa, agregar el impuesto a la sesión
-        $_SESSION['partidasImpuestos' . $_GET['rand']][] = [
+        $_SESSION['partidasImpuestos'.$_GET['rand']][] = [
             'impuesto' => $form['impuesto'],
             'tipoImpuesto' => $form['tipoImpuesto'],
             'tipoFactor' => $form['tipoFactor'],
@@ -152,9 +153,7 @@ class almacenProductos extends alkesGlobal
 
     function tablaImpuestos()
     {
-        // Obtener los datos de la sesión
-        $rand = $_GET['rand'] ?? ''; // Asegurarnos de obtener el rand
-        $impuestos = $_SESSION['partidasImpuestos' . $rand] ?? [];
+        $impuestos = $_SESSION['partidasImpuestos'.$_GET['rand']] ?? [];
 
         // Verificar si hay impuestos para mostrar
         if (empty($impuestos)) {
@@ -182,11 +181,11 @@ class almacenProductos extends alkesGlobal
                     $html .= '<td>' . htmlspecialchars($impuesto['tipoFactor']) . '</td>';
                     $html .= '<td>' . htmlspecialchars($impuesto['porcentaje']) . '%</td>';
                     $html .= '<td>';
-                    $html .= '<button class="btn btn-sm btn-danger" onclick="JaxonalmacenProductos.eliminarImpuesto(' . $index . ');">';
+                    $html .= '<button type="button" class="btn btn-sm btn-danger" onclick="JaxonalmacenProductos.eliminarImpuesto(' . $index . ');">';
                     $html .= '<i class="bi bi-trash"></i>';
                     $html .= '</button>';
-                    $html .= '<button class="btn btn-sm btn-primary" onclick="JaxonalmacenProductos.editarImpuesto(' . $index . ');">';
-                    $html .= '<i class="bi bi-trash"></i>';
+                    $html .= '<button type="button" class="btn btn-sm btn-primary" onclick="JaxonalmacenProductos.modalEditImpuesto(' . $index . ');">';
+                    $html .= '<i class="bi bi-pencil-square"></i>';
                     $html .= '</button>';
                     $html .= '</td>';
                     $html .= '</tr>';
@@ -204,6 +203,154 @@ class almacenProductos extends alkesGlobal
         return $this->response;
     }
 
+    function eliminarImpuesto($index)
+    {
+        // Verificar si el índice existe en la sesión
+        if (isset($_SESSION['partidasImpuestos'.$_GET['rand']][$index])) {
+            // Cambiar el estado del impuesto a 'Inactivo'
+            $_SESSION['partidasImpuestos'.$_GET['rand']][$index]['estado'] = 'Inactivo';
+
+            // Devolver una respuesta con éxito (esto puede ser útil para notificaciones o actualizaciones)
+            $this->response->script('Swal.fire("Éxito", "El impuesto se ha marcado como inactivo.", "success");');
+            $this->alerta(
+                "Éxito",
+                "El impuesto se ha marcado como inactivo.",
+                "success",
+                null,
+                false,
+                true
+            );
+        } else {
+            // Si no se encuentra el índice, mostrar un mensaje de error
+            $this->response->script('Swal.fire("Error", "No se encontró el impuesto.", "error");');
+            $this->alerta(
+                "Error",
+                "No se encontró el impuesto.",
+                "error",
+            );
+        }
+        
+        $this->tablaImpuestos();
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
+
+
+    function modalEditImpuesto($index)
+    {
+        // Obtener la partida actual desde la sesión
+        $impuestoActual = $_SESSION['partidasImpuestos' . $_GET['rand']][$index] ?? null;
+
+        if (!$impuestoActual) {
+            // Si no se encuentra la partida, mostrar un mensaje de error
+            return $this->alerta(
+                'Error',
+                'No se encontró la partida seleccionada.',
+                'error'
+            );
+        }
+
+        // Definir los campos para el formulario modal
+        $campos = [
+            [
+                'id' => 'impuesto',
+                'label' => 'Impuesto',
+                'type' => 'select',
+                'options' => getCfdiImpuesto(),
+                'value' => $impuestoActual['impuesto'] ?? '', // Valor actual
+            ],
+            [
+                'id' => 'tipoImpuesto',
+                'label' => 'Tipo de Impuesto',
+                'type' => 'select',
+                'options' => '
+                    <option value="" disabled>Elije una opción...</option>
+                    <option value="Traslado" ' . ($impuestoActual['tipoImpuesto'] == 'Traslado' ? 'selected' : '') . '>Traslado</option>
+                    <option value="Retencion" ' . ($impuestoActual['tipoImpuesto'] == 'Retencion' ? 'selected' : '') . '>Retención</option>',
+                'value' => $impuestoActual['tipoImpuesto'] ?? '', // Valor actual
+            ],
+            [
+                'id' => 'tipoFactor',
+                'label' => 'Tipo de factor',
+                'type' => 'select',
+                'options' => getCfdiTipoFactor(),
+                'value' => $impuestoActual['tipoFactor'] ?? '', // Valor actual
+            ],
+            [
+                'id' => 'porcentaje',
+                'label' => 'Porcentaje en entero (ej: 16)',
+                'type' => 'number',
+                'value' => $impuestoActual['porcentaje'] ?? '', // Valor actual
+            ],
+        ];
+
+        // Título del modal
+        $titulo = 'Editar Impuesto';
+
+        // Callback que se ejecutará al guardar los cambios
+        $funcionCallBack = 'JaxonalmacenProductos.editarImpuesto'; // Nombre de la función JavaScript
+
+        // Agregar el índice como parámetro adicional
+        $parametrosAdicionales = ', ' . $index;
+
+        // Llamar a la función modalFormulario
+        $this->modalFormulario($campos, $titulo, $funcionCallBack, $parametrosAdicionales);
+
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
+
+    function editarImpuesto($form, $index)
+    {
+        // Validar el índice
+        if (!isset($_SESSION['partidasImpuestos' . $_GET['rand']][$index])) {
+            return $this->alerta('Error', 'No se encontró la partida a editar.', 'error');
+        }
+    
+        // Validar los datos
+        $reglas = [
+            'impuesto' => ['obligatorio' => true, 'tipo' => 'string'],
+            'tipoImpuesto' => ['obligatorio' => true, 'tipo' => 'string'],
+            'tipoFactor' => ['obligatorio' => true, 'tipo' => 'string'],
+            'porcentaje' => ['obligatorio' => true, 'tipo' => 'int'],
+        ];
+        $resultadoValidacion = validar_global($form, $reglas);
+    
+        if ($resultadoValidacion !== true) {
+            $error = $resultadoValidacion['error'];
+            $campo = $resultadoValidacion['campo'];
+
+            $this->modalEditImpuesto($index);
+            // Mostrar alerta con el error
+            $this->alerta(
+                "Error en la validación",
+                $error,
+                "error",
+                $campo
+            );
+            // Retornar la respuesta Jaxon
+            return $this->response;
+        }
+    
+        // Actualizar la partida en la sesión
+        $_SESSION['partidasImpuestos' . $_GET['rand']][$index] = [
+            'impuesto' => $form['impuesto'],
+            'tipoImpuesto' => $form['tipoImpuesto'],
+            'tipoFactor' => $form['tipoFactor'],
+            'porcentaje' => $form['porcentaje'],
+            'estado' => 'Activo', // Mantener o cambiar estado según el caso
+        ];
+    
+        // Mostrar un mensaje de éxito
+        $this->response->script('Swal.fire("Éxito", "El impuesto se ha actualizado correctamente.", "success");');
+    
+        // Actualizar la tabla en la vista
+        $this->tablaImpuestos();
+    
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
+    
 
 
 
