@@ -889,6 +889,46 @@ function getCfdiMoneda()
     return $options;
 }
 
+function getCfdiImpuesto()
+{
+    global $database;
+    $registros = $database->select("cfdi_impuesto", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_impuesto']). " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getCfdiTipoFactor()
+{
+    global $database;
+    $registros = $database->select("cfdi_tipofactor", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_tipofactor']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
 
 
 
