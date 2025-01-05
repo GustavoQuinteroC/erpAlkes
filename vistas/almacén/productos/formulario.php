@@ -465,7 +465,7 @@ if (file_exists($pathControlador)) {
                                         </div>
 
                                         <div class="card-body">
-                                            <div class="row">
+                                            <div id='tablaImpuestos' class="row">
                                                 <!-- Contenido -->
                                             </div>
                                         </div>

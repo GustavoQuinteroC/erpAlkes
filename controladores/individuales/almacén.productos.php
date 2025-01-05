@@ -145,10 +145,65 @@ class almacenProductos extends alkesGlobal
             'porcentaje' => $form['porcentaje'],
             'estado' => 'Activo',
         ];
+        $this->tablaImpuestos();
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
+
+    function tablaImpuestos()
+    {
+        // Obtener los datos de la sesión
+        $rand = $_GET['rand'] ?? ''; // Asegurarnos de obtener el rand
+        $impuestos = $_SESSION['partidasImpuestos' . $rand] ?? [];
+
+        // Verificar si hay impuestos para mostrar
+        if (empty($impuestos)) {
+            $html = '<p class="text-muted text-center">No hay impuestos registrados.</p>';
+        } else {
+            // Construir la tabla
+            $html = '<table class="table table-borderless table-striped">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>CFDI Impuesto</th>';
+            $html .= '<th>Tipo de Impuesto</th>';
+            $html .= '<th>CFDI Tipo Factor</th>';
+            $html .= '<th>Porcentaje</th>';
+            $html .= '<th>Acciones</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+
+            foreach ($impuestos as $index => $impuesto) {
+                if($impuesto['estado']=='Activo')
+                {
+                    $html .= '<tr>';
+                    $html .= '<td>' . htmlspecialchars($impuesto['impuesto']) . '</td>';
+                    $html .= '<td>' . htmlspecialchars($impuesto['tipoImpuesto']) . '</td>';
+                    $html .= '<td>' . htmlspecialchars($impuesto['tipoFactor']) . '</td>';
+                    $html .= '<td>' . htmlspecialchars($impuesto['porcentaje']) . '%</td>';
+                    $html .= '<td>';
+                    $html .= '<button class="btn btn-sm btn-danger" onclick="JaxonalmacenProductos.eliminarImpuesto(' . $index . ');">';
+                    $html .= '<i class="bi bi-trash"></i>';
+                    $html .= '</button>';
+                    $html .= '<button class="btn btn-sm btn-primary" onclick="JaxonalmacenProductos.editarImpuesto(' . $index . ');">';
+                    $html .= '<i class="bi bi-trash"></i>';
+                    $html .= '</button>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        // Asignar el HTML generado al contenedor en el card-body
+        $this->response->assign("tablaImpuestos", "innerHTML", $html);
 
         // Retornar la respuesta Jaxon
         return $this->response;
     }
+
 
 
 
