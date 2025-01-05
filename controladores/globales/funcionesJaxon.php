@@ -16,8 +16,6 @@ use Medoo\Medoo;
 // Inicializa Jaxon
 $url_base = $_SERVER['HTTP_X_FORWARDED_PROTO']."://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $jaxon = jaxon();
-$jaxon->setOption('core.request.mode', 'asynchronous');
-$jaxon->setOption('core.request.method', 'POST');
 $jaxon->setOption('core.request.uri', $url_base);
 
 
@@ -136,7 +134,7 @@ class alkesGlobal
         $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalFormularioLabel" aria-hidden="true">';
         $html .= '<div class="modal-dialog">';
         $html .= '<div class="modal-content">';
-        $html .= '<div class="modal-header text-bg-'.getEnfasis().'">';
+        $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
         $html .= '<h5 class="modal-title" id="modalFormularioLabel">' . $titulo . '</h5>';
         $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
         $html .= '</div>';
@@ -156,8 +154,23 @@ class alkesGlobal
                     $html .= '<textarea class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $readOnly . '>' . $campo['value'] . '</textarea>';
                     break;
                 case 'select':
+                    // Abrimos el select
                     $html .= '<select class="form-select" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $disabled . '>';
-                    $html .= $campo['options'];
+                    
+                    // Aquí tomamos las opciones del campo y agregamos la lógica para seleccionar la opción
+                    $options = $campo['options'];
+                    // Reemplazamos el value seleccionado por el atributo selected
+                    // Utilizamos una expresión regular para hacerlo dinámicamente
+                    $options = preg_replace_callback(
+                        '/<option\s+value="([^"]+)"/', 
+                        function($matches) use ($campo) {
+                            // Si el value coincide con el valor seleccionado, añadimos el atributo selected
+                            return $matches[0] . ($matches[1] == $campo['value'] ? ' selected' : '');
+                        },
+                        $options
+                    );
+                    
+                    $html .= $options; // Imprimimos las opciones ya modificadas
                     $html .= '</select>';
                     break;
                 default:
@@ -199,6 +212,7 @@ class alkesGlobal
 
         return $this->response;
     }
+
 
     public function alerta($titulo, $mensaje, $icono, $elementoEnfocar = null, $boton = true, $timer = false, $redireccion = null)
     {
