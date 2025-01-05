@@ -26,6 +26,61 @@ if (file_exists($pathControlador)) {
 
 <head>
     <?= headHtml($modulo, $submodulo); ?>
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <style>
+        /* Estilo adicional para corregir bordes y colores */
+        .select2-container--bootstrap-5 .select2-selection--single {
+            border: 1px solid var(--bs-border-color, #ced4da);
+            background-color: var(--bs-body-bg, #ffffff);
+            color: var(--bs-body-color, #212529);
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5;
+        }
+
+        /* Ajustes para el dropdown de opciones */
+        .select2-container--bootstrap-5 .select2-dropdown {
+            border: 1px solid var(--bs-border-color, #ced4da);
+            background-color: var(--bs-body-bg, #ffffff);
+        }
+
+        /* Tema oscuro */
+        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single {
+            background-color: #212529;
+            color: #ffffff;
+        }
+
+        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option {
+            background-color: #212529;
+            color: #ffffff;
+        }
+
+        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted {
+            color: #ffffff;
+        }
+
+        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
+            background-color: #212529;
+            color: #ffffff;
+        }
+
+        /* Ajustar el color del texto en el campo de búsqueda */
+        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+            background-color: #212529;
+            /* Fondo oscuro acorde al tema */
+            color: #ffffff;
+            /* Borde acorde al tema oscuro */
+        }
+
+        /* Ajustar el texto del elemento seleccionado */
+        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__rendered {
+            color: #ffffff;
+            /* Texto blanco para el tema oscuro */
+        }
+    </style>
 </head>
 
 <body class="layout-fixed-complete sidebar-expand-lg bg-body-tertiary">
@@ -42,7 +97,7 @@ if (file_exists($pathControlador)) {
                                 <div class="col-12">
                                     <div class="card mb-4">
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                            <h3 class="card-title">Datos generales</h3>
+                                            <h3 class="card-title">Datos generales2</h3>
                                             <div class="card-tools">
                                                 <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
                                                     data-lte-toggle="card-collapse" title="Collapse">
@@ -60,26 +115,28 @@ if (file_exists($pathControlador)) {
                                                 <!-- Primera columna -->
                                                 <div class="col-md-5">
                                                     <div class="form-group row mb-3">
-                                                        <label for="codigo"
+                                                        <label for="codigo_barras"
                                                             class="col-sm-3 col-form-label text-start">Código</label>
                                                         <div class="col-sm-9">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-upc"></i></span>
-                                                                <input type="text" class="form-control" id="codigo"
-                                                                    name="codigo" placeholder="Código del producto">
+                                                                        class="bi bi-upc-scan"></i></span>
+                                                                <input type="text" class="form-control"
+                                                                    id="codigo_barras" name="codigo_barras"
+                                                                    placeholder="Código unico del producto">
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row mb-3">
-                                                        <label for="catalogo"
-                                                            class="col-sm-3 col-form-label text-start">Cátalogo</label>
+                                                        <label for="nombre"
+                                                            class="col-sm-3 col-form-label text-start">Nombre</label>
                                                         <div class="col-sm-9">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-journal-text"></i></span>
-                                                                <input type="text" class="form-control" id="catalogo"
-                                                                    name="catalogo" placeholder="Cátalogo del producto">
+                                                                        class="bi bi-card-text"></i></span>
+                                                                <input type="text" class="form-control" id="nombre"
+                                                                    name="nombre"
+                                                                    placeholder="Nombre unico del producto">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -140,7 +197,7 @@ if (file_exists($pathControlador)) {
                                                                                 class="bi bi-list"></i></span>
                                                                         <select id="idtipo" name="idtipo"
                                                                             class="form-select">
-                                                                            <?php getProductos_tipos(); ?>
+                                                                            <?php echo getProductosTipos(); ?>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -154,8 +211,8 @@ if (file_exists($pathControlador)) {
                                                                                 class="bi bi-box"></i></span>
                                                                         <select id="idcategoria" name="idcategoria"
                                                                             class="form-select"
-                                                                            onchange="Jaxon<?php echo $modulo . $submodulo; ?>.actualizaSubCategorias(this.value)">
-                                                                            <?php getCategorias(); ?>
+                                                                            onchange="JaxonalmacenProductos.actualizaSubCategorias(this.value)">
+                                                                            <?php echo getCategorias(); ?>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -169,7 +226,7 @@ if (file_exists($pathControlador)) {
                                                                                 class="bi bi-box-seam"></i></span>
                                                                         <select id="idsubcategoria"
                                                                             name="idsubcategoria" class="form-select"
-                                                                            onchange="Jaxon<?php echo $modulo . $submodulo; ?>.actualizaSubSubCategorias(this.value)">
+                                                                            onchange="JaxonalmacenProductos.actualizaSubSubCategorias(this.value)">
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -325,37 +382,16 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-box"></i></span>
-                                                                <select id="idunidad" name="idunidad"
-                                                                    class="form-select">
-                                                                    <option value="unidad1">Unidad 1</option>
-                                                                    <option value="unidad2">Unidad 2</option>
-                                                                    <!-- Agrega más opciones según corresponda -->
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Clave Producto o Servicio -->
-                                                    <div class="form-group row mb-3">
-                                                        <label for="idclave_producto_servicio"
-                                                            class="col-sm-3 col-form-label text-start">Clave
-                                                            Producto/Servicio</label>
-                                                        <div class="col-sm-9">
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i
-                                                                        class="bi bi-key"></i></span>
-                                                                <select id="idclave_producto_servicio"
-                                                                    name="idclave_producto_servicio"
-                                                                    class="form-select">
-                                                                    <option value="clave1">Clave 1</option>
-                                                                    <option value="clave2">Clave 2</option>
-                                                                    <!-- Agrega más opciones según corresponda -->
+                                                                <select id="idunidad" class="form-select select2-field"
+                                                                    name="idunidad">
+                                                                    <?php echo getCfdiClaveUnidades(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
+                                                <!-- Segunda columna -->
                                                 <div class="col-md-6">
                                                     <!-- Moneda -->
                                                     <div class="form-group row mb-3">
@@ -366,17 +402,41 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-currency-dollar"></i></span>
                                                                 <select id="idmoneda" name="idmoneda"
-                                                                    class="form-select">
-                                                                    <option value="mxn">MXN - Peso Mexicano</option>
-                                                                    <option value="usd">USD - Dólar Estadounidense
-                                                                    </option>
-                                                                    <!-- Agrega más opciones según corresponda -->
+                                                                    class="form-select select2-field">
+                                                                        <?php echo getCfdiMoneda(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <div class="row mb-3">
+                                                <!-- Etiqueta -->
+                                                <label for="idclave_producto_servicio"
+                                                    class="col-sm-2 col-form-label text-start">Clave
+                                                    Producto/Servicio</label>
+
+                                                <!-- Input de clave -->
+                                                <div class="col-md-3">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                                        <input type="text" id="idclave_producto_servicio"
+                                                            name="idclave_producto_servicio" class="form-control"
+                                                            placeholder="Ingresa la clave SAT"
+                                                            onchange="JaxonalmacenProductos.validarClaveSat(this.value)">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Input de descripción -->
+                                                <div class="col-md-7">
+                                                    <input type="text" id="descripcion_producto_servicio"
+                                                        class="form-control text-muted"
+                                                        placeholder="Descripción de la clave ingresada" readonly>
+                                                </div>
+                                            </div>
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -400,7 +460,7 @@ if (file_exists($pathControlador)) {
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
-                                                    
+
                                             </div>
                                         </div>
                                     </div>
@@ -439,9 +499,7 @@ if (file_exists($pathControlador)) {
         </div>
     </div>
     <?= scriptsHtml(); ?>
-    <script>
-        JaxonalkesGlobal.listadosIndex("<?= $modulo; ?>", "<?= $submodulo; ?>", "<?= $subsubmodulo; ?>", 'Principal', 'Index');
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function () {
             // Inicializar Select2 con tema Bootstrap 5
@@ -452,6 +510,10 @@ if (file_exists($pathControlador)) {
                     return $(this).data('placeholder');
                 },
                 allowClear: true
+            });
+            // Inicializar Select2 con tema Bootstrap 5
+            $('.select2-field').select2({
+                theme: 'bootstrap-5'
             });
         });
     </script>
