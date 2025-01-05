@@ -459,7 +459,6 @@ function scriptsHtml()
     <script src=\"/plugins/datatables-buttons/js/buttons.colVis.min.js\"></script>
     <!-- AdminLTE App -->
     <script src=\"/dist/js/adminlte.min.js\"></script>
-    <script src=\"/plugins/select2/js/select2.full.min.js\"></script>
     <script src=\"/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js\"></script>
     <script src=\"/plugins/moment/moment.min.js\"></script>
     <script src=\"/plugins/inputmask/jquery.inputmask.min.js\"></script>
@@ -756,54 +755,21 @@ function ordenTablas($modulo, $submodulo, $subsubmodulo, $uso)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function getProductos_tipos()
+function getProductosTipos()
 {
     global $database;
     $registros = $database->select("productos_tipos", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
     $options = '<option value="" selected disabled>Elije una opción...</option>';
-    foreach ($registros as $registro) {
-        $options .= '<option value="' . $registro['id'] . '">' . $registro['nombre'] . '</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
     }
-
-    print $options;
+    return $options;
 }
 
 function getCategorias()
@@ -813,13 +779,15 @@ function getCategorias()
         "ORDER" => ["id" => "ASC"]
     ]);
     $options = '<option value="" selected disabled>Elije una opción...</option>';
-    foreach ($registros as $registro) {
-        $options .= '<option value="' . $registro['id'] . '">' . $registro['nombre'] . '</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
     }
-
-    print $options;
+    return $options;
 }
-
 
 function getSubcategorias($categoria)
 {
@@ -829,10 +797,13 @@ function getSubcategorias($categoria)
         "ORDER" => ["id" => "ASC"]
     ]);
     $options = '<option value="" selected disabled>Elije una opción...</option>';
-    foreach ($registros as $registro) {
-        $options .= '<option value="' . $registro['id'] . '">' . $registro['nombre'] . '</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
     }
-
     return $options;
 }
 
@@ -844,12 +815,117 @@ function getSubsubcategorias($subcategoria)
         "ORDER" => ["id" => "ASC"]
     ]);
     $options = '<option value="" selected disabled>Elije una opción...</option>';
-    foreach ($registros as $registro) {
-        $options .= '<option value="' . $registro['id'] . '">' . $registro['nombre'] . '</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
+
+function getCfdiClaveUnidades()
+{
+    global $database;
+    $registros = $database->select("cfdi_claveunidad", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $simbolo = !empty($registro['simbolo']) ? " (" . htmlspecialchars($registro['simbolo']) . ")" : "";
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_claveunidad']) . $simbolo . " - " . htmlspecialchars($registro['nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
     }
 
     return $options;
 }
+
+function getCfdiClaveProdServ()
+{
+    global $database;
+    $registros = $database->select("cfdi_claveprodserv", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $palabras_similares = !empty($registro['palabras_similares']) ? " (" . htmlspecialchars($registro['palabras_similares']) . ")" : "";
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_claveprodserv']). " - " . htmlspecialchars($registro['descripcion']) . $palabras_similares . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+function getCfdiMoneda()
+{
+    global $database;
+    $registros = $database->select("cfdi_moneda", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_moneda']). " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function verificaRegistroRepetido($tabla, $columna, $dato, $idb = 0)
