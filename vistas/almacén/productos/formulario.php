@@ -26,61 +26,6 @@ if (file_exists($pathControlador)) {
 
 <head>
     <?= headHtml($modulo, $submodulo); ?>
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-    <style>
-        /* Estilo adicional para corregir bordes y colores */
-        .select2-container--bootstrap-5 .select2-selection--single {
-            border: 1px solid var(--bs-border-color, #ced4da);
-            background-color: var(--bs-body-bg, #ffffff);
-            color: var(--bs-body-color, #212529);
-        }
-
-        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
-            line-height: 1.5;
-        }
-
-        /* Ajustes para el dropdown de opciones */
-        .select2-container--bootstrap-5 .select2-dropdown {
-            border: 1px solid var(--bs-border-color, #ced4da);
-            background-color: var(--bs-body-bg, #ffffff);
-        }
-
-        /* Tema oscuro */
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single {
-            background-color: #212529;
-            color: #ffffff;
-        }
-
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option {
-            background-color: #212529;
-            color: #ffffff;
-        }
-
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            color: #ffffff;
-        }
-
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
-            background-color: #212529;
-            color: #ffffff;
-        }
-
-        /* Ajustar el color del texto en el campo de búsqueda */
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
-            background-color: #212529;
-            /* Fondo oscuro acorde al tema */
-            color: #ffffff;
-            /* Borde acorde al tema oscuro */
-        }
-
-        /* Ajustar el texto del elemento seleccionado */
-        [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__rendered {
-            color: #ffffff;
-            /* Texto blanco para el tema oscuro */
-        }
-    </style>
 </head>
 
 <body class="layout-fixed-complete sidebar-expand-lg bg-body-tertiary">
@@ -507,24 +452,6 @@ if (file_exists($pathControlador)) {
         </div>
     </div>
     <?= scriptsHtml(); ?>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            // Inicializar Select2 con tema Bootstrap 5
-            $('.select2-field').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: function () {
-                    return $(this).data('placeholder');
-                },
-                allowClear: true
-            });
-            // Inicializar Select2 con tema Bootstrap 5
-            $('.select2-field').select2({
-                theme: 'bootstrap-5'
-            });
-        });
-    </script>
 </body>
 
 </html>

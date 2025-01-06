@@ -159,14 +159,20 @@ function headHtml($modulo, $submodulo)
     <link rel=\"stylesheet\" href=\"/plugins/datatables-buttons/css/buttons.bootstrap4.min.css\">
     <!-- iCheck for checkboxes and radio inputs -->
     <link rel=\"stylesheet\" href=\"/plugins/icheck-bootstrap/icheck-bootstrap.min.css\">
-    <title>Alkes - $normalizedModulo / $normalizedSubmodulo</title><!--begin::Primary Meta Tags-->
+    <!-- Select2 -->
+    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css\">
+    <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css\">
+    <title>Alkes - $normalizedModulo / $normalizedSubmodulo</title>
+    <!--begin::Primary Meta Tags-->
     <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css\">
     <!--end::Fonts-->
     <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/styles/overlayscrollbars.min.css\">
     <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css\">
-    <link rel=\"stylesheet\" href=\"/dist/css/adminlte.css\">";
+    <link rel=\"stylesheet\" href=\"/dist/css/adminlte.css\">
+    <link rel=\"stylesheet\" href=\"/src/scss/customizado/estilos.css\">";
     print $html;
 }
+
 
 function encabezado()
 {
@@ -439,7 +445,7 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
 
 function scriptsHtml()
 {
-	$html = "<!-- jQuery -->
+    $html = "<!-- jQuery -->
     <script src=\"/plugins/jquery/jquery.min.js\"></script>
     <!-- Bootstrap 4 -->
     <script src=\"/plugins/bootstrap/js/bootstrap.bundle.min.js\"></script>
@@ -496,9 +502,30 @@ function scriptsHtml()
                 });
             }
         });
+    </script>
+    <!-- Select2 -->
+    <script src=\"https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js\"></script>
+    <script>
+        $(document).ready(function () {
+            // Inicializar Select2 con tema Bootstrap 5
+            $('.select2-field').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: function () {
+                    return $(this).data('placeholder');
+                },
+                allowClear: true
+            });
+            // Inicializar Select2 con tema Bootstrap 5
+            $('.select2-field').select2({
+                theme: 'bootstrap-5'
+            });
+        });
     </script>";
-	print $html;
+
+    print $html;
 }
+
 
 function cerrarSesion($redirigir = true)
 {
