@@ -105,7 +105,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-pencil-fill"></i></span>
                                                                 <textarea class="form-control" id="descripcion"
-                                                                    name="descripcion" rows="6"
+                                                                    name="descripcion" rows="8"
                                                                     placeholder="Descripción del producto"></textarea>
                                                             </div>
                                                         </div>
@@ -200,8 +200,23 @@ if (file_exists($pathControlador)) {
                                                                                 class="bi bi-list-check"></i></span>
                                                                         <select id="lote_serie" name="lote_serie"
                                                                             class="form-select">
-                                                                            <option value="si" selected>Sí</option>
-                                                                            <option value="no">No</option>
+                                                                            <option value="Sí" selected>Sí</option>
+                                                                            <option value="No">No</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row mb-3">
+                                                                <label for="kit"
+                                                                    class="col-sm-4 col-form-label text-start">Kit</label>
+                                                                <div class="col-sm-8">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text"><i
+                                                                                class="bi bi-dropbox"></i></span>
+                                                                        <select id="kit" name="kit"
+                                                                            class="form-select">
+                                                                            <option value="Sí" selected>Sí</option>
+                                                                            <option value="No">No</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
