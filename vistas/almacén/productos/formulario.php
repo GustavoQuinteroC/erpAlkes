@@ -14,7 +14,7 @@ if (file_exists($pathControlador)) {
     require_once($pathControlador);
     validarSesion();
     echo $jaxon->getScript(true);
-    $_SESSION['partidasImpuestos'.$_GET['rand']] = array();
+    $_SESSION['partidasImpuestos' . $_GET['rand']] = array();
 } else {
     // Manejo de errores si el archivo controlador no existe
     die("No se encontró el archivo del controlador en: $pathControlador");
@@ -37,7 +37,7 @@ if (file_exists($pathControlador)) {
                 <?= titulos($modulo, $submodulo, $subsubmodulo); ?>
                 <div class="app-content">
                     <div class="container-fluid">
-                        <form action="#" id="formProducto<?= $_GET['rand']; ?>" name="formProducto" method="post">
+                        <form action="#" id="formProducto<?= $_GET['rand']; ?>" name="formProducto<?= $_GET['rand']; ?>" method="post">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="card mb-4">
@@ -79,8 +79,7 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-card-text"></i></span>
-                                                                <input type="text" class="form-control" id="nombre"
-                                                                    name="nombre"
+                                                                <input type="text" class="form-control" id="nombre" name="nombre"
                                                                     placeholder="Nombre unico del producto">
                                                             </div>
                                                         </div>
@@ -92,8 +91,8 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-shop"></i></span>
-                                                                <input type="text" class="form-control" id="marca"
-                                                                    name="marca" placeholder="Marca del producto">
+                                                                <input type="text" class="form-control" id="marca" name="marca"
+                                                                    placeholder="Marca del producto">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -104,8 +103,7 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-pencil-fill"></i></span>
-                                                                <textarea class="form-control" id="descripcion"
-                                                                    name="descripcion" rows="8"
+                                                                <textarea class="form-control" id="descripcion" name="descripcion" rows="8"
                                                                     placeholder="Descripción del producto"></textarea>
                                                             </div>
                                                         </div>
@@ -124,8 +122,7 @@ if (file_exists($pathControlador)) {
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-toggle-on"></i></span>
-                                                                        <select id="estado" name="estado"
-                                                                            class="form-select">
+                                                                        <select id="estado" name="estado" class="form-select">
                                                                             <option value="activo" selected>Activo
                                                                             </option>
                                                                             <option value="inactivo">Inactivo</option>
@@ -140,8 +137,7 @@ if (file_exists($pathControlador)) {
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-list"></i></span>
-                                                                        <select id="idtipo" name="idtipo"
-                                                                            class="form-select">
+                                                                        <select id="idtipo" name="idtipo" class="form-select">
                                                                             <?php echo getProductosTipos(); ?>
                                                                         </select>
                                                                     </div>
@@ -154,8 +150,7 @@ if (file_exists($pathControlador)) {
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-box"></i></span>
-                                                                        <select id="idcategoria" name="idcategoria"
-                                                                            class="form-select"
+                                                                        <select id="idcategoria" name="idcategoria" class="form-select"
                                                                             onchange="JaxonalmacenProductos.actualizaSubCategorias(this.value)">
                                                                             <?php echo getCategorias(); ?>
                                                                         </select>
@@ -169,8 +164,7 @@ if (file_exists($pathControlador)) {
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-box-seam"></i></span>
-                                                                        <select id="idsubcategoria"
-                                                                            name="idsubcategoria" class="form-select"
+                                                                        <select id="idsubcategoria" name="idsubcategoria"  class="form-select"
                                                                             onchange="JaxonalmacenProductos.actualizaSubSubCategorias(this.value)">
                                                                         </select>
                                                                     </div>
@@ -183,8 +177,7 @@ if (file_exists($pathControlador)) {
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-box2"></i></span>
-                                                                        <select id="idsubsubcategoria"
-                                                                            name="idsubsubcategoria"
+                                                                        <select id="idsubsubcategoria" name="idsubsubcategoria"
                                                                             class="form-select">
                                                                         </select>
                                                                     </div>
@@ -198,10 +191,10 @@ if (file_exists($pathControlador)) {
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-list-check"></i></span>
-                                                                        <select id="lote_serie" name="lote_serie"
-                                                                            class="form-select">
-                                                                            <option value="Sí" selected>Sí</option>
-                                                                            <option value="No">No</option>
+                                                                        <select id="lote_serie" name="lote_serie" class="form-select"
+                                                                            onchange="JaxonalmacenProductos.validarUsoLoteSerie(jaxon.getFormValues('formProducto<?= $_GET['rand'] ?>'))">
+                                                                            <option value="No" selected>No</option>
+                                                                            <option value="Sí">Sí</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -212,11 +205,11 @@ if (file_exists($pathControlador)) {
                                                                 <div class="col-sm-8">
                                                                     <div class="input-group">
                                                                         <span class="input-group-text"><i
-                                                                                class="bi bi-dropbox"></i></span>
-                                                                        <select id="kit" name="kit"
-                                                                            class="form-select">
-                                                                            <option value="Sí" selected>Sí</option>
-                                                                            <option value="No">No</option>
+                                                                                class="bi bi-ui-checks"></i></span>
+                                                                        <select id="kit" name="kit" class="form-select"
+                                                                            onchange="JaxonalmacenProductos.validarUsoKit(jaxon.getFormValues('formProducto<?= $_GET['rand'] ?>'))">
+                                                                            <option value="No" selected>No</option>
+                                                                            <option value="Sí">Sí</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -245,8 +238,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-currency-dollar"></i></span>
                                                                         <input type="text" class="form-control"
-                                                                            id="costo2" name="costo2"
-                                                                            placeholder="Costo 2">
+                                                                            id="costo2" name="costo2" placeholder="Costo 2">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -259,8 +251,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-currency-dollar"></i></span>
                                                                         <input type="text" class="form-control"
-                                                                            id="costo3" name="costo3"
-                                                                            placeholder="Costo 3">
+                                                                            id="costo3" name="costo3" placeholder="Costo 3">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -272,8 +263,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-tag"></i></span>
                                                                         <input type="text" class="form-control"
-                                                                            id="precio" name="precio"
-                                                                            placeholder="Precio">
+                                                                            id="precio" name="precio" placeholder="Precio">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -286,8 +276,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-tag"></i></span>
                                                                         <input type="text" class="form-control"
-                                                                            id="precio2" name="precio2"
-                                                                            placeholder="Precio 2">
+                                                                            id="precio2" name="precio2" placeholder="Precio 2">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -300,8 +289,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-tag"></i></span>
                                                                         <input type="text" class="form-control"
-                                                                            id="precio3" name="precio3"
-                                                                            placeholder="Precio 3">
+                                                                            id="precio3" name="precio3" placeholder="Precio 3">
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -342,8 +330,7 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-box"></i></span>
-                                                                <select id="idunidad" class="form-select select2-field"
-                                                                    name="idunidad">
+                                                                <select id="idunidad" name="idunidad" class="form-select select2-field">
                                                                     <?php echo getCfdiClaveUnidades(); ?>
                                                                 </select>
                                                             </div>
@@ -361,8 +348,7 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-currency-dollar"></i></span>
-                                                                <select id="idmoneda" name="idmoneda"
-                                                                    class="form-select select2-field">
+                                                                <select id="idmoneda" name="idmoneda" class="form-select select2-field">
                                                                     <?php echo getCfdiMoneda(); ?>
                                                                 </select>
                                                             </div>
@@ -380,8 +366,8 @@ if (file_exists($pathControlador)) {
                                                 <div class="col-md-3">
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i class="bi bi-key"></i></span>
-                                                        <input type="text" id="idclave_producto_servicio"
-                                                            name="idclave_producto_servicio" class="form-control"
+                                                        <input type="text" id="idclave_producto_servicio" name="idclave_producto_servicio"
+                                                            class="form-control"
                                                             placeholder="Ingresa la clave del producto o servicio"
                                                             onchange="JaxonalmacenProductos.validarClaveSat(this.value)">
                                                     </div>
@@ -389,7 +375,7 @@ if (file_exists($pathControlador)) {
 
                                                 <!-- Input de descripción -->
                                                 <div class="col-md-7">
-                                                    <input type="text" id="descripcion_producto_servicio"
+                                                    <input type="text" id="descripcion_producto_servicio" name="descripcion_producto_servicio"
                                                         class="form-control text-muted"
                                                         placeholder="Descripción de la clave ingresada" readonly>
                                                 </div>
@@ -406,10 +392,9 @@ if (file_exists($pathControlador)) {
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
                                             <h3 class="card-title">Impuestos</h3>
                                             <div class="card-tools d-flex align-items-center gap-2">
-                                                <button tabindex="400" id="addImpuesto"
+                                                <button tabindex="400" id="addImpuesto" name="addImpuesto"
                                                     class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
-                                                    onclick="JaxonalmacenProductos.modalAddImpuesto();"
-                                                    type="button">
+                                                    onclick="JaxonalmacenProductos.modalAddImpuesto();" type="button">
                                                     <span class="bi bi-plus-lg me-1"></span> Agregar
                                                 </button>
                                                 <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
@@ -425,7 +410,7 @@ if (file_exists($pathControlador)) {
                                         </div>
 
                                         <div class="card-body">
-                                            <div id='tablaImpuestos' class="row">
+                                            <div id='tablaImpuestos' name='tablaImpuestos' class="row">
                                                 <!-- Contenido -->
                                             </div>
                                         </div>
@@ -437,11 +422,6 @@ if (file_exists($pathControlador)) {
                                 <label for="notas" class="col-sm-4 col-form-label text-start">Notas del
                                     desarrollador:</label>
                                 <div class="col-sm-8">
-                                    <p id="notas" class="form-text text-muted">
-                                        1- que cuando se active lote o serie se desactrive kit y cuando se active
-                                        kit se
-                                        desactive lote o serie.
-                                    </p>
                                     <p id="notas" class="form-text text-muted">
                                         2- al guardar validar si si era lote entonces confirmar que todos los lotes
                                         de

@@ -356,7 +356,44 @@ class almacenProductos extends alkesGlobal
         // Retornar la respuesta Jaxon
         return $this->response;
     }
+
+    function validarUsoLoteSerie($form)
+    {
+        if($form['kit']=='Sí')
+        {
+            // Mostrar un mensaje de éxito
+            $this->alerta(
+                "Invalido",
+                "No se puede tener un producto de tipo kit con lotes.",
+                "warning",
+                "lote_serie",
+                false,
+                true
+            );
+            $this->response->assign("lote_serie","value","No");
+        }
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
     
+    function validarUsoKit($form)
+    {
+        if($form['lote_serie']=='Sí')
+        {
+            // Mostrar un mensaje de éxito
+            $this->alerta(
+                "Invalido",
+                "No se puede tener un producto de tipo kit con lotes.",
+                "warning",
+                "kit",
+                false,
+                true
+            );
+            $this->response->assign("kit","value","No");
+        }
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
 
 
 
