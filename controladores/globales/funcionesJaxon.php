@@ -216,18 +216,26 @@ class alkesGlobal
 
     public function alerta($titulo, $mensaje, $icono, $elementoEnfocar = null, $boton = true, $timer = false, $redireccion = null)
     {
-        //quitar el foco de todo el documento
+        // Obtener el tema actual (dark o light)
+        $tema = getBackground();
+        $backgroundColor = $tema == 'dark' ? '#212529' : '#ffffff'; // Fondo según tema
+        $textColor = $tema == 'dark' ? '#ffffff' : '#000000';       // Texto según tema
+
+        // Quitar el foco del elemento activo
         $this->response->script('$(document.activeElement).blur();');
+
         $mostrarTimer = $timer ? 'timer: 2000,' : '';
         $enfoqueScript = $elementoEnfocar !== null ? 'setTimeout(function() { $("#' . $elementoEnfocar . '").focus(); }, 2);' : '';
         $redireccionScript = $redireccion !== null ? 'window.location.href = "' . $redireccion . '";' : '';
 
         $script = 'Swal.fire({
-        title: "' . $titulo . '",
-        text: "' . $mensaje . '",
-        showConfirmButton: "' . $boton . '",
-        ' . $mostrarTimer . '
-        icon: "' . $icono . '"
+            title: "' . $titulo . '",
+            text: "' . $mensaje . '",
+            showConfirmButton: ' . ($boton ? 'true' : 'false') . ',
+            ' . $mostrarTimer . '
+            icon: "' . $icono . '",
+            background: "' . $backgroundColor . '",
+            color: "' . $textColor . '"
         }).then((result) => {
             ' . $enfoqueScript . '
             ' . $redireccionScript . '
@@ -239,6 +247,8 @@ class alkesGlobal
         // Devolver la response a Jaxon
         return $this->response;
     }
+
+
 
 
 
