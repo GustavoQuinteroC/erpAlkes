@@ -8,9 +8,30 @@ use Medoo\Medoo;
 
 class almacenProductos extends alkesGlobal
 {
-    function validar($form)
+    function inializarFormulario()
     {
+        if($_GET['id']!=0)
+        {
+            if(!validarEmpresaPorRegistro("productos", $_GET['id']))
+            {
+                $this->alerta(
+                    "¡ERROR GRABE!",
+                    "Este registro no pertenece a esta empresa. Por favor, reporte este problema de inmediato y con la mayor discreción posible; usted será recompensado por ello. Mientras le damos respuesta, es importante que no abandone esta ventana",
+                    "error"
+                );
+                return $this->response;
+            }
+        }
+        $rand = $_GET['rand']; // Obtener el valor dinámico
+        $this->response->append("botonera-contenedor", "innerHTML", "
+            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formProducto{$rand}\"));'>
+                <i class='bi bi-save'></i> Guardar
+            </button>
+        ");
+
         
+
+
         return $this->response;
     }
 

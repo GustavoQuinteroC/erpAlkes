@@ -447,6 +447,9 @@ if (file_exists($pathControlador)) {
         </div>
     </div>
     <?= scriptsHtml(); ?>
+    <script>
+        JaxonalmacenProductos.inializarFormulario();
+    </script>
 </body>
 
 </html>
