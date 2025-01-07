@@ -956,6 +956,21 @@ function getCfdiTipoFactor()
 
 
 
+function validarEmpresaPorRegistro($tabla, $registro)
+{
+    global $database; // Variable global de medoo
+    $bandera = false;
+
+    // Consulta para obtener el idempresa asociado al registro
+    $resultado = $database->get($tabla, 'idempresa', ['id' => $registro]);
+
+    // Verificar si se obtuvo un resultado y si coincide con el idempresa de la sesión
+    if ($resultado && $resultado == $_SESSION['idempresa']) {
+        $bandera = true;
+    }
+
+    return $bandera;
+}
 
 
 
