@@ -60,12 +60,18 @@ if (empty($filtroData)) {
     return;
 }
 
-// Construir la condición WHERE
+// Construir la condición WHERE correctamente
 $baseWhere = $tabla[0]['condicion_principal'];
-$where = str_replace('{empresa}', "idempresa=" . addslashes($_SESSION['idempresa']), $baseWhere);
-$where = str_replace('{entidad}', "identidad=" . addslashes($_SESSION['entidad']), $baseWhere);
+
+// Reemplazar variables en $baseWhere
+$where = $baseWhere;
+$where = str_replace('{empresa}', "idempresa=" . addslashes($_SESSION['idempresa']), $where);
+$where = str_replace('{entidad}', "identidad=" . addslashes($_SESSION['entidad']), $where);
 $where = str_replace('{almacen}', "idalmacen=" . addslashes($_SESSION['almacen']), $where);
+
+// Añadir la condición del filtro
 $where .= " AND " . $filtroData[0];
+
 
 // Configuración de conexión para SSP
 $sql_details = array(
