@@ -109,7 +109,6 @@ if (file_exists($pathControlador)) {
                                                         </div>
                                                     </div>
                                                 </div>
-
                                                 <!-- Segunda columna -->
                                                 <div class="col-md-7">
                                                     <div class="row">
@@ -123,9 +122,9 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-toggle-on"></i></span>
                                                                         <select id="estado" name="estado" class="form-select">
-                                                                            <option value="activo" selected>Activo
+                                                                            <option value="Activo" selected>Activo
                                                                             </option>
-                                                                            <option value="inactivo">Inactivo</option>
+                                                                            <option value="Inactivo">Inactivo</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -324,31 +323,30 @@ if (file_exists($pathControlador)) {
                                                 <div class="col-md-6">
                                                     <!-- Unidad -->
                                                     <div class="form-group row mb-3">
-                                                        <label for="idunidad"
+                                                        <label for="idc_claveunidad"
                                                             class="col-sm-3 col-form-label text-start">Unidad</label>
                                                         <div class="col-sm-9">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-box"></i></span>
-                                                                <select id="idunidad" name="idunidad" class="form-select select2-field">
+                                                                <select id="idc_claveunidad" name="idc_claveunidad" class="form-select select2-field">
                                                                     <?php echo getCfdiClaveUnidades(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-
                                                 <!-- Segunda columna -->
                                                 <div class="col-md-6">
                                                     <!-- Moneda -->
                                                     <div class="form-group row mb-3">
-                                                        <label for="idmoneda"
+                                                        <label for="idc_moneda"
                                                             class="col-sm-3 col-form-label text-start">Moneda</label>
                                                         <div class="col-sm-9">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-currency-dollar"></i></span>
-                                                                <select id="idmoneda" name="idmoneda" class="form-select select2-field">
+                                                                <select id="idc_moneda" name="idc_moneda" class="form-select select2-field">
                                                                     <?php echo getCfdiMoneda(); ?>
                                                                 </select>
                                                             </div>
@@ -356,12 +354,10 @@ if (file_exists($pathControlador)) {
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="row mb-3">
                                                 <!-- Etiqueta -->
                                                 <label for="idclave_producto_servicio"
                                                     class="col-sm-2 col-form-label text-start">Clave SAT</label>
-
                                                 <!-- Input de clave -->
                                                 <div class="col-md-3">
                                                     <div class="input-group">
@@ -372,7 +368,6 @@ if (file_exists($pathControlador)) {
                                                             onchange="JaxonalmacenProductos.validarClaveSat(this.value)">
                                                     </div>
                                                 </div>
-
                                                 <!-- Input de descripción -->
                                                 <div class="col-md-7">
                                                     <input type="text" id="descripcion_producto_servicio" name="descripcion_producto_servicio"
@@ -380,8 +375,6 @@ if (file_exists($pathControlador)) {
                                                         placeholder="Descripción de la clave ingresada" readonly>
                                                 </div>
                                             </div>
-
-
                                         </div>
                                     </div>
                                 </div>
@@ -408,7 +401,6 @@ if (file_exists($pathControlador)) {
                                                 </button>
                                             </div>
                                         </div>
-
                                         <div class="card-body">
                                             <div id='tablaImpuestos' name='tablaImpuestos' class="row">
                                                 <!-- Contenido -->
@@ -417,7 +409,6 @@ if (file_exists($pathControlador)) {
                                     </div>
                                 </div>
                             </div>
-
                             <div class="form-group row mb-3">
                                 <label for="notas" class="col-sm-4 col-form-label text-start">Notas del
                                     desarrollador:</label>

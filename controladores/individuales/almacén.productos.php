@@ -10,18 +10,54 @@ class almacenProductos extends alkesGlobal
 {
     function inializarFormulario()
     {
-        if($_GET['id']!=0)
-        {
-            if(!validarEmpresaPorRegistro("productos", $_GET['id']))
-            {
+        global $database;
+        if ($_GET['id'] != 0) {
+            if (!validarEmpresaPorRegistro("productos", $_GET['id'])) {
                 $this->alerta(
-                    "¡ERROR GRABE!",
+                    "¡ERROR GRAVE!",
                     "Este registro no pertenece a esta empresa. Por favor, reporte este problema de inmediato y con la mayor discreción posible; usted será recompensado por ello. Mientras le damos respuesta, es importante que no abandone esta ventana",
                     "error"
                 );
                 return $this->response;
             }
+
+            //consultas a la bd para obtener los datos necesarios para la consulta del producto
+            $producto = $database->get('productos', '*', ['id' => $_GET['id']]);
+            $unidadSAT= $database->get('cfdi_claveprodserv', 'c_claveprodserv', ['id' => $producto['idc_claveprodserv']]);
+
+            // Asignaciones a los campos
+            $this->response->assign("idsubcategoria", "innerHTML", getSubcategorias($producto['idcategoria']));
+            $this->response->assign("idsubsubcategoria", "innerHTML", getSubsubcategorias($producto['idsubcategoria']));
+            $this->response->assign("smallTitulos", "innerHTML", $producto['nombre']);
+            $this->response->assign("codigo_barras", "value", $producto['codigo_barras']);
+            $this->response->assign("nombre", "value", $producto['nombre']);
+            $this->response->assign("marca", "value", $producto['marca']);
+            $this->response->assign("descripcion", "value", $producto['descripcion']);
+            $this->response->assign("estado", "value", $producto['estado']);
+            $this->response->assign("idtipo", "value", $producto['idtipo']);
+            $this->response->assign("idcategoria", "value", $producto['idcategoria']);
+            $this->response->assign("idsubcategoria", "value", $producto['idsubcategoria']);
+            $this->response->assign("idsubsubcategoria", "value", $producto['idsubsubcategoria']);
+            $this->response->assign("lote_serie", "value", $producto['lote_serie']);
+            $this->response->assign("kit", "value", $producto['kit']);
+            $this->response->assign("costo", "value", $producto['costo']);
+            $this->response->assign("costo2", "value", $producto['costo2']);
+            $this->response->assign("costo3", "value", $producto['costo3']);
+            $this->response->assign("precio", "value", $producto['precio']);
+            $this->response->assign("precio2", "value", $producto['precio2']);
+            $this->response->assign("precio3", "value", $producto['precio3']);
+            $this->response->assign("idclave_producto_servicio", "value", $unidadSAT);
+
+            // Actualizar select2
+            $this->response->script('
+                $("#idc_claveunidad").val("' . $producto['idc_claveunidad'] . '").trigger("change");
+                $("#idc_moneda").val("' . $producto['idc_moneda'] . '").trigger("change");
+                $("#idclave_producto_servicio").trigger("change");
+            ');
+
+            $this->cargarImpuestosConsulta();
         }
+
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
             <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formProducto{$rand}\"));'>
@@ -29,15 +65,13 @@ class almacenProductos extends alkesGlobal
             </button>
         ");
 
-        
-
-
         return $this->response;
     }
 
     function actualizaSubCategorias($idcategoria)
     {
         $this->response->assign("idsubcategoria", "innerHTML", getSubcategorias($idcategoria));
+        $this->response->assign("idsubsubcategoria", "innerHTML", "");
         return $this->response;
     }
 
@@ -416,7 +450,32 @@ class almacenProductos extends alkesGlobal
         return $this->response;
     }
 
+    function validar($form)
+    {
+        var_dump($form);
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
 
+    function cargarImpuestosConsulta()
+    {
+        global $database;
+        //consultas a la bd para obtener los datos necesarios para la consulta de los impuestos
+        $impuestos = $database->select("productos_impuestos", "*", [ "idproducto" => $_GET['id']]);
+        foreach($impuestos as $impuesto)
+        {
+            $_SESSION['partidasImpuestos'.$_GET['rand']][] = [
+                'impuesto' => $impuesto['idc_impuesto'],
+                'tipoImpuesto' => $impuesto['tipo'],
+                'tipoFactor' => $impuesto['idc_tipofactor'],
+                'porcentaje' => $impuesto['porcentaje'],
+                'estado' => $impuesto['estado'],
+            ];
+        }
+        $this->tablaImpuestos();
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
 
 
 }
