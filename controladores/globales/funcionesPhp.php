@@ -954,8 +954,6 @@ function getCfdiTipoFactor()
     return $options;
 }
 
-
-
 function validarEmpresaPorRegistro($tabla, $registro)
 {
     global $database; // Variable global de medoo
@@ -969,57 +967,6 @@ function validarEmpresaPorRegistro($tabla, $registro)
         $bandera = true;
     }
 
-    return $bandera;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function verificaRegistroRepetido($tabla, $columna, $dato, $idb = 0)
-{
-    $bandera = false;
-    global $database;
-    $registros = $database->select($tabla, "*", [
-        $columna => $dato,
-        "id[!]" => $idb // Excluye el registro con este id
-    ]);
-    // Verificar si el usuario no está logueado
-    if (count($registros) > 0) {
-        $bandera = true;
-    }
     return $bandera;
 }
 
@@ -1121,4 +1068,44 @@ function validar_global($form, $reglas)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function verificaRegistroRepetido($tabla, $columna, $dato, $idb = 0)
+{
+    $bandera = false;
+    global $database;
+    $registros = $database->select($tabla, "*", [
+        $columna => $dato,
+        "id[!]" => $idb // Excluye el registro con este id
+    ]);
+    // Verificar si el usuario no está logueado
+    if (count($registros) > 0) {
+        $bandera = true;
+    }
+    return $bandera;
+}
 ?>

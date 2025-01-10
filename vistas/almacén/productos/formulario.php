@@ -356,13 +356,13 @@ if (file_exists($pathControlador)) {
                                             </div>
                                             <div class="row mb-3">
                                                 <!-- Etiqueta -->
-                                                <label for="idclave_producto_servicio"
+                                                <label for="clave_producto_servicio"
                                                     class="col-sm-2 col-form-label text-start">Clave SAT</label>
                                                 <!-- Input de clave -->
                                                 <div class="col-md-3">
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i class="bi bi-key"></i></span>
-                                                        <input type="text" id="idclave_producto_servicio" name="idclave_producto_servicio"
+                                                        <input type="text" id="clave_producto_servicio" name="clave_producto_servicio"
                                                             class="form-control"
                                                             placeholder="Ingresa la clave del producto o servicio"
                                                             onchange="JaxonalmacenProductos.validarClaveSat(this.value)">
