@@ -427,6 +427,12 @@ if (file_exists($pathControlador)) {
                                         de que no se puede cambiar la configuracion por que hay movimientos ya con
                                         kit.
                                     </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        4- falta validar registro repetido, teniendo cuidado de que solo valide por empresa y no globalmente.
+                                    </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        5- falta hacer una funcion para validar la empresa antes de guardar.
+                                    </p>
                                 </div>
                             </div>
                         </form>

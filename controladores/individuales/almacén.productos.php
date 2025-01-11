@@ -545,10 +545,10 @@ class almacenProductos extends alkesGlobal
 
         // Si el 'id' de la URL es 0, realizamos una inserción
         if ($_GET['id'] == 0) {
-            
-
             // Realizamos la inserción
             $insert_id = $database->insert('productos', $data);
+            // Llamamos a la función guardarPartidas y pasamos el id del nuevo producto
+            $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo producto
             $this->alerta(
                 "Producto registrado correctamente",
                 "El producto ha sido añadido a la base de datos.",
@@ -558,13 +558,13 @@ class almacenProductos extends alkesGlobal
                 false,
                 "index.php"
             );
-            // Llamamos a la función guardarPartidas y pasamos el id del nuevo producto
-            $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo producto
         }
         // Si el 'id' no es 0, actualizamos el registro correspondiente
         else {
             // Realizamos la actualización
             $database->update('productos', $data, ['id' => $_GET['id']]);
+            // Llamamos a la función guardarPartidas y pasamos el id del producto
+            $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del producto actualizado
             $this->alerta(
                 "Producto actualizado correctamente",
                 "El producto ha sido actualizado en la base de datos.",
@@ -574,8 +574,6 @@ class almacenProductos extends alkesGlobal
                 false,
                 "index.php"
             );
-            // Llamamos a la función guardarPartidas y pasamos el id del producto
-            $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del producto actualizado
         }
 
         // Retornar la respuesta Jaxon

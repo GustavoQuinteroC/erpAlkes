@@ -23,6 +23,7 @@ $database = new Medoo([
     'username' => $_ENV['DB_USERNAME'], // Usuario
     'password' => $_ENV['DB_PASSWORD'], // Contraseña
     'charset' => 'utf8mb4',             // Codificación de caracteres
+    'error' => PDO::ERRMODE_EXCEPTION
 ]);
 
 function validarSesion()
