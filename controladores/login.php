@@ -75,11 +75,13 @@ function login($form)
         "usuario" => $user
     ]);
 
+    // Verificar si el usuario no existe
     if (empty($usuario)) {
         $response->appendResponse(alerta("error", "Error", "Usuario no registrado."));
         return $response;
     }
 
+    // Variables relevantes
     $intentos = $usuario[0]['intentos'];
     $ultimo_intento = $usuario[0]['ultimo_intento'];
     $estado_usuario = $usuario[0]['estado'];
@@ -93,6 +95,12 @@ function login($form)
         return $response;
     }
 
+    // Manejar casos inesperados para el estado del usuario
+    if ($estado_usuario !== "Activo" && $estado_usuario !== "Inactivo") {
+        $response->appendResponse(alerta("error", "Error desconocido", "Estado de usuario no válido. Contacte al administrador."));
+        return $response;
+    }
+
     // Verificar si se superó el número máximo de intentos
     if ($intentos >= 3 && $diferencia_minutos < 15) {
         $tiempo_restante = 15 - floor($diferencia_minutos);
@@ -101,7 +109,7 @@ function login($form)
         return $response;
     }
 
-    // Validar credenciales
+    // Validar credenciales con datos adicionales de entidad y empresa
     $usuario_valido = $database->select("usuarios", 
     [
         "[>]entidades" => ["identidad" => "id"], // Unión con entidades
@@ -183,6 +191,7 @@ function login($form)
 
     return $response;
 }
+
 
 
 

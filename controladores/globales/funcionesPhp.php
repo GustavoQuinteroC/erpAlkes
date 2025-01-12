@@ -11,7 +11,7 @@ use Dotenv\Dotenv;
 session_start();
 
 // Cargar las variables de entorno
-$dotenv = Dotenv::createImmutable(__DIR__."/../..");
+$dotenv = Dotenv::createImmutable(__DIR__ . "/../..");
 $dotenv->load();
 
 // Conectar a la base de datos con Medoo utilizando las variables de entorno
@@ -31,6 +31,7 @@ function validarSesion()
     global $database;
 
     if (!isset($_SESSION['idusuario'])) {
+        // Si no hay sesión, verificar cookie "recuerdame_alkes"
         if (isset($_COOKIE['recuerdame_alkes'])) {
             $token = $_COOKIE['recuerdame_alkes'];
             $usuario = $database->select("usuarios", [
@@ -45,7 +46,7 @@ function validarSesion()
                 $estado_usuario = $usuario[0]['estado'];
 
                 // Verificar si el usuario está inactivo
-                if ($estado_usuario === "Inactivo") {
+                if ($estado_usuario != "Activo") {
                     cerrarSesion();
                 }
 
@@ -62,7 +63,7 @@ function validarSesion()
 
                 if (!empty($entidad)) {
                     // Verificar si la entidad o empresa están inactivas
-                    if ($entidad[0]['entidad_estado'] === "Inactivo" || $entidad[0]['empresa_estado'] === "Inactivo") {
+                    if ($entidad[0]['entidad_estado'] == "Inactivo" || $entidad[0]['empresa_estado'] == "Inactivo") {
                         cerrarSesion();
                     }
 
@@ -92,7 +93,12 @@ function validarSesion()
             "id" => $_SESSION['idusuario']
         ]);
 
-        if (!empty($usuario) && $usuario[0]['estado'] === "Inactivo") {
+        if (!empty($usuario)) {
+            // Verificar si el usuario está activo
+            if ($usuario[0]['estado'] != "Activo") {
+                cerrarSesion();
+            }
+        } else {
             cerrarSesion();
         }
 
@@ -109,7 +115,7 @@ function validarSesion()
 
         if (!empty($entidad)) {
             // Verificar si la entidad o empresa están inactivas
-            if ($entidad[0]['entidad_estado'] === "Inactivo" || $entidad[0]['empresa_estado'] === "Inactivo") {
+            if ($entidad[0]['entidad_estado'] == "Inactivo" || $entidad[0]['empresa_estado'] == "Inactivo") {
                 cerrarSesion();
             }
 
@@ -120,6 +126,7 @@ function validarSesion()
         }
     }
 }
+
 
 
 
@@ -310,13 +317,13 @@ function encabezado()
                 <!--begin::User Menu Dropdown-->
                 <li class="nav-item dropdown user-menu"> 
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
-                        <img src="/src/assets/img/users/'.$usuarioId.'.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
+                        <img src="/src/assets/img/users/' . $usuarioId . '.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
                         <span class="d-none d-md-inline">' . $nombreUsuario . '</span> 
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> 
                         <!--begin::User Image-->
-                        <li class="user-header text-bg-'.getEnfasis().'"> 
-                            <img src="/src/assets/img/users/'.$usuarioId.'.jpg" class="rounded-circle shadow" alt="User Image">
+                        <li class="user-header text-bg-' . getEnfasis() . '"> 
+                            <img src="/src/assets/img/users/' . $usuarioId . '.jpg" class="rounded-circle shadow" alt="User Image">
                             <p>
                                 ' . $nombreUsuario . ' - ' . $departamento . '
                                 <small>Miembro desde ' . $fechaIngreso . '</small>
@@ -336,7 +343,8 @@ function encabezado()
 }
 
 
-function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmoduloActivo = null) {
+function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmoduloActivo = null)
+{
     global $database;
 
     // Obtener los módulos disponibles para el usuario (con sus permisos)
@@ -346,11 +354,11 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
             "[>]usuarios_modulos" => ["id" => "idmodulo"] // Unir con permisos del usuario
         ],
         [
-            "modulos.id", 
-            "modulos.nombre", 
-            "modulos.ruta", 
-            "modulos.icono", 
-            "modulos.padre_id", 
+            "modulos.id",
+            "modulos.nombre",
+            "modulos.ruta",
+            "modulos.icono",
+            "modulos.padre_id",
             "usuarios_modulos.ver"
         ],
         [
@@ -366,14 +374,16 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
     }
 
     // Función recursiva para generar el menú
-    function generarMenu($padre_id, $modulos, $moduloActivo, $submoduloActivo, $subsubmoduloActivo) {
-        if (!isset($modulos[$padre_id])) return '';
+    function generarMenu($padre_id, $modulos, $moduloActivo, $submoduloActivo, $subsubmoduloActivo)
+    {
+        if (!isset($modulos[$padre_id]))
+            return '';
 
         $html = '';
         foreach ($modulos[$padre_id] as $modulo) {
             // Verificar si tiene submódulos (hijos)
             $hasChildren = isset($modulos[$modulo['id']]);
-            
+
             // Determinar si este módulo es el activo
             $isActive = (strtolower($modulo['nombre']) === strtolower($moduloActivo)) ? 'active' : '';
 
@@ -388,7 +398,7 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
                 $html .= "</li>";
             } else {
                 // Si no tiene hijos, es un enlace directo
-                $isActiveSub = (strtolower($modulo['nombre']) === strtolower($submoduloActivo)) ? 'active text-bg-'.getEnfasis() : '';
+                $isActiveSub = (strtolower($modulo['nombre']) === strtolower($submoduloActivo)) ? 'active text-bg-' . getEnfasis() : '';
                 $html .= "<li class=\"nav-item\">";
                 $html .= "<a href=\"{$modulo['ruta']}\" class=\"nav-link {$isActiveSub}\">";
                 $html .= "<i class=\"nav-icon bi {$modulo['icono']}\"></i>";
@@ -885,7 +895,7 @@ function getCfdiClaveProdServ()
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $palabras_similares = !empty($registro['palabras_similares']) ? " (" . htmlspecialchars($registro['palabras_similares']) . ")" : "";
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_claveprodserv']). " - " . htmlspecialchars($registro['descripcion']) . $palabras_similares . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_claveprodserv']) . " - " . htmlspecialchars($registro['descripcion']) . $palabras_similares . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -906,7 +916,7 @@ function getCfdiMoneda()
     if (!empty($registros)) {
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_moneda']). " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_moneda']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -926,7 +936,7 @@ function getCfdiImpuesto()
     if (!empty($registros)) {
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_impuesto']). " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_impuesto']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -1060,7 +1070,71 @@ function validar_global($form, $reglas)
     return true; // Validación exitosa
 }
 
+function getEntidades()
+{
+    global $database;
+    $registros = $database->select(
+        "entidades",
+        ["id", "nombre", "descripcion"],
+        [
+            "idempresa" => $_SESSION['idempresa'],
+            "estado" => "Activo"
+        ],
+        [
+            "ORDER" => ["id" => "ASC"]
+        ]
+    );
 
+    $options = '<option value="" . disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getUsuarios()
+{
+    global $database;
+    $registros = $database->select(
+        "usuarios",
+        [
+            "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+        ],
+        [
+            "usuarios.id", // Alias para usuarios.id
+            "usuarios.estado", // Alias para usuarios.estado
+            "usuarios.nombre(usuario_nombre)", // Alias para usuarios.nombre
+            "entidades.idempresa", // Alias para entidades.idempresa
+            "entidades.nombre(entidad_nombre)" // Alias para entidades.nombre
+        ],
+        [
+            "entidades.idempresa" => $_SESSION['idempresa'],
+            "usuarios.estado" => "Activo"
+        ],
+        [
+            "ORDER" => ["usuarios.nombre" => "ASC"] // Asegúrate de especificar el nombre con el alias o prefijo correcto
+        ]
+    );
+    
+
+    $options = '<option value="" . disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['usuario_nombre']) . " - " . htmlspecialchars($registro['entidad_nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
 
 
 
