@@ -14,7 +14,7 @@ if (file_exists($pathControlador)) {
     require_once($pathControlador);
     validarSesion();
     echo $jaxon->getScript(true);
-    $_SESSION['partidasImpuestos' . $_GET['rand']] = array();
+    $_SESSION['partidas' . $_GET['rand']] = array();
 } else {
     // Manejo de errores si el archivo controlador no existe
     die("No se encontró el archivo del controlador en: $pathControlador");
@@ -37,7 +37,7 @@ if (file_exists($pathControlador)) {
                 <?= titulos($modulo, $submodulo, $subsubmodulo); ?>
                 <div class="app-content">
                     <div class="container-fluid">
-                        <form action="#" id="formProducto<?= $_GET['rand']; ?>" name="formProducto<?= $_GET['rand']; ?>"
+                        <form action="#" id="formulario<?= $_GET['rand']; ?>" name="formulario<?= $_GET['rand']; ?>"
                             method="post">
                             <div class="row">
                                 <div class="col-12">
@@ -206,7 +206,7 @@ if (file_exists($pathControlador)) {
                                             </div>
                                         </div>
                                         <div class="card-body">
-                                            <div id='tablaImpuestos' name='tablaImpuestos' class="row">
+                                            <div id='tablaProductos' name='tablaProductos' class="row">
                                                 <!-- Contenido -->
                                             </div>
                                         </div>
@@ -220,6 +220,9 @@ if (file_exists($pathControlador)) {
                                     <p id="notas" class="form-text text-muted">
                                         1- de alguna forma hacer que el usuario con permisos pueda cambiar entre
                                         almacenes de diferentes entidades.
+                                    </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        2- añadir ubicacion del producto, tanto en vista, base de datos y array.
                                     </p>
                                 </div>
                             </div>

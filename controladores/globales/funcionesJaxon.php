@@ -128,6 +128,92 @@ class alkesGlobal
         return $this->response;
     }
 
+    function modalSeleccionServerSide($modulo, $submodulo, $subsubmodulo, $filtroSeleccionado = '', $uso = '', $funcionCallBack = '', $multiple = false, $parametrosAdicionales = '', $tituloModal = '')
+    {
+        $filtros = filtrosTablas($modulo, $submodulo, $uso);
+        $html = '';
+
+        // Construcción específica para el modal
+        $html .= '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel" aria-hidden="true">';
+        $html .= '<div class="modal-dialog modal-xl" role="document">';
+        $html .= '<div class="modal-content">';
+        $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
+        $html .= '<h5 class="modal-title" id="modalSeleccionLabel">' . $tituloModal . '</h5>';
+        $html .= '</div>';
+        $html .= '<div class="modal-body">';
+        $html .= '<form id="formModalSeleccion">';
+        $html .= '<table id="tablaModalSeleccion" class="table table-striped table-bordered" style="width:100%">';
+        
+        // Añadir las columnas de la tabla y cerrar etiquetas necesarias
+        $columnas = columnasTablas($modulo, $submodulo, $subsubmodulo, $uso);
+        $orden = ordenTablas($modulo, $submodulo, $subsubmodulo, $uso);
+        $html .= '<thead><tr>' . $columnas . '</tr></thead></table>';
+
+        $html .= '</form></div>';
+        $html .= '<div class="modal-footer">';
+        $html .= '<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$(\'#modalSeleccion\').modal(\'hide\').remove();">Cancelar</button>';
+        $html .= '<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="' . $funcionCallBack . '(jaxon.getFormValues(\'formModalSeleccion\')' . $parametrosAdicionales . '); $(\'#modalSeleccion\').modal(\'hide\');" data-dismiss="modal">Aceptar</button>';
+        $html .= '</div></div></div></div>';
+
+        $this->response->remove('modalSeleccion');
+        $this->response->append("modales", "innerHTML", $html);
+        $this->response->script('$("#modalSeleccion").modal("show");');
+
+        // Configuración de DataTable con parámetros comunes
+        $ajaxUrl = '/controladores/globales/tablas.php?modulo=' . $modulo . '&submodulo=' . $submodulo . '&subsubmodulo=' . $subsubmodulo . '&filtro=' . $filtroSeleccionado . '&uso=' . $uso;
+        $tableId = '#tablaModalSeleccion';
+        $pageLength = 7;
+        $lengthMenu = '[[7, 10, 20], [7, 10, 20]]';
+
+        $columnDefs = "
+            columnDefs: [
+                {
+                    targets: -1,
+                    render: function (data, type, row, meta) {
+                        return " . ($multiple ? "'<input type=\"checkbox\" name=\"seleccion[]\" value=\"' + data + '\" />'" : "'<input type=\"radio\" name=\"seleccion\" value=\"' + data + '\" />'") . ";
+                    }
+                }
+            ],
+            initComplete: function () {
+                var api = this.api();
+                // Cambiar el título de la última columna a 'Selección'
+                $(api.column(-1).header()).html('Selección');
+            }
+        ";
+
+        // Script para inicializar DataTable
+        $this->response->script("
+            if ($.fn.DataTable.isDataTable('$tableId')) {
+                $('$tableId').DataTable().destroy();
+            }
+            $('$tableId').DataTable({
+                ajax: '$ajaxUrl',
+                responsive: true,
+                processing: true,
+                serverSide: true,
+                pageLength: $pageLength,
+                lengthMenu: $lengthMenu,
+                language: {
+                    url: \"/plugins/datatables/es-ES.json\"
+                },
+                order: [[".$orden['indice'].", '".$orden['orden']."']],
+                $columnDefs
+            });
+        ");
+        // Agregar evento para eliminar la modal después de ocultarla
+        $this->response->script('
+        if (!$("#modalSeleccion").data("evento-registrado")) {
+            $("#modalSeleccion").on("hidden.bs.modal", function () {
+                $(this).remove();
+            });
+            $("#modalSeleccion").data("evento-registrado", true);
+        }
+        ');
+
+        return $this->response;
+    }
+    
+
     public function modalFormulario($campos, $titulo, $funcionCallBack, $parametrosAdicionales = '')
     {
         // Crear el HTML de la ventana modal

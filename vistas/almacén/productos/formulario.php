@@ -14,7 +14,7 @@ if (file_exists($pathControlador)) {
     require_once($pathControlador);
     validarSesion();
     echo $jaxon->getScript(true);
-    $_SESSION['partidasImpuestos' . $_GET['rand']] = array();
+    $_SESSION['partidas' . $_GET['rand']] = array();
 } else {
     // Manejo de errores si el archivo controlador no existe
     die("No se encontró el archivo del controlador en: $pathControlador");
@@ -37,7 +37,7 @@ if (file_exists($pathControlador)) {
                 <?= titulos($modulo, $submodulo, $subsubmodulo); ?>
                 <div class="app-content">
                     <div class="container-fluid">
-                        <form action="#" id="formProducto<?= $_GET['rand']; ?>" name="formProducto<?= $_GET['rand']; ?>" method="post">
+                        <form action="#" id="formulario<?= $_GET['rand']; ?>" name="formulario<?= $_GET['rand']; ?>" method="post">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="card mb-4">
@@ -191,7 +191,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-list-check"></i></span>
                                                                         <select id="lote_serie" name="lote_serie" class="form-select"
-                                                                            onchange="JaxonalmacenProductos.validarUsoLoteSerie(jaxon.getFormValues('formProducto<?= $_GET['rand'] ?>'))">
+                                                                            onchange="JaxonalmacenProductos.validarUsoLoteSerie(jaxon.getFormValues('formulario<?= $_GET['rand'] ?>'))">
                                                                             <option value="No" selected>No</option>
                                                                             <option value="Sí">Sí</option>
                                                                         </select>
@@ -206,7 +206,7 @@ if (file_exists($pathControlador)) {
                                                                         <span class="input-group-text"><i
                                                                                 class="bi bi-ui-checks"></i></span>
                                                                         <select id="kit" name="kit" class="form-select"
-                                                                            onchange="JaxonalmacenProductos.validarUsoKit(jaxon.getFormValues('formProducto<?= $_GET['rand'] ?>'))">
+                                                                            onchange="JaxonalmacenProductos.validarUsoKit(jaxon.getFormValues('formulario<?= $_GET['rand'] ?>'))">
                                                                             <option value="No" selected>No</option>
                                                                             <option value="Sí">Sí</option>
                                                                         </select>

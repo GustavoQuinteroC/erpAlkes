@@ -60,7 +60,7 @@ class almacenProductos extends alkesGlobal
 
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formProducto{$rand}\"));'>
+            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
                 <i class='bi bi-save'></i> Guardar
             </button>
         ");
@@ -194,7 +194,7 @@ class almacenProductos extends alkesGlobal
         }
 
         // Si la validación es exitosa, agregar el impuesto a la sesión
-        $_SESSION['partidasImpuestos'.$_GET['rand']][] = [
+        $_SESSION['partidas'.$_GET['rand']][] = [
             'iddb' => 0,
             'impuesto' => $form['impuesto'],
             'tipoImpuesto' => $form['tipoImpuesto'],
@@ -209,7 +209,7 @@ class almacenProductos extends alkesGlobal
 
     function tablaImpuestos()
     {
-        $impuestos = $_SESSION['partidasImpuestos' . $_GET['rand']] ?? [];
+        $impuestos = $_SESSION['partidas' . $_GET['rand']] ?? [];
         global $database;
         // Verificar si hay impuestos para mostrar
         if (empty($impuestos)) {
@@ -265,9 +265,9 @@ class almacenProductos extends alkesGlobal
     function eliminarImpuesto($index)
     {
         // Verificar si el índice existe en la sesión
-        if (isset($_SESSION['partidasImpuestos'.$_GET['rand']][$index])) {
+        if (isset($_SESSION['partidas'.$_GET['rand']][$index])) {
             // Cambiar el estado del impuesto a 'Inactivo'
-            $_SESSION['partidasImpuestos'.$_GET['rand']][$index]['estado'] = 'Inactivo';
+            $_SESSION['partidas'.$_GET['rand']][$index]['estado'] = 'Inactivo';
 
             // Devolver una respuesta con éxito (esto puede ser útil para notificaciones o actualizaciones)
             $this->alerta(
@@ -296,7 +296,7 @@ class almacenProductos extends alkesGlobal
     function modalEditImpuesto($index)
     {
         // Obtener la partida actual desde la sesión
-        $impuestoActual = $_SESSION['partidasImpuestos' . $_GET['rand']][$index] ?? null;
+        $impuestoActual = $_SESSION['partidas' . $_GET['rand']][$index] ?? null;
 
         if (!$impuestoActual) {
             // Si no se encuentra la partida, mostrar un mensaje de error
@@ -366,7 +366,7 @@ class almacenProductos extends alkesGlobal
     function editarImpuesto($form, $index)
     {
         // Validar el índice
-        if (!isset($_SESSION['partidasImpuestos' . $_GET['rand']][$index])) {
+        if (!isset($_SESSION['partidas' . $_GET['rand']][$index])) {
             return $this->alerta('Error', 'No se encontró la partida a editar.', 'error');
         }
     
@@ -397,7 +397,7 @@ class almacenProductos extends alkesGlobal
         }
     
         // Actualizar la partida en la sesión
-        $_SESSION['partidasImpuestos' . $_GET['rand']][$index] = [
+        $_SESSION['partidas' . $_GET['rand']][$index] = [
             'iddb' => $form['iddb'],
             'impuesto' => $form['impuesto'],
             'tipoImpuesto' => $form['tipoImpuesto'],
@@ -587,9 +587,9 @@ class almacenProductos extends alkesGlobal
         global $database; // Asegúrate de tener la instancia de Medoo
 
         // Verificamos si la sesión contiene las partidas
-        if (isset($_SESSION['partidasImpuestos'.$_GET['rand']]) && is_array($_SESSION['partidasImpuestos'.$_GET['rand']])) {
+        if (isset($_SESSION['partidas'.$_GET['rand']]) && is_array($_SESSION['partidas'.$_GET['rand']])) {
             // Iteramos sobre las partidas
-            foreach ($_SESSION['partidasImpuestos'.$_GET['rand']] as $partida) {
+            foreach ($_SESSION['partidas'.$_GET['rand']] as $partida) {
                 // Si la partida tiene iddb igual a 0, significa que es un nuevo registro
                 if ($partida['iddb'] == 0) {
                     // Verificamos si el impuesto está marcado como Inactivo
@@ -636,7 +636,7 @@ class almacenProductos extends alkesGlobal
         $impuestos = $database->select("productos_impuestos", "*", [ "idproducto" => $_GET['id']]);
         foreach($impuestos as $impuesto)
         {
-            $_SESSION['partidasImpuestos'.$_GET['rand']][] = [
+            $_SESSION['partidas'.$_GET['rand']][] = [
                 'iddb' => $impuesto['id'],
                 'impuesto' => $impuesto['idc_impuesto'],
                 'tipoImpuesto' => $impuesto['tipo'],
