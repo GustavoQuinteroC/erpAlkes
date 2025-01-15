@@ -334,73 +334,73 @@ class alkesGlobal
         return $this->response;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    function pruebaSmall()
+    public function alertaConfirmacion($titulo, $mensaje, $icono, $confirmCallback)
     {
-        // Actualizar el contenido del <small> con el ID especificado
-        $this->response->assign('smallTitulos', 'innerHTML', 'Prueba1');
-
+        // Obtener el tema actual (dark o light)
+        $tema = getBackground();
+        $backgroundColor = $tema == 'dark' ? '#212529' : '#ffffff'; // Fondo según tema
+        $textColor = $tema == 'dark' ? '#ffffff' : '#000000';       // Texto según tema
+    
+        // Quitar el foco del elemento activo
+        $this->response->script('$(document.activeElement).blur();');
+    
+        // Construir el script de SweetAlert2 con los parámetros proporcionados
+        $script = '
+            Swal.fire({
+                title: "' . $titulo . '",
+                text: "' . $mensaje . '",
+                icon: "' . $icono . '",
+                showCancelButton: true,
+                confirmButtonColor: "#28a745", // Color verde para el botón de confirmación
+                cancelButtonColor: "#d33", // Color rojo para el botón de cancelación
+                confirmButtonText: "Sí, confirmar", // Texto del botón de confirmación
+                cancelButtonText: "Cancelar", // Texto del botón de cancelación
+                reverseButtons: true, // Intercambiar posición de los botones
+                background: "' . $backgroundColor . '", // Fondo según tema
+                color: "' . $textColor . '" // Texto según tema
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Llamar a la función de confirmación proporcionada
+                    ' . $confirmCallback . '
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        title: "Cancelado",
+                        text: "No se han hecho cambios ;)",
+                        icon: "error",
+                        background: "' . $backgroundColor . '", // Fondo según tema
+                        color: "' . $textColor . '" // Texto según tema
+                    });
+                }
+            });
+        ';
+    
+        // Agregar el script de SweetAlert2 a la response
+        $this->response->script($script);
+    
+        // Devolver la response
         return $this->response;
     }
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -517,44 +517,7 @@ class alkesGlobal
     
 
 
-    public function alertaConfirmacion($titulo, $mensaje, $icono, $confirmCallback)
-    {
-        // Quital el foco de todo el documento
-        $this->response->script('$(document.activeElement).blur();');
-
-        // Construir el script de SweetAlert2 con los parámetros proporcionados
-        $script = '
-                Swal.fire({
-                    title: "' . $titulo . '",
-                    text: "' . $mensaje . '",
-                    icon: "' . $icono . '",
-                    showCancelButton: true,
-                    confirmButtonColor: "#28a745", // Color verde para el botón de confirmación
-                    cancelButtonColor: "#d33", // Color del botón de cancelación
-                    confirmButtonText: "Sí, confirmar", // Texto del botón de confirmación
-                    cancelButtonText: "Cancelar", // Texto del botón de cancelación
-                    reverseButtons: true // Intercambiar posición de los botones
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Llamar a la función de confirmación proporcionada
-                        ' . $confirmCallback . '
-                    } else if (
-                        result.dismiss === Swal.DismissReason.cancel
-                    ) {
-                        Swal.fire({
-                            title: "Cancelado",
-                            text: "No se han hecho cambios ;)",
-                            icon: "error"
-                        });
-                    }
-                });
-            ';
-        // Agregar el script de SweetAlert2 a la response
-        $this->response->script($script);
-
-        // Devolver la response
-        return $this->response;
-    }
+    
 
 }
 

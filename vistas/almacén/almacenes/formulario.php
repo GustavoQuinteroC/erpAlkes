@@ -152,7 +152,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-check-circle"></i></span>
                                                                 <select id="principal" name="principal"
-                                                                    class="form-select">
+                                                                    class="form-select" onchange="JaxonalmacenAlmacenes.alertaCambioPrincipal(this.value);">
                                                                     <option value="No" selected>No</option>
                                                                     <option value="Sí">Sí</option>
                                                                 </select>
@@ -226,6 +226,12 @@ if (file_exists($pathControlador)) {
                                     </p>
                                     <p id="notas" class="form-text text-muted">
                                         2- añadir ubicacion del producto, tanto en vista, base de datos y array.
+                                    </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        3- si el usuario eligio como principal este, entonces quitar principal al actual principal.
+                                    </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        6- Hacer uso de la funcion verificaRegistroRepetido para ver si ya esta repetido este almacen.
                                     </p>
                                 </div>
                             </div>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 // controlador.php
-require_once(__DIR__ .'/../globales/funcionesJaxon.php');
+require_once(__DIR__ . '/../globales/funcionesJaxon.php');
 use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
@@ -19,6 +19,26 @@ class almacenAlmacenes extends alkesGlobal
                     "error"
                 );
                 return $this->response;
+            } else {
+                //consultas a la bd para obtener los datos necesarios para la consulta del almacén
+                $almacen = $database->get('almacenes', '*', ['id' => $_GET['id']]);
+
+                // Asignaciones a los campos
+                $this->response->assign("smallTitulos", "innerHTML", $almacen['nombre']);
+                $this->response->assign("nombre", "value", $almacen['nombre']);
+                $this->response->assign("direccion", "value", $almacen['direccion']);
+                $this->response->assign("capacidad", "value", $almacen['capacidad_m3']);
+                $this->response->assign("estado", "value", $almacen['estado']);
+                $this->response->assign("principal", "value", $almacen['principal']);
+                $this->response->assign("consigna", "value", $almacen['consigna']);
+                
+                // Actualizar select2
+                $this->response->script('
+                    $("#identidad").val("' . $almacen['identidad'] . '").trigger("change");
+                    $("#idusuario").val("' . $almacen['idusuario_encargado'] . '").trigger("change");
+                ');
+
+                $this->cargarProductosConsulta();
             }
         }
         $rand = $_GET['rand']; // Obtener el valor dinámico
@@ -30,12 +50,36 @@ class almacenAlmacenes extends alkesGlobal
         return $this->response;
     }
 
+    function cargarProductosConsulta()
+    {
+        global $database;
+        // Consulta select que nos regresa toda la informacion de todos los oproductos asociados al almacén
+        $productos = $database->select("almacenes_productos", "*", ["idalmacen" => $_GET['id']]);
+        // Verificar si se obtuvieron productos
+        if (empty($productos)) {
+            $this->alerta("Advertencia", "No se encontraron productos asociados al almacén.", "info");
+        } else {
+            // Agrega los productos al array de sesión
+            foreach ($productos as $idproducto) {
+                $_SESSION['partidas' . $_GET['rand']][] = [
+                    'iddb' => $idproducto['id'],
+                    'idproducto' => $idproducto['idproducto'],
+                    'existencia' => $idproducto['existencia'],
+                    'ubicacion' => $idproducto['ubicacion'],
+                    'estado' => $idproducto['estado'],
+                ];
+            }
+            $this->tablaProductos();
+        }
+        return $this->response;
+    }
+
     function asignarTodos()
     {
         global $database;
 
         // Obtén los IDs ya existentes en el array de sesión para excluirlos
-        $excluir_ids = array_column($_SESSION['partidas'.$_GET['rand']], 'idproducto');
+        $excluir_ids = array_column($_SESSION['partidas' . $_GET['rand']], 'idproducto');
 
         // Condición base para la consulta
         $conditions = [
@@ -54,12 +98,53 @@ class almacenAlmacenes extends alkesGlobal
 
         // Agrega los nuevos productos al array de sesión
         foreach ($productos as $idproducto) {
-            $_SESSION['partidas'.$_GET['rand']][] = [
+            $_SESSION['partidas' . $_GET['rand']][] = [
                 'iddb' => 0,
                 'idproducto' => $idproducto,
                 'existencia' => 0,
+                'ubicacion' => '',
                 'estado' => 'Activo',
             ];
+        }
+        $this->tablaProductos();
+        return $this->response;
+    }
+
+    function modalAddProducto()
+    {
+        global $database;
+        $this->modalSeleccionServerSide('almacén', 'productos', '', 'Principal', 'Modal', 'JaxonalmacenAlmacenes.addProductos', true, '', 'Seleccionar Productos');
+        return $this->response;
+    }
+
+    function addProductos($form)
+    {
+        // Itera sobre los productos seleccionados
+        $existian = false;
+        foreach ($form['seleccion'] as $idproducto) {
+            // Verifica si el producto ya existe en la sesión
+            $existe = false;
+            foreach ($_SESSION['partidas' . $_GET['rand']] as $producto) {
+                if ($producto['idproducto'] == $idproducto) {
+                    $existe = true;
+                    $existian = true;
+                    break;
+                }
+            }
+
+            // Solo agrega el producto si no existe
+            if (!$existe) {
+                $_SESSION['partidas' . $_GET['rand']][] = [
+                    'iddb' => 0,
+                    'idproducto' => $idproducto,
+                    'existencia' => 0,
+                    'ubicacion' => '',
+                    'estado' => 'Activo',
+                ];
+            }
+        }
+        if ($existian) {
+            $this->alerta("Precaución", "Algunos elementos que se intentaron agregar ya existian y no fueron agregados", "warning");
         }
         $this->tablaProductos();
         return $this->response;
@@ -134,15 +219,19 @@ class almacenAlmacenes extends alkesGlobal
                 $html .= '<td>' . htmlspecialchars($producto['estado']) . '</td>';
                 $html .= '<td>' . htmlspecialchars($producto['existencia']) . '</td>';
                 $html .= '<td>';
+                $html .= '<input type="text" class="form-control form-control-sm" value="' . $producto['ubicacion'] . '" ';
+                $html .= 'onchange="JaxonalmacenAlmacenes.actualizarUbicacion(this.value, ' . $index . ');" />';
+                $html .= '</td>';
+                $html .= '<td>';
                 // Botón según el estado del producto
-                if ($infoProducto['estado'] === 'Activo') {
+                if ($producto['estado'] == 'Activo') {
                     // Mostrar X si está Activo
-                    $html .= '<button type="button" class="btn btn-sm btn-danger" onclick="JaxonalmacenAlmacenes.eliminarImpuesto(' . $index . ');">';
+                    $html .= '<button type="button" class="btn btn-sm btn-danger" onclick="JaxonalmacenAlmacenes.desactivarProducto(' . $index . ');">';
                     $html .= '<i class="bi bi-trash"></i>'; // X de eliminación
                     $html .= '</button>';
-                } elseif ($infoProducto['estado'] === 'Inactivo') {
+                } elseif ($producto['estado'] == 'Inactivo') {
                     // Mostrar palomita si está Inactivo
-                    $html .= '<button type="button" class="btn btn-sm btn-success" onclick="JaxonalmacenAlmacenes.modalEditImpuesto(' . $index . ');">';
+                    $html .= '<button type="button" class="btn btn-sm btn-success" onclick="JaxonalmacenAlmacenes.activarProducto(' . $index . ');">';
                     $html .= '<i class="bi bi-check"></i>'; // Palomita
                     $html .= '</button>';
                 }
@@ -160,13 +249,164 @@ class almacenAlmacenes extends alkesGlobal
         return $this->response;
     }
 
+    function activarProducto($indice)
+    {
+        $_SESSION['partidas' . $_GET['rand']][$indice]["estado"] = "Activo";
+        $this->tablaProductos();
+        return $this->response;
+    }
 
+    function desactivarProducto($indice)
+    {
+        $_SESSION['partidas' . $_GET['rand']][$indice]["estado"] = "Inactivo";
+        $this->tablaProductos();
+        return $this->response;
+    }
 
+    function actualizarUbicacion($valor, $indice)
+    {
+        $_SESSION['partidas' . $_GET['rand']][$indice]["ubicacion"] = $valor;
+        $this->tablaProductos();
+        return $this->response;
+    }
 
-    function modalAddProducto()
+    function alertaCambioPrincipal($valor)
+    {
+        if ($valor == "Sí") {
+            $this->alerta("Alerta importante", "Si deja este almacén como principal, el almacén principal actual perdera este atributo", "warning");
+        }
+        return $this->response;
+    }
+
+    function validar($form)
+    {
+        // Definir las reglas de validación
+        $reglas = [
+            'nombre' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
+            'direccion' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
+            'capacidad' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'estado' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
+            'identidad' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'idusuario' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'principal' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
+            'consigna' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
+        ];
+
+        // Validar el formulario
+        $resultadoValidacion = validar_global($form, $reglas);
+        if ($resultadoValidacion !== true) {
+            $error = $resultadoValidacion['error'];
+            $campo = $resultadoValidacion['campo'];
+
+            // Mostrar alerta con el error
+            $this->alerta(
+                "Error en la validación",
+                $error,
+                "error",
+                $campo
+            );
+            // Retornar la respuesta Jaxon
+            return $this->response;
+        } else {
+            if ($form['principal'] == 'Sí') {
+                $rand = $_GET['rand']; // Obtener el valor dinámico
+                $this->alertaConfirmacion("Cambiar almacén principal", "¿Estas seguro que deseas cambiar el actual almacén principal por este?", "warning", "JaxonalmacenAlmacenes.guardar(jaxon.getFormValues(\"formulario{$rand}\"));");
+            } else {
+                $this->guardar($form);
+            }
+        }
+        return $this->response;
+    }
+
+    function guardar($form)
     {
         global $database;
-        $this->modalSeleccionServerSide('almacén', 'productos', '', 'Principal', 'Modal', '', false, '', 'Seleccionar Productos');
+        $data = [
+            'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
+            'identidad' => isset($form['identidad']) ? $form['identidad'] : 0,
+            'idusuario_encargado' => isset($form['idusuario']) ? $form['idusuario'] : 0,
+            'nombre' => isset($form['nombre']) ? $form['nombre'] : '',
+            'direccion' => isset($form['direccion']) ? $form['direccion'] : '',
+            'capacidad_m3' => isset($form['capacidad']) ? $form['capacidad'] : 0,
+            'estado' => isset($form['estado']) ? $form['estado'] : 'Activo',
+            'principal' => isset($form['principal']) ? $form['principal'] : "No",
+            'consigna' => isset($form['consigna']) ? $form['consigna'] : "No"
+
+        ];
+
+        // Si el 'id' de la URL es 0, realizamos una inserción
+        if ($_GET['id'] == 0) {
+            // Realizamos la inserción
+            $database->insert('almacenes', $data);
+            $insert_id = $database->id();
+            // Llamamos a la función guardarPartidas y pasamos el id del nuevo Almacén
+            $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo Almacén
+            $this->alerta(
+                "Exito",
+                "Almacén registrado correctamente.",
+                "success",
+                null,
+                true,
+                false,
+                "index.php"
+            );
+        }
+        // Si el 'id' no es 0, actualizamos el registro correspondiente
+        else {
+            // Realizamos la actualización
+            $database->update('almacenes', $data, ['id' => $_GET['id']]);
+            // Llamamos a la función guardarPartidas y pasamos el id del Almacén
+            $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del Almacén actualizado
+            $this->alerta(
+                "Exito",
+                "Almacén actualizado correctamente.",
+                "success",
+                null,
+                true,
+                false,
+                "index.php"
+            );
+        }
+        return $this->response;
+    }
+
+    function guardarPartidas($idalmacen)
+    {
+        global $database; // instancia de Medoo
+
+        // Verificamos si la sesión contiene las partidas
+        if (isset($_SESSION['partidas'.$_GET['rand']]) && is_array($_SESSION['partidas'.$_GET['rand']])) {
+            // Iteramos sobre las partidas
+            foreach ($_SESSION['partidas'.$_GET['rand']] as $partida) {
+                // Si la partida tiene iddb igual a 0, significa que es un nuevo registro
+                if ($partida['iddb'] == 0) {
+                    // Verificamos si el impuesto está marcado como Inactivo
+                    if ($partida['estado'] == 'Inactivo') {
+                        // Si el impuesto está Inactivo, no insertamos la partida
+                        continue;
+                    }
+                    // Si el impuesto no está Inactivo, insertamos la nueva partida
+                    $data = [
+                        'idalmacen' => $idalmacen, // ID del almacén desde la URL
+                        'idproducto' => $partida['idproducto'],
+                        'existencia' => $partida['existencia'],
+                        'estado' => $partida['estado'],
+                        'ubicacion' => $partida['ubicacion'],
+                    ];
+                    // Realizamos la inserción
+                    $database->insert('almacenes_productos', $data);
+                } else {
+                    // Si iddb no es 0, significa que la partida ya existe, por lo que actualizamos
+                    $data = [
+                        'estado' => $partida['estado'],
+                        'ubicacion' => $partida['ubicacion'],
+                    ];
+                    // Realizamos la actualización
+                    $database->update('almacenes_productos', $data, ['id' => $partida['iddb']]);
+                }
+            }
+        }
+        // Retornar la respuesta Jaxon
         return $this->response;
     }
 

@@ -516,7 +516,7 @@ class almacenProductos extends alkesGlobal
 
     function guardar($form)
     {
-        global $database; // Asegúrate de tener la instancia de Medoo
+        global $database; // instancia de Medoo
 
         // Preparamos los datos a utilizar
         $data = [
@@ -546,12 +546,13 @@ class almacenProductos extends alkesGlobal
         // Si el 'id' de la URL es 0, realizamos una inserción
         if ($_GET['id'] == 0) {
             // Realizamos la inserción
-            $insert_id = $database->insert('productos', $data);
+            $database->insert('productos', $data);
+            $insert_id = $database->id();
             // Llamamos a la función guardarPartidas y pasamos el id del nuevo producto
             $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo producto
             $this->alerta(
-                "Producto registrado correctamente",
-                "El producto ha sido añadido a la base de datos.",
+                "Exito",
+                "Producto registrado correctamente.",
                 "success",
                 null,
                 true,
@@ -566,8 +567,8 @@ class almacenProductos extends alkesGlobal
             // Llamamos a la función guardarPartidas y pasamos el id del producto
             $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del producto actualizado
             $this->alerta(
-                "Producto actualizado correctamente",
-                "El producto ha sido actualizado en la base de datos.",
+                "Exito",
+                "Producto actualizado correctamente.",
                 "success",
                 null,
                 true,
@@ -584,7 +585,7 @@ class almacenProductos extends alkesGlobal
 
     function guardarPartidas($idproducto)
     {
-        global $database; // Asegúrate de tener la instancia de Medoo
+        global $database; // instancia de Medoo
 
         // Verificamos si la sesión contiene las partidas
         if (isset($_SESSION['partidas'.$_GET['rand']]) && is_array($_SESSION['partidas'.$_GET['rand']])) {

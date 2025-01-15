@@ -433,6 +433,9 @@ if (file_exists($pathControlador)) {
                                     <p id="notas" class="form-text text-muted">
                                         5- falta hacer una funcion para validar la empresa antes de guardar.
                                     </p>
+                                    <p id="notas" class="form-text text-muted">
+                                        6- Hacer uso de la funcion verificaRegistroRepetido para ver si ya esta repetido este producto.
+                                    </p>
                                 </div>
                             </div>
                         </form>
