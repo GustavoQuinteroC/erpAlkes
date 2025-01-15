@@ -65,7 +65,7 @@ if (file_exists($pathControlador)) {
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-upc-scan"></i></span>
+                                                                        class="bi bi-person-circle"></i></span>
                                                                 <input type="text" class="form-control" id="nombre"
                                                                     name="nombre" placeholder="Nombre del almacén">
                                                             </div>
@@ -77,7 +77,7 @@ if (file_exists($pathControlador)) {
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-upc-scan"></i></span>
+                                                                        class="bi bi-geo-alt"></i></span>
                                                                 <input type="text" class="form-control" id="direccion"
                                                                     name="direccion"
                                                                     placeholder="Dirección del almacén">
@@ -91,10 +91,10 @@ if (file_exists($pathControlador)) {
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-upc-scan"></i></span>
-                                                                <input type="text" class="form-control" id="nombre"
+                                                                        class="bi bi-box-seam"></i></span>
+                                                                <input type="text" class="form-control" id="capacidad"
                                                                     name="capacidad"
-                                                                    placeholder="capacidad del almacén en metros cubicos">
+                                                                    placeholder="Capacidad del almacén en metros cúbicos">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -106,8 +106,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-toggle-on"></i></span>
                                                                 <select id="estado" name="estado" class="form-select">
-                                                                    <option value="Activo" selected>Activo
-                                                                    </option>
+                                                                    <option value="Activo" selected>Activo</option>
                                                                     <option value="Inactivo">Inactivo</option>
                                                                 </select>
                                                             </div>
@@ -121,7 +120,7 @@ if (file_exists($pathControlador)) {
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-box"></i></span>
+                                                                        class="bi bi-building"></i></span>
                                                                 <select id="identidad" name="identidad"
                                                                     class="form-select select2-field">
                                                                     <?php echo getEntidades(); ?>
@@ -136,7 +135,7 @@ if (file_exists($pathControlador)) {
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-box"></i></span>
+                                                                        class="bi bi-person-badge"></i></span>
                                                                 <select id="idusuario" name="idusuario"
                                                                     class="form-select select2-field">
                                                                     <?php echo getUsuarios(); ?>
@@ -146,12 +145,14 @@ if (file_exists($pathControlador)) {
                                                     </div>
                                                     <div class="form-group row mb-3">
                                                         <label for="principal"
-                                                            class="col-sm-4 col-form-label text-start">Principal por entidad</label>
+                                                            class="col-sm-4 col-form-label text-start">Principal por
+                                                            entidad</label>
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-ui-checks"></i></span>
-                                                                <select id="principal" name="principal" class="form-select">
+                                                                        class="bi bi-check-circle"></i></span>
+                                                                <select id="principal" name="principal"
+                                                                    class="form-select">
                                                                     <option value="No" selected>No</option>
                                                                     <option value="Sí">Sí</option>
                                                                 </select>
@@ -160,12 +161,14 @@ if (file_exists($pathControlador)) {
                                                     </div>
                                                     <div class="form-group row mb-3">
                                                         <label for="consigna"
-                                                            class="col-sm-4 col-form-label text-start">Es consigna</label>
+                                                            class="col-sm-4 col-form-label text-start">Es
+                                                            consigna</label>
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
-                                                                        class="bi bi-ui-checks"></i></span>
-                                                                <select id="consigna" name="consigna" class="form-select">
+                                                                        class="bi bi-clipboard-check"></i></span>
+                                                                <select id="consigna" name="consigna"
+                                                                    class="form-select">
                                                                     <option value="No" selected>No</option>
                                                                     <option value="Sí">Sí</option>
                                                                 </select>
