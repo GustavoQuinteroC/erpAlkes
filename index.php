@@ -3,31 +3,31 @@ session_start();
 require_once("controladores/login.php");
 if (!isset($_SESSION['usuario'])) {
   if (isset($_COOKIE['recuerdame_alkes'])) {
-      global $database;
-      $token = $_COOKIE['recuerdame_alkes'];
+    global $database;
+    $token = $_COOKIE['recuerdame_alkes'];
 
-      // Realizamos la consulta unificada
-      $usuario = $database->select("usuarios", [
-          "[>]entidades" => ["identidad" => "id"], // Unión con entidades
-          "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
-      ], [
-          "usuarios.id(idusuario)",
-          "usuarios.identidad",
-          "empresas.id(empresa_id)"
-      ], [
-          "usuarios.token_recuerdame" => $token
-      ]);
+    // Realizamos la consulta unificada
+    $usuario = $database->select("usuarios", [
+      "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+      "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+    ], [
+      "usuarios.id(idusuario)",
+      "usuarios.identidad",
+      "empresas.id(empresa_id)"
+    ], [
+      "usuarios.token_recuerdame" => $token
+    ]);
 
-      if (!empty($usuario)) {
-          // Asignamos las variables de sesión
-          $_SESSION['idusuario'] = $usuario[0]['idusuario'];
-          $_SESSION['identidad'] = $usuario[0]['identidad'];
-          $_SESSION['idempresa'] = $usuario[0]['empresa_id'];
+    if (!empty($usuario)) {
+      // Asignamos las variables de sesión
+      $_SESSION['idusuario'] = $usuario[0]['idusuario'];
+      $_SESSION['identidad'] = $usuario[0]['identidad'];
+      $_SESSION['idempresa'] = $usuario[0]['empresa_id'];
 
-          // Redirigir al inicio
-          header("Location: vistas/inicio/index.php");
-          exit;
-      }
+      // Redirigir al inicio
+      header("Location: vistas/inicio/index.php");
+      exit;
+    }
   }
 }
 
@@ -37,6 +37,7 @@ if (!isset($_SESSION['usuario'])) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,67 +46,65 @@ if (!isset($_SESSION['usuario'])) {
   <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
   <?php
   echo $jaxon->getScript(true); // Cambiado para Jaxon 4.x
   ?>
 </head>
+
 <body>
-  <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
-    <div class="container">
-      <div class="card login-card">
-        <div class="row no-gutters">
-          <div class="col-md-5">
-            <img src="assets/images/login.jpg" alt="login" class="login-card-img">
+  <div class="login">
+    <img src="assets/images/login-bg.png" alt="login image" class="login__img">
+    <form id="login" method="post" autocomplete="off" onsubmit="return jaxon_login(jaxon.getFormValues('login'));" class="login__form">
+      <h1 class="login__title">ERP ALKES</h1>
+
+      <div class="login__content">
+        <div class="login__box">
+          <i class="ri-user-3-line login__icon"></i>
+
+          <div class="login__box-input">
+            <input type="text" name="user" class="login__input" id="user" placeholder=" " autocomplete="new-username">
+            <label for="user" class="login__label">Usuario</label>
           </div>
-          <div class="col-md-7">
-            <div class="card-body">
-              <div class="brand-wrapper">
-                <img src="assets/images/logoSimple.svg" alt="logo" class="logo">
-              </div>
-              <p class="login-card-description">Iniciar sesión</p>
-              <form id="login" method="post" onsubmit="return jaxon_login(jaxon.getFormValues('login'));">
-                <div class="form-group">
-                  <label for="user" class="sr-only">Usuario</label>
-                  <input type="text" name="user" id="user" class="form-control" placeholder="Usuario" required>
-                </div>
-                <div class="form-group mb-4">
-                  <label for="clave" class="sr-only">Contraseña</label>
-                  <input type="password" name="clave" id="password-field" class="form-control" placeholder="Contraseña" required>
-                  <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
-                </div>
-                <div class="form-group">
-                  <button type="submit" class="btn btn-block login-btn mb-4">Iniciar sesión</button>
-                </div>
-                <div class="form-group d-md-flex">
-                  <div class="w-50">
-                    <label class="checkbox-wrap checkbox-primary">Recuerdame
-                      <input type="checkbox" name="rememberPasswordCheck" checked>
-                      <span class="checkmark"></span>
-                    </label>
-                  </div>
-                  <div class="w-50 text-md-right">
-                    <a href="#" class="forgot-password-link">Olvidé mi contraseña</a>
-                  </div>
-                </div>
-              </form>
-              <nav class="login-card-footer-nav">
-                <a href="#!">Términos de uso · </a>
-                <a href="#!">Política de privacidad</a>
-              </nav>
-            </div>
+        </div>
+
+        <div class="login__box">
+          <i class="ri-lock-2-line login__icon"></i>
+
+          <div class="login__box-input">
+            <input type="password" name="clave" class="login__input" id="password-field" placeholder=" " autocomplete="new-password">
+            <label for="password-field" class="login__label">Contraseña</label>
+            <i class="ri-eye-off-line login__eye" id="login-eye"></i>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+
+      <div class="login__check">
+        <div class="login__check-group">
+          <input type="checkbox" class="login__check-input" id="login-check" name="rememberPasswordCheck" checked>
+          <label for="login-check" class="login__check-label">Recuerdame</label>
+        </div>
+
+        <a href="#" class="login__forgot">Olvide mi contraseña</a>
+      </div>
+
+      <button type="submit" class="login__button">Iniciar sesión</button>
+
+      <p class="login__register">
+        Necesitas una prueba para tu negocio? <a href="#">Registrate</a>
+      </p>
+      
+    </form>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <!-- Custom JS -->
   <script src="/assets/js/login_js/main.js"></script>
-   <!-- jQuery -->
-   <script src="/plugins/jquery/jquery.min.js"></script>
+  <!-- jQuery -->
+  <script src="/plugins/jquery/jquery.min.js"></script>
   <!-- Bootstrap 4 -->
   <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <!-- AdminLTE App -->
@@ -114,9 +113,10 @@ if (!isset($_SESSION['usuario'])) {
   <script src="/plugins/sweetalert2/sweetalert2.min.js"></script>
   <!-- Jaxon -->
   <script>
-    $("#login").submit(function(e){
-        return false;
+    $("#login").submit(function (e) {
+      return false;
     });
   </script>
 </body>
+
 </html>

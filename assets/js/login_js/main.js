@@ -1,26 +1,26 @@
-(function($) {
-
-	"use strict";
-
-	var fullHeight = function() {
-
-		$('.js-fullheight').css('height', $(window).height());
-		$(window).resize(function(){
-			$('.js-fullheight').css('height', $(window).height());
-		});
-
-	};
-	fullHeight();
-
-	$(".toggle-password").click(function() {
-
-	  $(this).toggleClass("fa-eye fa-eye-slash");
-	  var input = $($(this).attr("toggle"));
-	  if (input.attr("type") == "password") {
-	    input.attr("type", "text");
-	  } else {
-	    input.attr("type", "password");
-	  }
-	});
-
-})(jQuery);
+/*=============== SHOW HIDDEN - PASSWORD ===============*/
+const showHiddenPass = (loginPass, loginEye) =>{
+	const input = document.getElementById(loginPass),
+		  iconEye = document.getElementById(loginEye)
+ 
+	iconEye.addEventListener('click', () =>{
+	   // Change password to text
+	   if(input.type === 'password'){
+		  // Switch to text
+		  input.type = 'text'
+ 
+		  // Icon change
+		  iconEye.classList.add('ri-eye-line')
+		  iconEye.classList.remove('ri-eye-off-line')
+	   } else{
+		  // Change to password
+		  input.type = 'password'
+ 
+		  // Icon change
+		  iconEye.classList.remove('ri-eye-line')
+		  iconEye.classList.add('ri-eye-off-line')
+	   }
+	})
+ }
+ 
+ showHiddenPass('login-pass','login-eye')
