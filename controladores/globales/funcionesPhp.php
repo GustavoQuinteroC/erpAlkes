@@ -945,6 +945,75 @@ function getCfdiImpuesto()
     return $options;
 }
 
+
+function getEntidades()
+{
+    global $database;
+    $registros = $database->select(
+        "entidades",
+        ["id", "nombre", "descripcion"],
+        [
+            "idempresa" => $_SESSION['idempresa'],
+            "estado" => "Activo"
+        ],
+        [
+            "ORDER" => ["id" => "ASC"]
+        ]
+    );
+
+    $options = '<option value="" . disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getUsuarios()
+{
+    global $database;
+    $registros = $database->select(
+        "usuarios",
+        [
+            "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+        ],
+        [
+            "usuarios.id", // Alias para usuarios.id
+            "usuarios.estado", // Alias para usuarios.estado
+            "usuarios.nombre(usuario_nombre)", // Alias para usuarios.nombre
+            "entidades.idempresa", // Alias para entidades.idempresa
+            "entidades.nombre(entidad_nombre)", // Alias para entidades.nombre
+            "usuarios.identidad"
+        ],
+        [
+            "entidades.idempresa" => $_SESSION['idempresa'],
+            "usuarios.estado" => "Activo",
+            "usuarios.identidad" => $_SESSION['identidad']
+        ],
+        [
+            "ORDER" => ["usuarios.nombre" => "ASC"] // Asegúrate de especificar el nombre con el alias o prefijo correcto
+        ]
+    );
+
+    $options = '<option value="" . disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['usuario_nombre']) . " - " . htmlspecialchars($registro['entidad_nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
 function getCfdiTipoFactor()
 {
     global $database;
@@ -1070,71 +1139,8 @@ function validar_global($form, $reglas)
     return true; // Validación exitosa
 }
 
-function getEntidades()
-{
-    global $database;
-    $registros = $database->select(
-        "entidades",
-        ["id", "nombre", "descripcion"],
-        [
-            "idempresa" => $_SESSION['idempresa'],
-            "estado" => "Activo"
-        ],
-        [
-            "ORDER" => ["id" => "ASC"]
-        ]
-    );
 
-    $options = '<option value="" . disabled>Elije una opción...</option>';
-    if (!empty($registros)) {
-        foreach ($registros as $registro) {
-            // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
-        }
-    } else {
-        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
-    }
 
-    return $options;
-}
-
-function getUsuarios()
-{
-    global $database;
-    $registros = $database->select(
-        "usuarios",
-        [
-            "[>]entidades" => ["identidad" => "id"], // Unión con entidades
-        ],
-        [
-            "usuarios.id", // Alias para usuarios.id
-            "usuarios.estado", // Alias para usuarios.estado
-            "usuarios.nombre(usuario_nombre)", // Alias para usuarios.nombre
-            "entidades.idempresa", // Alias para entidades.idempresa
-            "entidades.nombre(entidad_nombre)" // Alias para entidades.nombre
-        ],
-        [
-            "entidades.idempresa" => $_SESSION['idempresa'],
-            "usuarios.estado" => "Activo"
-        ],
-        [
-            "ORDER" => ["usuarios.nombre" => "ASC"] // Asegúrate de especificar el nombre con el alias o prefijo correcto
-        ]
-    );
-    
-
-    $options = '<option value="" . disabled>Elije una opción...</option>';
-    if (!empty($registros)) {
-        foreach ($registros as $registro) {
-            // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['usuario_nombre']) . " - " . htmlspecialchars($registro['entidad_nombre']) . '</option>';
-        }
-    } else {
-        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
-    }
-
-    return $options;
-}
 
 
 
