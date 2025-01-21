@@ -1034,6 +1034,203 @@ function getCfdiTipoFactor()
     return $options;
 }
 
+function getCfdiRegimene()
+{
+    global $database;
+    $registros = $database->select("cfdi_regimenfiscal", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_regimenfiscal']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getCfdiMetodoPago()
+{
+    global $database;
+    $registros = $database->select("cfdi_metodopago", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_metodopago']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+function getCfdiUsoCfdi($idregimen = null)
+{
+    global $database;
+
+    // Consultar todos los usos si no se proporciona un idregimen
+    if ($idregimen === null) {
+        $registros = $database->select("cfdi_usocfdi", "*", [
+            "ORDER" => ["id" => "ASC"]
+        ]);
+    } else {
+        // Preconsulta para obtener el c_regimen
+        $regimen = $database->get("cfdi_regimenfiscal", "c_regimenfiscal", ["id" => $idregimen]);
+
+        // Consultar los registros filtrados por el régimen proporcionado
+        $registros = $database->select("cfdi_usocfdi", "*", [
+            "regimen[~]" => $regimen, // Filtrar registros que contengan el régimen
+            "ORDER" => ["id" => "ASC"]
+        ]);
+    }
+
+    // Construir las opciones para el select
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
+                        htmlspecialchars($registro['c_usocfdi']) . " - " . 
+                        htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getCfdiFormaPago()
+{
+    global $database;
+    $registros = $database->select("cfdi_formapago", "*", [
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_formapago']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getCfdiEstado()
+{
+    global $database;
+    $registros = $database->select("cfdi_estado", "*", [
+        "c_pais" => "MEX",
+        "ORDER" => ["id" => "ASC"]
+    ]);
+
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_estado']) . " - " . htmlspecialchars($registro['nombre_estado']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
+function getCfdiMunicipio($idestado)
+{
+    global $database;
+
+    // Consultar todos los municipios si no se proporciona un idestado
+    if ($idestado === null) {
+        $registros = $database->select("cfdi_municipio", "*", [
+            "ORDER" => ["id" => "ASC"]
+        ]);
+    } else {
+        // Preconsulta para obtener el c_estado
+        $estadoLetras = $database->get("cfdi_estado", "c_estado", ["id" => $idestado]);
+
+        // Consultar los registros filtrados por el estado proporcionado
+        $registros = $database->select("cfdi_municipio", "*", [
+            "c_estado" => $estadoLetras, // Filtrar registros que contengan el estado
+            "ORDER" => ["id" => "ASC"]
+        ]);
+    }
+
+    // Construir las opciones para el select
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
+                        htmlspecialchars($registro['descripcion']) .'</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+function getCfdiColonia($codigoPostal)
+{
+    global $database;
+
+    // Consultar todas las colonias si no se proporciona un codigo Postal
+    if ($codigoPostal === null) {
+        $registros = $database->select("cfdi_colonia", "*", [
+            "ORDER" => ["id" => "ASC"]
+        ]);
+    } else {
+        // Consultar los registros filtrados por el codigo Postal proporcionado
+        $registros = $database->select("cfdi_colonia", "*", [
+            "c_codigopostal" => $codigoPostal, // Filtrar registros que contengan el codigo Postal
+            "ORDER" => ["id" => "ASC"]
+        ]);
+    }
+
+    // Construir las opciones para el select
+    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
+                        htmlspecialchars($registro['nombre']) .'</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function validarEmpresaPorRegistro($tabla, $registro)
 {
     global $database; // Variable global de medoo
