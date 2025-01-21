@@ -43,11 +43,8 @@ if (!isset($_SESSION['usuario'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Alkes - Login</title>
-  <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/login.css">
+  <link rel="stylesheet" href="/assets/css/login_styles.css">
   <?php
   echo $jaxon->getScript(true); // Cambiado para Jaxon 4.x
   ?>
@@ -82,7 +79,7 @@ if (!isset($_SESSION['usuario'])) {
 
       <div class="login__check">
         <div class="login__check-group">
-          <input type="checkbox" class="login__check-input" id="login-check" name="rememberPasswordCheck" checked>
+          <input type="checkbox" class="login__check-input" id="rememberPasswordCheck" name="rememberPasswordCheck" checked>
           <label for="login-check" class="login__check-label">Recuerdame</label>
         </div>
 
@@ -98,15 +95,10 @@ if (!isset($_SESSION['usuario'])) {
     </form>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <!-- Custom JS -->
   <script src="/assets/js/login_js/main.js"></script>
   <!-- jQuery -->
   <script src="/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
-  <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <!-- AdminLTE App -->
   <script src="/dist/js/adminlte.min.js"></script>
   <link rel="stylesheet" href="/plugins/sweetalert2/sweetalert2.min.css">

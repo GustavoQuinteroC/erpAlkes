@@ -16,7 +16,6 @@
   --font-medium: 500;
 }
 
-
 /*=============== BASE ===============*/
 * {
   box-sizing: border-box;
@@ -147,7 +146,15 @@ img {
 .login__forgot:hover {
   text-decoration: underline;
 }
-
+.login__button {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--white-color);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  margin-bottom: 2rem;
+}
 .login__register {
   text-align: center;
 }
