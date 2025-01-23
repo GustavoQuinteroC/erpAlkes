@@ -33,9 +33,9 @@ class alkesGlobal
         return $this->response;
     }
 
-    public function cambiarEntidad($id)
+    public function cambiarSucursal($id)
     {
-        $_SESSION['entidad'] = $id;
+        $_SESSION['sucursal'] = $id;
         $this->response->script('location.reload();');
         return $this->response;
     }

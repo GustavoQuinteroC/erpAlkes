@@ -31,7 +31,7 @@ return [
         'mismatch' => [
             'content-types' => "No se puede mezclar tipos de contenido en una sola respuesta: :type",
             'encodings' => "No se puede mezclar la codificación de caracteres en una sola respuesta: :encoding",
-            'entities' => "No se puede mezclar entidades de salida (verdadero / falso) en una sola respuesta: :entities",
+            'entities' => "No se puede mezclar sucursales de salida (verdadero / falso) en una sola respuesta: :entities",
             'types' => "No se puede mezclar tipos de respuesta al procesar una sola petición: :class",
         ],
         'events' => [

@@ -94,36 +94,23 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-list-ul"></i></span>
                                                                 <select id="nivel" name="nivel" class="form-select">
-                                                                    <option value="Entidad">Entidad</option>
+                                                                    <option value="Sucursal">Sucursal</option>
                                                                     <option value="Empresa">Empresa</option>
                                                                 </select>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group row mb-3">
-                                                        <label for="identidad"
-                                                            class="col-sm-4 col-form-label text-start">Entidad</label>
-                                                        <div class="col-sm-8">
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i
-                                                                        class="bi bi-building"></i></span>
-                                                                <select id="identidad" name="identidad"
-                                                                    class="form-select select2-field">
-                                                                    <?php echo getEntidades(); ?>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group row mb-3">
                                                         <label for="idvendedor"
-                                                            class="col-sm-4 col-form-label text-start">ID
-                                                            Vendedor</label>
+                                                            class="col-sm-4 col-form-label text-start">Vendedor</label>
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-person-badge"></i></span>
-                                                                <input type="text" class="form-control" id="idvendedor"
-                                                                    name="idvendedor" placeholder="ID Vendedor">
+                                                                <select id="idvendedor" name="idvendedor"
+                                                                    class="form-select select2-field">
+                                                                    <?php echo getUsuarios(); ?>
+                                                                </select>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -323,8 +310,9 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-briefcase"></i></span>
                                                                 <select id="idc_regimen" name="idc_regimen"
-                                                                    class="form-select">
-                                                                    <!-- Opciones se llenarán dinámicamente -->
+                                                                    onchange="JaxonalmacenClientes.cambiarUsoCfdi(this.value);"
+                                                                    class="form-select select2-field">
+                                                                    <?php echo getCfdiRegimene(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -337,8 +325,8 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-currency-exchange"></i></span>
                                                                 <select id="idc_moneda" name="idc_moneda"
-                                                                    class="form-select">
-                                                                    <!-- Opciones se llenarán dinámicamente -->
+                                                                    class="form-select select2-field">
+                                                                    <?php echo getCfdiMoneda(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -354,7 +342,7 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-credit-card"></i></span>
                                                                 <select id="idc_metodopago" name="idc_metodopago"
                                                                     class="form-select">
-                                                                    <!-- Opciones se llenarán dinámicamente -->
+                                                                    <?php echo getCfdiMetodoPago(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -368,8 +356,8 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-file-earmark"></i></span>
                                                                 <select id="idc_usocfdi" name="idc_usocfdi"
-                                                                    class="form-select">
-                                                                    <!-- Opciones se llenarán dinámicamente -->
+                                                                    class="form-select select2-field">
+
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -383,8 +371,8 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-wallet2"></i></span>
                                                                 <select id="idc_formapago" name="idc_formapago"
-                                                                    class="form-select">
-                                                                    <!-- Opciones se llenarán dinámicamente -->
+                                                                    class="form-select select2-field">
+                                                                    <?php echo getCfdiFormaPago(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -443,7 +431,7 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-mailbox"></i></span>
                                                                 <input type="text" class="form-control"
                                                                     id="codigo_postal" name="codigo_postal"
-                                                                    placeholder="Código Postal">
+                                                                    placeholder="Código Postal" onchange="JaxonalmacenClientes.ajustesCodigoPostal(this.value);">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -455,7 +443,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-geo-alt"></i></span>
                                                                 <select id="idc_estado" name="idc_estado"
-                                                                    class="form-select">
+                                                                    class="form-select select2-field">
                                                                     <!-- Opciones se llenarán dinámicamente -->
                                                                 </select>
                                                             </div>
@@ -469,7 +457,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-geo"></i></span>
                                                                 <select id="idc_municipio" name="idc_municipio"
-                                                                    class="form-select">
+                                                                    class="form-select select2-field">
                                                                     <!-- Opciones se llenarán dinámicamente -->
                                                                 </select>
                                                             </div>
@@ -483,7 +471,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-house-door"></i></span>
                                                                 <select id="idc_colonia" name="idc_colonia"
-                                                                    class="form-select">
+                                                                    class="form-select select2-field">
                                                                     <!-- Opciones se llenarán dinámicamente -->
                                                                 </select>
                                                             </div>
@@ -583,7 +571,7 @@ if (file_exists($pathControlador)) {
     </div>
     <?= scriptsHtml(); ?>
     <script>
-        JaxonalmacenAlmacenes.inializarFormulario();
+        JaxonalmacenClientes.inializarFormulario();
     </script>
 </body>
 

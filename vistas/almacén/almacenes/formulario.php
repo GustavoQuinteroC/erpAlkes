@@ -115,15 +115,15 @@ if (file_exists($pathControlador)) {
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group row mb-3">
-                                                        <label for="identidad"
-                                                            class="col-sm-4 col-form-label text-start">Entidad</label>
+                                                        <label for="idsucursal"
+                                                            class="col-sm-4 col-form-label text-start">Sucursal</label>
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-building"></i></span>
-                                                                <select id="identidad" name="identidad"
+                                                                <select id="idsucursal" name="idsucursal"
                                                                     class="form-select select2-field">
-                                                                    <?php echo getEntidades(); ?>
+                                                                    <?php echo getsucursales(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -146,7 +146,7 @@ if (file_exists($pathControlador)) {
                                                     <div class="form-group row mb-3">
                                                         <label for="principal"
                                                             class="col-sm-4 col-form-label text-start">Principal por
-                                                            entidad</label>
+                                                            sucursal</label>
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
@@ -222,7 +222,7 @@ if (file_exists($pathControlador)) {
                                 <div class="col-sm-8">
                                     <p id="notas" class="form-text text-muted">
                                         1- de alguna forma hacer que el usuario con permisos pueda cambiar entre
-                                        almacenes de diferentes entidades.
+                                        almacenes de diferentes sucursales.
                                     </p>
                                     <p id="notas" class="form-text text-muted">
                                         2- añadir ubicacion del producto, tanto en vista, base de datos y array.

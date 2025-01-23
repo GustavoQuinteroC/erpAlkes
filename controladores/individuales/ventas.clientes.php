@@ -6,7 +6,7 @@ use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
 
-class almacenAlmacenes extends alkesGlobal
+class almacenClientes extends alkesGlobal
 {
     function inializarFormulario()
     {
@@ -25,257 +25,42 @@ class almacenAlmacenes extends alkesGlobal
 
                 // Asignaciones a los campos
                 $this->response->assign("smallTitulos", "innerHTML", $almacen['nombre']);
-                $this->response->assign("nombre", "value", $almacen['nombre']);
-                $this->response->assign("direccion", "value", $almacen['direccion']);
-                $this->response->assign("capacidad", "value", $almacen['capacidad_m3']);
-                $this->response->assign("estado", "value", $almacen['estado']);
-                $this->response->assign("principal", "value", $almacen['principal']);
-                $this->response->assign("consigna", "value", $almacen['consigna']);
                 
-                // Actualizar select2
-                $this->response->script('
-                    $("#identidad").val("' . $almacen['identidad'] . '").trigger("change");
-                    $("#idusuario").val("' . $almacen['idusuario_encargado'] . '").trigger("change");
-                ');
-
-                $this->cargarProductosConsulta();
+                
+                
             }
         }
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenAlmacenes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenClientes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
                 <i class='bi bi-save'></i> Guardar
             </button>
         ");
         return $this->response;
     }
 
-    function cargarProductosConsulta()
+    function cambiarUsoCfdi($idregimen)
+    {
+        $this->response->assign("idc_usocfdi","innerHTML",getCfdiUsoCfdi($idregimen));
+        return $this->response;
+    }
+
+    function ajustesCodigoPostal($codigoPostal)
     {
         global $database;
-        // Consulta select que nos regresa toda la informacion de todos los oproductos asociados al almacén
-        $productos = $database->select("almacenes_productos", "*", ["idalmacen" => $_GET['id']]);
-        // Verificar si se obtuvieron productos
-        if (empty($productos)) {
-            $this->alerta("Advertencia", "No se encontraron productos asociados al almacén.", "info");
-        } else {
-            // Agrega los productos al array de sesión
-            foreach ($productos as $idproducto) {
-                $_SESSION['partidas' . $_GET['rand']][] = [
-                    'iddb' => $idproducto['id'],
-                    'idproducto' => $idproducto['idproducto'],
-                    'existencia' => $idproducto['existencia'],
-                    'ubicacion' => $idproducto['ubicacion'],
-                    'estado' => $idproducto['estado'],
-                ];
-            }
-            $this->tablaProductos();
-        }
-        return $this->response;
-    }
+        $registroCodigoPostal = $database->get("cfdi_codigopostal", "*", ["c_codigopostal" => $codigoPostal]);
+        $registroEstado = $database->get("cfdi_estado", "*", ["c_estado" => $registroCodigoPostal['c_estado']]);
+        $registroMunicipio = $database->get("cfdi_municipio", "*", ["c_estado" => $registroCodigoPostal['c_estado'], "c_municipio" => $registroCodigoPostal['c_municipio']]);
+        
+        
+        $this->response->assign("idc_estado","innerHTML",getCfdiEstado());
+        $this->response->assign("idc_municipio","innerHTML",getCfdiMunicipio($registroEstado['id']));
+        $this->response->assign("idc_colonia","innerHTML",getCfdiColonia($codigoPostal));
 
-    function asignarTodos()
-    {
-        global $database;
-
-        // Obtén los IDs ya existentes en el array de sesión para excluirlos
-        $excluir_ids = array_column($_SESSION['partidas' . $_GET['rand']], 'idproducto');
-
-        // Condición base para la consulta
-        $conditions = [
-            "idempresa" => $_SESSION['idempresa']
-        ];
-
-        // Agrega la condición para excluir IDs solo si el array no está vacío
-        if (!empty($excluir_ids)) {
-            $conditions["id[!]"] = $excluir_ids;
-        }
-
-        // Ejecuta la consulta usando el método select
-        $productos = $database->select("productos", "id", [
-            "AND" => $conditions
-        ]);
-
-        // Agrega los nuevos productos al array de sesión
-        foreach ($productos as $idproducto) {
-            $_SESSION['partidas' . $_GET['rand']][] = [
-                'iddb' => 0,
-                'idproducto' => $idproducto,
-                'existencia' => 0,
-                'ubicacion' => '',
-                'estado' => 'Activo',
-            ];
-        }
-        $this->tablaProductos();
-        return $this->response;
-    }
-
-    function modalAddProducto()
-    {
-        global $database;
-        $this->modalSeleccionServerSide('almacén', 'productos', '', 'Principal', 'Modal', 'JaxonalmacenAlmacenes.addProductos', true, '', 'Seleccionar Productos');
-        return $this->response;
-    }
-
-    function addProductos($form)
-    {
-        // Itera sobre los productos seleccionados
-        $existian = false;
-        foreach ($form['seleccion'] as $idproducto) {
-            // Verifica si el producto ya existe en la sesión
-            $existe = false;
-            foreach ($_SESSION['partidas' . $_GET['rand']] as $producto) {
-                if ($producto['idproducto'] == $idproducto) {
-                    $existe = true;
-                    $existian = true;
-                    break;
-                }
-            }
-
-            // Solo agrega el producto si no existe
-            if (!$existe) {
-                $_SESSION['partidas' . $_GET['rand']][] = [
-                    'iddb' => 0,
-                    'idproducto' => $idproducto,
-                    'existencia' => 0,
-                    'ubicacion' => '',
-                    'estado' => 'Activo',
-                ];
-            }
-        }
-        if ($existian) {
-            $this->alerta("Precaución", "Algunos elementos que se intentaron agregar ya existian y no fueron agregados", "warning");
-        }
-        $this->tablaProductos();
-        return $this->response;
-    }
-
-
-    function tablaProductos()
-    {
-        $productos = $_SESSION['partidas' . $_GET['rand']] ?? [];
-        global $database;
-
-        // Verificar si hay productos para mostrar
-        if (empty($productos)) {
-            $html = '<p class="text-muted text-center">No hay productos registrados.</p>';
-        } else {
-            // Obtener IDs de los productos del array de sesión
-            $idproductos = array_column($productos, 'idproducto');
-
-            // Realizar la consulta con LEFT JOIN
-            $infoProductos = $database->select("productos(p)", [
-                "[>]categorias(c)" => ["p.idcategoria" => "id"],
-                "[>]subcategorias(sc)" => ["p.idsubcategoria" => "id"],
-                "[>]subsubcategorias(ssc)" => ["p.idsubsubcategoria" => "id"]
-            ], [
-                "p.codigo_barras",
-                "p.nombre",
-                "p.marca",
-                "p.precio",
-                "p.estado",
-                "c.nombre(categoria)",
-                "sc.nombre(subcategoria)",
-                "ssc.nombre(subsubcategoria)",
-                "p.id(idproducto)"
-            ], [
-                "p.id" => $idproductos
-            ]);
-
-            // Construir la tabla
-            $html = '<div class="table-responsive">'; // Contenedor responsivo
-            $html .= '<table class="table table-borderless table-striped table-hover">';
-            $html .= '<thead class="text-bg-secondary">';
-            $html .= '<tr>';
-            $html .= '<th>Código de barras</th>';
-            $html .= '<th>Nombre</th>';
-            $html .= '<th>Marca</th>';
-            $html .= '<th>Categoría</th>';
-            $html .= '<th>Subcategoría</th>';
-            $html .= '<th>Subsubcategoría</th>';
-            $html .= '<th>Precio</th>';
-            $html .= '<th>Estado</th>';
-            $html .= '<th>Existencia</th>';
-            $html .= '<th>Ubicación</th>';
-            $html .= '<th>Acciones</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-
-            foreach ($productos as $index => $producto) {
-                // Buscar los datos del producto en el resultado de la consulta
-                $infoProducto = array_filter($infoProductos, function ($p) use ($producto) {
-                    return $p['idproducto'] == $producto['idproducto'];
-                });
-                $infoProducto = reset($infoProducto); // Obtener el primer resultado coincidente
-
-                $html .= '<tr>';
-                $html .= '<td>' . htmlspecialchars($infoProducto['codigo_barras']) . '</td>';
-                $html .= '<td>' . htmlspecialchars($infoProducto['nombre']) . '</td>';
-                $html .= '<td>' . htmlspecialchars($infoProducto['marca']) . '</td>';
-                $html .= '<td>' . htmlspecialchars($infoProducto['categoria'] ?? 'N/A') . '</td>';
-                $html .= '<td>' . htmlspecialchars($infoProducto['subcategoria'] ?? 'N/A') . '</td>';
-                $html .= '<td>' . htmlspecialchars($infoProducto['subsubcategoria'] ?? 'N/A') . '</td>';
-                $html .= '<td>' . htmlspecialchars(number_format($infoProducto['precio'], 2)) . '</td>';
-                $html .= '<td>' . htmlspecialchars($producto['estado']) . '</td>';
-                $html .= '<td>' . htmlspecialchars($producto['existencia']) . '</td>';
-                $html .= '<td>';
-                $html .= '<input type="text" class="form-control form-control-sm" value="' . $producto['ubicacion'] . '" ';
-                $html .= 'onchange="JaxonalmacenAlmacenes.actualizarUbicacion(this.value, ' . $index . ');" />';
-                $html .= '</td>';
-                $html .= '<td>';
-                // Botón según el estado del producto
-                if ($producto['estado'] == 'Activo') {
-                    // Mostrar X si está Activo
-                    $html .= '<button type="button" class="btn btn-sm btn-danger" onclick="JaxonalmacenAlmacenes.desactivarProducto(' . $index . ');">';
-                    $html .= '<i class="bi bi-trash"></i>'; // X de eliminación
-                    $html .= '</button>';
-                } elseif ($producto['estado'] == 'Inactivo') {
-                    // Mostrar palomita si está Inactivo
-                    $html .= '<button type="button" class="btn btn-sm btn-success" onclick="JaxonalmacenAlmacenes.activarProducto(' . $index . ');">';
-                    $html .= '<i class="bi bi-check"></i>'; // Palomita
-                    $html .= '</button>';
-                }
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-
-            $html .= '</tbody>';
-            $html .= '</table>';
-            $html .= '</div>'; // Cierre del contenedor responsivo
-        }
-
-        // Asignar el HTML generado al contenedor en el card-body
-        $this->response->assign("tablaProductos", "innerHTML", $html);
-        return $this->response;
-    }
-
-    function activarProducto($indice)
-    {
-        $_SESSION['partidas' . $_GET['rand']][$indice]["estado"] = "Activo";
-        $this->tablaProductos();
-        return $this->response;
-    }
-
-    function desactivarProducto($indice)
-    {
-        $_SESSION['partidas' . $_GET['rand']][$indice]["estado"] = "Inactivo";
-        $this->tablaProductos();
-        return $this->response;
-    }
-
-    function actualizarUbicacion($valor, $indice)
-    {
-        $_SESSION['partidas' . $_GET['rand']][$indice]["ubicacion"] = $valor;
-        $this->tablaProductos();
-        return $this->response;
-    }
-
-    function alertaCambioPrincipal($valor)
-    {
-        if ($valor == "Sí") {
-            $this->alerta("Alerta importante", "Si deja este almacén como principal, el almacén principal actual perdera este atributo", "warning");
-        }
+        $this->response->script('
+                $("#idc_estado").val("' . $registroEstado['id'] . '").trigger("change");
+                $("#idc_municipio").val("' . $registroMunicipio['id'] . '").trigger("change");
+            ');
         return $this->response;
     }
 
@@ -283,18 +68,44 @@ class almacenAlmacenes extends alkesGlobal
     {
         // Definir las reglas de validación
         $reglas = [
-            'nombre' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
-            'direccion' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
-            'capacidad' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
-            'estado' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
-            'identidad' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
-            'idusuario' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
-            'principal' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
-            'consigna' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
+            'clave' =>            ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'nombre_comercial' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
+            'nivel' =>            ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Sucursal', 'Empresa']],
+            'idvendedor' =>       ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'correo' =>           ['obligatorio' => false, 'tipo' => 'email', 'max' => 254],
+            'web' =>              ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'telefono' =>         ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'telefono_fijo' =>    ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'fax' =>              ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'banco' =>            ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'cuenta' =>           ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'descuento' =>        ['obligatorio' => true, 'tipo' => 'float', 'min' => 0.0000, 'max_val' => 99999999.9999],
+            'status' =>           ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Activo', 'Inactivo', 'Suspendido']],
+            'tipo' =>             ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Cliente', 'Proveedor', 'Ambos']],
+
+            'razon_social' =>          ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
+            'rfc' =>                   ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'pattern' => '/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{2}[A0-9]$/'],
+            'idc_regimen' =>           ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'idc_moneda' =>            ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'idc_metodopago' =>        ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'idc_usocfdi' =>           ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'idc_formapago' =>         ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'calle' =>                 ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'numero_exterior' =>       ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'numero_interior' =>       ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'codigo_postal' =>         ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 10000, 'max_val' => 99999],
+            'idc_estado' =>            ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
+            'idc_municipio' =>         ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
+            'idc_colonia' =>           ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
+            'credito_monto_cliente' => ['obligatorio' => true, 'tipo' => 'float', 'min_val' => 0.0000, 'max_val' => 99999999.9999],
+            'credito_dias_cliente' =>  ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 0],
+            'notas' =>                 ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
         ];
 
         // Validar el formulario
         $resultadoValidacion = validar_global($form, $reglas);
+
+        // Si hay un error en la validación
         if ($resultadoValidacion !== true) {
             $error = $resultadoValidacion['error'];
             $campo = $resultadoValidacion['campo'];
@@ -308,114 +119,26 @@ class almacenAlmacenes extends alkesGlobal
             );
             // Retornar la respuesta Jaxon
             return $this->response;
-        } else {
-            if ($form['principal'] == 'Sí') {
-                $rand = $_GET['rand']; // Obtener el valor dinámico
-                $this->alertaConfirmacion("Cambiar almacén principal", "¿Estas seguro que deseas cambiar el actual almacén principal por este?", "warning", "JaxonalmacenAlmacenes.guardar(jaxon.getFormValues(\"formulario{$rand}\"));");
-            } else {
-                $this->guardar($form);
-            }
         }
-        return $this->response;
-    }
-
-    function guardar($form)
-    {
-        global $database;
-        $data = [
-            'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
-            'identidad' => isset($form['identidad']) ? $form['identidad'] : 0,
-            'idusuario_encargado' => isset($form['idusuario']) ? $form['idusuario'] : 0,
-            'nombre' => isset($form['nombre']) ? $form['nombre'] : '',
-            'direccion' => isset($form['direccion']) ? $form['direccion'] : '',
-            'capacidad_m3' => isset($form['capacidad']) ? $form['capacidad'] : 0,
-            'estado' => isset($form['estado']) ? $form['estado'] : 'Activo',
-            'principal' => isset($form['principal']) ? $form['principal'] : "No",
-            'consigna' => isset($form['consigna']) ? $form['consigna'] : "No"
-
-        ];
-
-        // Si el 'id' de la URL es 0, realizamos una inserción
-        if ($_GET['id'] == 0) {
-            // Realizamos la inserción
-            $database->insert('almacenes', $data);
-            $insert_id = $database->id();
-            // Llamamos a la función guardarPartidas y pasamos el id del nuevo Almacén
-            $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo Almacén
-            $this->alerta(
-                "Exito",
-                "Almacén registrado correctamente.",
-                "success",
-                null,
-                true,
-                false,
-                "index.php"
-            );
-        }
-        // Si el 'id' no es 0, actualizamos el registro correspondiente
-        else {
-            // Realizamos la actualización
-            $database->update('almacenes', $data, ['id' => $_GET['id']]);
-            // Llamamos a la función guardarPartidas y pasamos el id del Almacén
-            $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del Almacén actualizado
-            $this->alerta(
-                "Exito",
-                "Almacén actualizado correctamente.",
-                "success",
-                null,
-                true,
-                false,
-                "index.php"
-            );
-        }
-        return $this->response;
-    }
-
-    function guardarPartidas($idalmacen)
-    {
-        global $database; // instancia de Medoo
-
-        // Verificamos si la sesión contiene las partidas
-        if (isset($_SESSION['partidas'.$_GET['rand']]) && is_array($_SESSION['partidas'.$_GET['rand']])) {
-            // Iteramos sobre las partidas
-            foreach ($_SESSION['partidas'.$_GET['rand']] as $partida) {
-                // Si la partida tiene iddb igual a 0, significa que es un nuevo registro
-                if ($partida['iddb'] == 0) {
-                    // Verificamos si el impuesto está marcado como Inactivo
-                    if ($partida['estado'] == 'Inactivo') {
-                        // Si el impuesto está Inactivo, no insertamos la partida
-                        continue;
-                    }
-                    // Si el impuesto no está Inactivo, insertamos la nueva partida
-                    $data = [
-                        'idalmacen' => $idalmacen, // ID del almacén desde la URL
-                        'idproducto' => $partida['idproducto'],
-                        'existencia' => $partida['existencia'],
-                        'estado' => $partida['estado'],
-                        'ubicacion' => $partida['ubicacion'],
-                    ];
-                    // Realizamos la inserción
-                    $database->insert('almacenes_productos', $data);
-                } else {
-                    // Si iddb no es 0, significa que la partida ya existe, por lo que actualizamos
-                    $data = [
-                        'estado' => $partida['estado'],
-                        'ubicacion' => $partida['ubicacion'],
-                    ];
-                    // Realizamos la actualización
-                    $database->update('almacenes_productos', $data, ['id' => $partida['iddb']]);
-                }
-            }
+        else
+        {
+            $this->guardar($form);
         }
         // Retornar la respuesta Jaxon
         return $this->response;
     }
 
+    function guardar($form)
+    {
+        
+        // Retornar la respuesta Jaxon
+        return $this->response;
+    }
 }
 
 
 $jaxon = jaxon();
-$jaxon->register(Jaxon::CALLABLE_CLASS, almacenAlmacenes::class);
+$jaxon->register(Jaxon::CALLABLE_CLASS, almacenClientes::class);
 if ($jaxon->canProcessRequest()) {
     $jaxon->processRequest();
 }

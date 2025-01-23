@@ -34,7 +34,7 @@ class almacenAlmacenes extends alkesGlobal
                 
                 // Actualizar select2
                 $this->response->script('
-                    $("#identidad").val("' . $almacen['identidad'] . '").trigger("change");
+                    $("#idsucursal").val("' . $almacen['idsucursal'] . '").trigger("change");
                     $("#idusuario").val("' . $almacen['idusuario_encargado'] . '").trigger("change");
                 ');
 
@@ -287,7 +287,7 @@ class almacenAlmacenes extends alkesGlobal
             'direccion' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
             'capacidad' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
             'estado' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
-            'identidad' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'idsucursal' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
             'idusuario' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
             'principal' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
             'consigna' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 200],
@@ -324,7 +324,7 @@ class almacenAlmacenes extends alkesGlobal
         global $database;
         $data = [
             'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
-            'identidad' => isset($form['identidad']) ? $form['identidad'] : 0,
+            'idsucursal' => isset($form['idsucursal']) ? $form['idsucursal'] : 0,
             'idusuario_encargado' => isset($form['idusuario']) ? $form['idusuario'] : 0,
             'nombre' => isset($form['nombre']) ? $form['nombre'] : '',
             'direccion' => isset($form['direccion']) ? $form['direccion'] : '',

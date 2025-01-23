@@ -8,11 +8,11 @@ if (!isset($_SESSION['usuario'])) {
 
     // Realizamos la consulta unificada
     $usuario = $database->select("usuarios", [
-      "[>]entidades" => ["identidad" => "id"], // Unión con entidades
-      "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+      "[>]sucursales" => ["idsucursal" => "id"], // Unión con sucursales
+      "[>]empresas" => ["sucursales.idempresa" => "id"] // Unión con empresas
     ], [
       "usuarios.id(idusuario)",
-      "usuarios.identidad",
+      "usuarios.idsucursal",
       "empresas.id(empresa_id)"
     ], [
       "usuarios.token_recuerdame" => $token
@@ -21,7 +21,7 @@ if (!isset($_SESSION['usuario'])) {
     if (!empty($usuario)) {
       // Asignamos las variables de sesión
       $_SESSION['idusuario'] = $usuario[0]['idusuario'];
-      $_SESSION['identidad'] = $usuario[0]['identidad'];
+      $_SESSION['idsucursal'] = $usuario[0]['idsucursal'];
       $_SESSION['idempresa'] = $usuario[0]['empresa_id'];
 
       // Redirigir al inicio

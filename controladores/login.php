@@ -67,7 +67,7 @@ function login($form)
     global $database;
     $usuario = $database->select("usuarios", [
         "id",
-        "identidad",
+        "idsucursal",
         "intentos",
         "ultimo_intento",
         "estado"
@@ -109,18 +109,18 @@ function login($form)
         return $response;
     }
 
-    // Validar credenciales con datos adicionales de entidad y empresa
+    // Validar credenciales con datos adicionales de sucursal y empresa
     $usuario_valido = $database->select("usuarios", 
     [
-        "[>]entidades" => ["identidad" => "id"], // Unión con entidades
-        "[>]empresas" => ["entidades.idempresa" => "id"] // Unión con empresas
+        "[>]sucursales" => ["idsucursal" => "id"], // Unión con sucursales
+        "[>]empresas" => ["sucursales.idempresa" => "id"] // Unión con empresas
     ],
     [
         "empresas.id(empresa_id)",
         "empresas.estado(empresa_estado)",
-        "entidades.estado(entidad_estado)",
+        "sucursales.estado(sucursal_estado)",
         "usuarios.id(usuario_id)",
-        "usuarios.identidad",
+        "usuarios.idsucursal",
         "usuarios.estado(usuario_estado)"
     ], 
     [
@@ -132,9 +132,9 @@ function login($form)
     ]);
 
     if (!empty($usuario_valido)) {
-        // Verificar si la entidad o la empresa están inactivas
-        if ($usuario_valido[0]['entidad_estado'] === "Inactivo") {
-            $response->appendResponse(alerta("error", "Entidad inactiva", "La entidad asociada a esta cuenta está inactiva. Contacte al administrador."));
+        // Verificar si la sucursal o la empresa están inactivas
+        if ($usuario_valido[0]['sucursal_estado'] === "Inactivo") {
+            $response->appendResponse(alerta("error", "Sucursal inactiva", "La sucursal asociada a esta cuenta está inactiva. Contacte al administrador."));
             return $response;
         }
 
@@ -146,7 +146,7 @@ function login($form)
         // Credenciales válidas: reiniciar intentos y guardar sesión
         session_start();
         $_SESSION['idusuario'] = $usuario_valido[0]['usuario_id'];
-        $_SESSION['identidad'] = $usuario_valido[0]['identidad'];
+        $_SESSION['idsucursal'] = $usuario_valido[0]['idsucursal'];
         $_SESSION['idempresa'] = $usuario_valido[0]['empresa_id'];
         $database->update("usuarios", [
             "intentos" => 0,

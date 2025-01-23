@@ -36,7 +36,7 @@ function validarSesion()
             $token = $_COOKIE['recuerdame_alkes'];
             $usuario = $database->select("usuarios", [
                 "id",
-                "identidad",
+                "idsucursal",
                 "estado"
             ], [
                 "token_recuerdame" => $token
@@ -50,29 +50,29 @@ function validarSesion()
                     cerrarSesion();
                 }
 
-                // Obtener información adicional de la entidad y la empresa
-                $entidad = $database->select("entidades", [
+                // Obtener información adicional de la sucursal y la empresa
+                $sucursal = $database->select("sucursales", [
                     "[>]empresas" => ["idempresa" => "id"]
                 ], [
-                    "entidades.estado(entidad_estado)",
+                    "sucursales.estado(sucursal_estado)",
                     "empresas.id(empresa_id)",
                     "empresas.estado(empresa_estado)"
                 ], [
-                    "entidades.id" => $usuario[0]['identidad']
+                    "sucursales.id" => $usuario[0]['idsucursal']
                 ]);
 
-                if (!empty($entidad)) {
-                    // Verificar si la entidad o empresa están inactivas
-                    if ($entidad[0]['entidad_estado'] == "Inactivo" || $entidad[0]['empresa_estado'] == "Inactivo") {
+                if (!empty($sucursal)) {
+                    // Verificar si la sucursal o empresa están inactivas
+                    if ($sucursal[0]['sucursal_estado'] == "Inactivo" || $sucursal[0]['empresa_estado'] == "Inactivo") {
                         cerrarSesion();
                     }
 
                     // Actualizar la sesión con idempresa
                     $_SESSION['idusuario'] = $usuario[0]['id'];
-                    $_SESSION['identidad'] = $usuario[0]['identidad'];
-                    $_SESSION['idempresa'] = $entidad[0]['empresa_id']; // Actualizamos idempresa aquí
+                    $_SESSION['idsucursal'] = $usuario[0]['idsucursal'];
+                    $_SESSION['idempresa'] = $sucursal[0]['empresa_id']; // Actualizamos idempresa aquí
                 } else {
-                    // Si no hay entidad válida, cerrar sesión
+                    // Si no hay sucursal válida, cerrar sesión
                     cerrarSesion();
                 }
             } else {
@@ -102,25 +102,25 @@ function validarSesion()
             cerrarSesion();
         }
 
-        // Verificar la entidad y la empresa de la sesión activa
-        $entidad = $database->select("entidades", [
+        // Verificar la sucursal y la empresa de la sesión activa
+        $sucursal = $database->select("sucursales", [
             "[>]empresas" => ["idempresa" => "id"]
         ], [
-            "entidades.estado(entidad_estado)",
+            "sucursales.estado(sucursal_estado)",
             "empresas.id(empresa_id)",
             "empresas.estado(empresa_estado)"
         ], [
-            "entidades.id" => $_SESSION['identidad']
+            "sucursales.id" => $_SESSION['idsucursal']
         ]);
 
-        if (!empty($entidad)) {
-            // Verificar si la entidad o empresa están inactivas
-            if ($entidad[0]['entidad_estado'] == "Inactivo" || $entidad[0]['empresa_estado'] == "Inactivo") {
+        if (!empty($sucursal)) {
+            // Verificar si la sucursal o empresa están inactivas
+            if ($sucursal[0]['sucursal_estado'] == "Inactivo" || $sucursal[0]['empresa_estado'] == "Inactivo") {
                 cerrarSesion();
             }
 
             // Asegurarnos de que idempresa esté en la sesión
-            $_SESSION['idempresa'] = $entidad[0]['empresa_id'];
+            $_SESSION['idempresa'] = $sucursal[0]['empresa_id'];
         } else {
             cerrarSesion();
         }
@@ -412,13 +412,13 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
 
     // Consulta simplificada para obtener el nombre comercial
     $resultado = $database->select(
-        "entidades", // Tabla principal
+        "sucursales", // Tabla principal
         [
             "[>]empresas" => ["idempresa" => "id"] // Unión con empresas
         ],
         "empresas.nombre_comercial", // Columna seleccionada
         [
-            "entidades.id" => $_SESSION['identidad'] // Condición WHERE
+            "sucursales.id" => $_SESSION['idsucursal'] // Condición WHERE
         ]
     );
 
@@ -946,11 +946,11 @@ function getCfdiImpuesto()
 }
 
 
-function getEntidades()
+function getsucursales()
 {
     global $database;
     $registros = $database->select(
-        "entidades",
+        "sucursales",
         ["id", "nombre", "descripcion"],
         [
             "idempresa" => $_SESSION['idempresa'],
@@ -980,20 +980,20 @@ function getUsuarios()
     $registros = $database->select(
         "usuarios",
         [
-            "[>]entidades" => ["identidad" => "id"], // Unión con entidades
+            "[>]sucursales" => ["idsucursal" => "id"], // Unión con sucursales
         ],
         [
             "usuarios.id", // Alias para usuarios.id
             "usuarios.estado", // Alias para usuarios.estado
             "usuarios.nombre(usuario_nombre)", // Alias para usuarios.nombre
-            "entidades.idempresa", // Alias para entidades.idempresa
-            "entidades.nombre(entidad_nombre)", // Alias para entidades.nombre
-            "usuarios.identidad"
+            "sucursales.idempresa", // Alias para sucursales.idempresa
+            "sucursales.nombre(sucursal_nombre)", // Alias para sucursales.nombre
+            "usuarios.idsucursal"
         ],
         [
-            "entidades.idempresa" => $_SESSION['idempresa'],
+            "sucursales.idempresa" => $_SESSION['idempresa'],
             "usuarios.estado" => "Activo",
-            "usuarios.identidad" => $_SESSION['identidad']
+            "usuarios.idsucursal" => $_SESSION['idsucursal']
         ],
         [
             "ORDER" => ["usuarios.nombre" => "ASC"] // Asegúrate de especificar el nombre con el alias o prefijo correcto
@@ -1004,7 +1004,7 @@ function getUsuarios()
     if (!empty($registros)) {
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['usuario_nombre']) . " - " . htmlspecialchars($registro['entidad_nombre']) . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['usuario_nombre']) . " - " . htmlspecialchars($registro['sucursal_nombre']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -1250,6 +1250,17 @@ function validarEmpresaPorRegistro($tabla, $registro)
 
 function validar_global($form, $reglas)
 {
+    // Mapeo de nombres técnicos a nombres descriptivos
+    $tiposDescriptivos = [
+        'string' => 'texto',
+        'int' => 'número entero',
+        'float' => 'número decimal',
+        'email' => 'correo electrónico',
+        'url' => 'URL',
+        'boolean' => 'booleano (verdadero o falso)',
+        'date' => 'fecha',
+    ];
+
     foreach ($form as $campo => $valor) {
         // Omitir campos que contienen "btn"
         if (strpos($campo, 'btn') !== false)
@@ -1262,11 +1273,11 @@ function validar_global($form, $reglas)
         $regla = $reglas[$campo];
 
         // Omitir campos opcionales vacíos
-        if (!$regla['obligatorio'] && empty($valor))
+        if (!$regla['obligatorio'] && ($valor === '' || $valor === null))
             continue;
 
         // Validar campo obligatorio
-        if ($regla['obligatorio'] && empty($valor)) {
+        if ($regla['obligatorio'] && ($valor === '' || $valor === null)) {
             return ["campo" => $campo, "error" => "El campo '{$campo}' es obligatorio y no ha sido llenado."];
         }
 
@@ -1294,7 +1305,8 @@ function validar_global($form, $reglas)
         ];
 
         if (isset($regla['tipo']) && isset($tipos[$regla['tipo']]) && !$tipos[$regla['tipo']]($valor)) {
-            return ["campo" => $campo, "error" => "El campo '{$campo}' debe ser un(a) {$regla['tipo']} válido(a)."];
+            $tipoDescriptivo = $tiposDescriptivos[$regla['tipo']] ?? $regla['tipo'];
+            return ["campo" => $campo, "error" => "El campo '{$campo}' debe ser un(a) {$tipoDescriptivo} válido(a)."];
         }
 
         // Validar longitud mínima
@@ -1372,7 +1384,8 @@ function validar_global($form, $reglas)
 
 
 
-function verificaRegistroRepetido($tabla, $columna, $dato, $idb = 0)
+
+function verificaRegistroRepetido($nivel, $tabla, $columna, $dato, $idb = 0)
 {
     $bandera = false;
     global $database;
