@@ -1217,20 +1217,6 @@ function getCfdiColonia($codigoPostal)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function validarEmpresaPorRegistro($tabla, $registro)
 {
     global $database; // Variable global de medoo
@@ -1348,55 +1334,90 @@ function validar_global($form, $reglas)
     return true; // Validación exitosa
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function verificaRegistroRepetido($nivel, $tabla, $columna, $dato, $idb = 0)
 {
     $bandera = false;
     global $database;
-    $registros = $database->select($tabla, "*", [
+
+    // Definir las condiciones básicas de la consulta
+    $condiciones = [
         $columna => $dato,
         "id[!]" => $idb // Excluye el registro con este id
-    ]);
-    // Verificar si el usuario no está logueado
+    ];
+
+    // Agregar condición según el nivel
+    if ($nivel == "sucursal") {
+        $condiciones["idsucursal"] = $_SESSION["idsucursal"]; // O ajustar la lógica según el origen de `idsucursal`
+    } elseif ($nivel == "empresa") {
+        $condiciones["idempresa"] = $_SESSION["idempresa"]; // O ajustar la lógica según el origen de `idempresa`
+    }
+
+    // Consultar la base de datos con las condiciones
+    $registros = $database->select($tabla, "*", $condiciones);
+
+    // Verificar si existen registros
     if (count($registros) > 0) {
         $bandera = true;
     }
+
     return $bandera;
 }
+
+
+function getConsecutivo($pertenece)
+{
+    global $database; // Instancia global de Medoo
+    
+    // Consultar el consecutivo correspondiente a la pertenencia, sucursal y empresa
+    $info_siguiente = $database->select("consecutivos", [
+        "id",
+        "prefijo",
+        "consecutivo",
+        "ceros"
+    ], [
+        "pertenece" => $pertenece,
+        "idempresa" => $_SESSION['idempresa'],
+        "idsucursal" => $_SESSION['idsucursal']
+    ]);
+
+    // Obtener los datos del primer resultado
+    $id = $info_siguiente[0]['id'];
+    $prefijo = $info_siguiente[0]['prefijo'];
+    $consecutivo = $info_siguiente[0]['consecutivo'];
+    $ceros = $info_siguiente[0]['ceros'];
+
+    // Generar el consecutivo con ceros a la izquierda
+    $consecutivoFormado = str_pad($consecutivo, $ceros, "0", STR_PAD_LEFT);
+    $consecutivoFormado = $prefijo . $consecutivoFormado;
+
+    // Incrementar el consecutivo en la base de datos
+    $database->update("consecutivos", [
+        "consecutivo[+]" => 1
+    ], [
+        "id" => $id,
+        "idempresa" => $_SESSION['idempresa'],
+        "idsucursal" => $_SESSION['idsucursal']
+
+    ]);
+
+    // Retornar el folio generado
+    return $consecutivoFormado;
+}
+
+function getParametro($parametro) {
+    // Acceder a la variable global de la base de datos
+    global $database;
+
+    // Consultar el valor del parámetro en la tabla "parametros"
+    $resultado = $database->get('parametros', $parametro, [
+        'idempresa' => $_SESSION['idempresa']
+    ]);
+
+    return $resultado;
+}
+
+
+
+
+
 ?>

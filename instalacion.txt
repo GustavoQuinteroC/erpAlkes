@@ -3,11 +3,10 @@ crear roles:
     Administración
 
 
+crear consecutivos
 
 
 
 
 
 
-cosas por hacer:
-en los roles poner si tiene o no permiso a los dashboards

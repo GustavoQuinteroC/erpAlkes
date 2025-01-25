@@ -67,8 +67,8 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-key"></i></span>
-                                                                <input type="text" class="form-control" id="clave"
-                                                                    name="clave" placeholder="Clave">
+                                                                <input type="text" class="form-control" id="clave" readOnly
+                                                                    name="clave" placeholder="Clave (esta sera autogenerada)">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -218,13 +218,13 @@ if (file_exists($pathControlador)) {
                                                         </div>
                                                     </div>
                                                     <div class="form-group row mb-3">
-                                                        <label for="status"
+                                                        <label for="estado"
                                                             class="col-sm-4 col-form-label text-start">Estado</label>
                                                         <div class="col-sm-8">
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-info-circle"></i></span>
-                                                                <select id="status" name="status" class="form-select">
+                                                                <select id="estado" name="estado" class="form-select">
                                                                     <option value="Activo">Activo</option>
                                                                     <option value="Inactivo">Inactivo</option>
                                                                     <option value="Suspendido">Suspendido</option>
@@ -241,8 +241,7 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-people"></i></span>
                                                                 <select id="tipo" name="tipo" class="form-select">
                                                                     <option value="Cliente">Cliente</option>
-                                                                    <option value="Proveedor">Proveedor</option>
-                                                                    <option value="Ambos">Ambos</option>
+                                                                    <option value="Ambos">Proveedor y cliente (ambos)</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -253,7 +252,7 @@ if (file_exists($pathControlador)) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row" id="datosFiscales" class="d-block">
                                 <div class="col-12">
                                     <div class="card mb-4">
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
@@ -483,7 +482,6 @@ if (file_exists($pathControlador)) {
                                     </div>
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col-12">
                                     <div class="card mb-4">
