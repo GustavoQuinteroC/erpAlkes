@@ -6,7 +6,7 @@ use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
 
-class almacenClientes extends alkesGlobal
+class ventasClientes extends alkesGlobal
 {
     function inializarFormulario()
     {
@@ -14,7 +14,7 @@ class almacenClientes extends alkesGlobal
         if (!getParametro("facturacion")) {
             $this->response->script("document.getElementById('datosFiscales').classList.add('d-none');");
             $this->response->script("document.getElementById('datosFiscales').classList.remove('d-block');");
-        } 
+        }
         if ($_GET['id'] != 0) {
             if (!validarEmpresaPorRegistro("socios", $_GET['id'])) {
                 $this->alerta(
@@ -52,10 +52,10 @@ class almacenClientes extends alkesGlobal
                 $this->response->assign("credito_monto_cliente", "value", $socio['credito_monto_cliente']);
                 $this->response->assign("credito_dias_cliente", "value", $socio['credito_dias_cliente']);
                 $this->response->assign("notas", "value", $socio['notas']);
-                $this->response->assign("idc_usocfdi","innerHTML",getCfdiUsoCfdi($socio['idc_regimen']));
-                $this->response->assign("idc_estado","innerHTML",getCfdiEstado());
-                $this->response->assign("idc_municipio","innerHTML",getCfdiMunicipio($socio['idc_estado']));
-                $this->response->assign("idc_colonia","innerHTML",getCfdiColonia($socio['codigo_postal']));
+                $this->response->assign("idc_usocfdi", "innerHTML", getCfdiUsoCfdi($socio['idc_regimen']));
+                $this->response->assign("idc_estado", "innerHTML", getCfdiEstado());
+                $this->response->assign("idc_municipio", "innerHTML", getCfdiMunicipio($socio['idc_estado']));
+                $this->response->assign("idc_colonia", "innerHTML", getCfdiColonia($socio['codigo_postal']));
                 // Actualizar select2 sin disparar el evento onchange
                 $this->response->script('
                     // Desactivar temporalmente el evento onchange para los selects que tienen onchange y necesiten un change (select2)
@@ -73,14 +73,14 @@ class almacenClientes extends alkesGlobal
 
                     // Restaurar el evento onchange original para los selects que tienen onchange y necesiten un change (select2)
                     document.getElementById("idc_regimen").onchange = function() {
-                        JaxonalmacenClientes.cambiarUsoCfdi(this.value);
+                        JaxonventasClientes.cambiarUsoCfdi(this.value);
                     };
                 ');
             }
         }
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenClientes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+            <button class='btn btn-primary btn-sm' id='btnguardar' name='btnguardar' type='button' onclick='JaxonventasClientes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
                 <i class='bi bi-save'></i> Guardar
             </button>
         ");
@@ -89,34 +89,32 @@ class almacenClientes extends alkesGlobal
 
     function cambiarUsoCfdi($idregimen)
     {
-        $this->response->assign("idc_usocfdi","innerHTML",getCfdiUsoCfdi($idregimen));
+        $this->response->assign("idc_usocfdi", "innerHTML", getCfdiUsoCfdi($idregimen));
         return $this->response;
     }
 
     function ajustesCodigoPostal($codigoPostal)
     {
         global $database;
-        $nuevo=($_GET['id']==0)?true:false;
+        $nuevo = ($_GET['id'] == 0) ? true : false;
         $registroCodigoPostal = $database->get("cfdi_codigopostal", "*", ["c_codigopostal" => $codigoPostal]);
         $registroEstado = $database->get("cfdi_estado", "*", ["c_estado" => $registroCodigoPostal['c_estado']]);
         $registroMunicipio = $database->get("cfdi_municipio", "*", ["c_estado" => $registroCodigoPostal['c_estado'], "c_municipio" => $registroCodigoPostal['c_municipio']]);
-        
-        
-        $this->response->assign("idc_estado","innerHTML",getCfdiEstado());
-        $this->response->assign("idc_municipio","innerHTML",getCfdiMunicipio($registroEstado['id']));
-        $this->response->assign("idc_colonia","innerHTML",getCfdiColonia($codigoPostal));
 
-        
-        if($nuevo)
-        {
+
+        $this->response->assign("idc_estado", "innerHTML", getCfdiEstado());
+        $this->response->assign("idc_municipio", "innerHTML", getCfdiMunicipio($registroEstado['id']));
+        $this->response->assign("idc_colonia", "innerHTML", getCfdiColonia($codigoPostal));
+
+
+        if ($nuevo) {
             $this->response->script('
                 $("#idc_estado").val("' . $registroEstado['id'] . '").trigger("change");
                 $("#idc_municipio").val("' . $registroMunicipio['id'] . '").trigger("change");
             ');
         }
         //en caso de que el registro no sea nuevo, entonces llenar con los datos ya almacenados
-        else
-        {
+        else {
             $registroSocio = $database->get("socios", "*", ["id" => $_GET['id']]);
             $this->response->script('
                 $("#idc_estado").val("' . $registroSocio['idc_estado'] . '").trigger("change");
@@ -129,40 +127,40 @@ class almacenClientes extends alkesGlobal
 
     function validar($form)
     {
-        $facturacion=getParametro("facturacion");//devuelve 0 o 1 (true o false) para determinar si la empresa hace facturacion o no
+        $facturacion = getParametro("facturacion");//devuelve 0 o 1 (true o false) para determinar si la empresa hace facturacion o no
         // Definir las reglas de validación
         $reglas = [
             'nombre_comercial' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
-            'nivel' =>            ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Sucursal', 'Empresa']],
-            'idvendedor' =>       ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
-            'correo' =>           ['obligatorio' => false, 'tipo' => 'email', 'max' => 254],
-            'web' =>              ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'telefono' =>         ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'telefono_fijo' =>    ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'fax' =>              ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'banco' =>            ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'cuenta' =>           ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'descuento' =>        ['obligatorio' => true, 'tipo' => 'float', 'min' => 0.0000, 'max_val' => 99999999.9999],
-            'status' =>           ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Activo', 'Inactivo', 'Suspendido']],
-            'tipo' =>             ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Cliente', 'Proveedor', 'Ambos']],
+            'nivel' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Sucursal', 'Empresa']],
+            'idvendedor' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
+            'correo' => ['obligatorio' => false, 'tipo' => 'email', 'max' => 254],
+            'web' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'telefono' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'telefono_fijo' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'fax' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'banco' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'cuenta' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'descuento' => ['obligatorio' => true, 'tipo' => 'float', 'min' => 0.0000, 'max_val' => 99999999.9999],
+            'estado' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Activo', 'Inactivo']],
+            'tipo' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'in' => ['Cliente', 'Proveedor', 'Ambos']],
 
-            'razon_social' =>          ['obligatorio' => $facturacion, 'tipo' => 'string', 'min' => 1, 'max' => 254],
-            'rfc' =>                   ['obligatorio' => $facturacion, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'pattern' => '/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{2}[A0-9]$/'],
-            'idc_regimen' =>           ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
-            'idc_moneda' =>            ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
-            'idc_metodopago' =>        ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
-            'idc_usocfdi' =>           ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
-            'idc_formapago' =>         ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
-            'calle' =>                 ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'numero_exterior' =>       ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'numero_interior' =>       ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
-            'codigo_postal' =>         ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 10000, 'max_val' => 99999],
-            'idc_estado' =>            ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
-            'idc_municipio' =>         ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
-            'idc_colonia' =>           ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
+            'razon_social' => ['obligatorio' => $facturacion, 'tipo' => 'string', 'min' => 1, 'max' => 254],
+            'rfc' => ['obligatorio' => $facturacion, 'tipo' => 'string', 'min' => 1, 'max' => 254, 'pattern' => '/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{2}[A0-9]$/'],
+            'idc_regimen' => ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
+            'idc_moneda' => ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
+            'idc_metodopago' => ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
+            'idc_usocfdi' => ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
+            'idc_formapago' => ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 1],
+            'calle' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'numero_exterior' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'numero_interior' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'codigo_postal' => ['obligatorio' => $facturacion, 'tipo' => 'int', 'min_val' => 10000, 'max_val' => 99999],
+            'idc_estado' => ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
+            'idc_municipio' => ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
+            'idc_colonia' => ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
             'credito_monto_cliente' => ['obligatorio' => true, 'tipo' => 'float', 'min_val' => 0.0000, 'max_val' => 99999999.9999],
-            'credito_dias_cliente' =>  ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 0],
-            'notas' =>                 ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'credito_dias_cliente' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 0],
+            'notas' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
         ];
 
         // Validar el formulario
@@ -182,17 +180,13 @@ class almacenClientes extends alkesGlobal
             );
             // Retornar la respuesta Jaxon
             return $this->response;
-        }
-        else
-        {
-            $resultadoValidacionRepetidoRfc=verificaRegistroRepetido("empresa", "socios", "rfc", $form['rfc'],$_GET['id']);
-            if($resultadoValidacionRepetidoRfc) {
+        } else {
+            $resultadoValidacionRepetidoRfc = verificaRegistroRepetido("empresa", "socios", "rfc", $form['rfc'], $_GET['id']);
+            if ($resultadoValidacionRepetidoRfc) {
                 // El registro está repetido, mostrar un error
-                $this->alerta('Error', 'Ya existe existe un cliente con este RFC', 'error', 'nombre', true, false);
+                $this->alerta('Error', 'Ya existe existe un cliente con este RFC', 'error', 'rfc', true, false);
                 return $this->response;
-            }
-            else
-            {
+            } else {
                 $this->guardar($form);
             }
         }
@@ -203,7 +197,7 @@ class almacenClientes extends alkesGlobal
     function guardar($form)
     {
         global $database;
-
+        $this->response->assign("btnguardar", "disabled", "disabled"); //Deshabilitar boton de guardar para evitar que el usuario de click varias veces
         // Campos que se insertarán o actualizarán
         $datos = [
             'idsucursal' => $_SESSION['idsucursal'] ?? 0,
@@ -220,9 +214,9 @@ class almacenClientes extends alkesGlobal
             'idc_moneda' => $form['idc_moneda'] ?? 0,
             'idvendedor' => $form['idvendedor'] ?? 0,
             'clave' => ($_GET['id'] > 0 ? $form['clave'] ?? '' : getConsecutivo("claves_socios")), // Ternario para clave
-            'razon_social' => $form['razon_social']??'',
-            'nombre_comercial' => $form['nombre_comercial']??'',
-            'rfc' => $form['rfc']??'',
+            'razon_social' => $form['razon_social'] ?? '',
+            'nombre_comercial' => $form['nombre_comercial'] ?? '',
+            'rfc' => $form['rfc'] ?? '',
             'correo' => $form['correo'] ?? '',
             'web' => $form['web'] ?? '',
             'fax' => $form['fax'] ?? '',
@@ -239,35 +233,33 @@ class almacenClientes extends alkesGlobal
             'tipo' => $form['tipo'],
             'credito_dias_cliente' => $form['credito_dias_cliente'],
             'credito_monto_cliente' => $form['credito_monto_cliente'],
-            'credito_dias_proveedor' => 0,
-            'credito_monto_proveedor' => 0,
             'notas' => $form['notas'] ?? '',
         ];
 
         if ($_GET['id'] > 0) {
             try {
                 // Actualizar el registro si existe un ID
-                $result = $database->update('socios', $datos, ['id' => $_GET['id']]);
-                    $this->alerta(
-                        "¡ACTUALIZADO!",
-                        "El cliente ha sido actualizado con exito",
-                        "success",
-                        null,
-                        true,
-                        false,
-                        "index.php"
-                    );
+                $database->update('socios', $datos, ['id' => $_GET['id']]);
+                $this->alerta(
+                    "¡ACTUALIZADO!",
+                    "El cliente ha sido actualizado con exito",
+                    "success",
+                    null,
+                    true,
+                    false,
+                    "index.php"
+                );
             } catch (PDOException $e) {
                 $this->alerta(
                     "¡ERROR AL ACTUALIZAR!",
-                    "El cliente no se pudo actualizar, por favor reporte este problema con el administrador del sistema",
+                    "El cliente no se pudo actualizar correctamente, por favor reporte este problema con el administrador del sistema",
                     "error"
                 );
             }
         } else {
             try {
                 // Insertar un nuevo registro si no existe ID
-                $idInsertado = $database->insert('socios', $datos);
+                $database->insert('socios', $datos);
                 $this->alerta(
                     "¡CREADO!",
                     "El cliente ha sido creado con exito",
@@ -280,7 +272,7 @@ class almacenClientes extends alkesGlobal
             } catch (PDOException $e) {
                 $this->alerta(
                     "¡ERROR AL GUARDAR!",
-                    "El cliente no se pudo guardar, por favor reporte este problema con el administrador del sistema",
+                    "El cliente no se pudo guardar correctamente, por favor reporte este problema con el administrador del sistema",
                     "error"
                 );
             }
@@ -293,7 +285,7 @@ class almacenClientes extends alkesGlobal
 
 
 $jaxon = jaxon();
-$jaxon->register(Jaxon::CALLABLE_CLASS, almacenClientes::class);
+$jaxon->register(Jaxon::CALLABLE_CLASS, ventasClientes::class);
 if ($jaxon->canProcessRequest()) {
     $jaxon->processRequest();
 }

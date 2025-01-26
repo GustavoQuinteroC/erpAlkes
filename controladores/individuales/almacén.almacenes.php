@@ -31,7 +31,7 @@ class almacenAlmacenes extends alkesGlobal
                 $this->response->assign("estado", "value", $almacen['estado']);
                 $this->response->assign("principal", "value", $almacen['principal']);
                 $this->response->assign("consigna", "value", $almacen['consigna']);
-                
+
                 // Actualizar select2
                 $this->response->script('
                     $("#idsucursal").val("' . $almacen['idsucursal'] . '").trigger("change");
@@ -43,7 +43,7 @@ class almacenAlmacenes extends alkesGlobal
         }
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenAlmacenes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+            <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenAlmacenes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
                 <i class='bi bi-save'></i> Guardar
             </button>
         ");
@@ -311,9 +311,23 @@ class almacenAlmacenes extends alkesGlobal
         } else {
             if ($form['principal'] == 'Sí') {
                 $rand = $_GET['rand']; // Obtener el valor dinámico
-                $this->alertaConfirmacion("Cambiar almacén principal", "¿Estas seguro que deseas cambiar el actual almacén principal por este?", "warning", "JaxonalmacenAlmacenes.guardar(jaxon.getFormValues(\"formulario{$rand}\"));");
+                $resultadoValidacionRepetidoRfc = verificaRegistroRepetido("sucursal", "almacenes", "nombre", $form['nombre'], $_GET['id']);
+                if ($resultadoValidacionRepetidoRfc) {
+                    // El registro está repetido, mostrar un error
+                    $this->alerta('Error', 'Ya existe existe un almacen con este nombre en esta sucursal', 'error', 'nombre', true, false);
+                    return $this->response;
+                } else {
+                    $this->alertaConfirmacion("Cambiar almacén principal", "¿Estas seguro que deseas cambiar el actual almacén principal por este?", "warning", "JaxonalmacenAlmacenes.guardar(jaxon.getFormValues(\"formulario{$rand}\"));");
+                }
             } else {
-                $this->guardar($form);
+                $resultadoValidacionRepetidoRfc = verificaRegistroRepetido("sucursal", "almacenes", "nombre", $form['nombre'], $_GET['id']);
+                if ($resultadoValidacionRepetidoRfc) {
+                    // El registro está repetido, mostrar un error
+                    $this->alerta('Error', 'Ya existe existe un almacen con este nombre en esta sucursal', 'error', 'nombre', true, false);
+                    return $this->response;
+                } else {
+                    $this->guardar($form);
+                }
             }
         }
         return $this->response;
@@ -322,6 +336,7 @@ class almacenAlmacenes extends alkesGlobal
     function guardar($form)
     {
         global $database;
+        $this->response->assign("btnguardar", "disabled", "disabled"); //Deshabilitar boton de guardar para evitar que el usuario de click varias veces
         $data = [
             'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
             'idsucursal' => isset($form['idsucursal']) ? $form['idsucursal'] : 0,
@@ -332,53 +347,69 @@ class almacenAlmacenes extends alkesGlobal
             'estado' => isset($form['estado']) ? $form['estado'] : 'Activo',
             'principal' => isset($form['principal']) ? $form['principal'] : "No",
             'consigna' => isset($form['consigna']) ? $form['consigna'] : "No"
-
         ];
 
         // Si el 'id' de la URL es 0, realizamos una inserción
         if ($_GET['id'] == 0) {
-            // Realizamos la inserción
-            $database->insert('almacenes', $data);
-            $insert_id = $database->id();
-            // Llamamos a la función guardarPartidas y pasamos el id del nuevo Almacén
-            $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo Almacén
-            $this->alerta(
-                "Exito",
-                "Almacén registrado correctamente.",
-                "success",
-                null,
-                true,
-                false,
-                "index.php"
-            );
+            try {
+                // Realizamos la inserción
+                $database->insert('almacenes', $data);
+                $insert_id = $database->id();
+                // Llamamos a la función guardarPartidas y pasamos el id del nuevo Almacén
+                $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo Almacén
+                $this->alerta(
+                    "Exito",
+                    "Almacén registrado correctamente.",
+                    "success",
+                    null,
+                    true,
+                    false,
+                    "index.php"
+                );
+            } catch (PDOException $e) {
+                $this->alerta(
+                    "Error al guardar",
+                    "No se pudo registrar el almacén, por favor intente nuevamente o contacte con el administrador.",
+                    "error"
+                );
+            }
         }
         // Si el 'id' no es 0, actualizamos el registro correspondiente
         else {
-            // Realizamos la actualización
-            $database->update('almacenes', $data, ['id' => $_GET['id']]);
-            // Llamamos a la función guardarPartidas y pasamos el id del Almacén
-            $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del Almacén actualizado
-            $this->alerta(
-                "Exito",
-                "Almacén actualizado correctamente.",
-                "success",
-                null,
-                true,
-                false,
-                "index.php"
-            );
+            try {
+                // Realizamos la actualización
+                $database->update('almacenes', $data, ['id' => $_GET['id']]);
+                // Llamamos a la función guardarPartidas y pasamos el id del Almacén
+                $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del Almacén actualizado
+                $this->alerta(
+                    "Exito",
+                    "Almacén actualizado correctamente.",
+                    "success",
+                    null,
+                    true,
+                    false,
+                    "index.php"
+                );
+            } catch (PDOException $e) {
+                $this->alerta(
+                    "Error al actualizar",
+                    "No se pudo actualizar el almacén, por favor intente nuevamente o contacte con el administrador.",
+                    "error"
+                );
+            }
         }
         return $this->response;
     }
+
 
     function guardarPartidas($idalmacen)
     {
         global $database; // instancia de Medoo
 
         // Verificamos si la sesión contiene las partidas
-        if (isset($_SESSION['partidas'.$_GET['rand']]) && is_array($_SESSION['partidas'.$_GET['rand']])) {
+        if (isset($_SESSION['partidas' . $_GET['rand']]) && is_array($_SESSION['partidas' . $_GET['rand']])) {
             // Iteramos sobre las partidas
-            foreach ($_SESSION['partidas'.$_GET['rand']] as $partida) {
+            foreach ($_SESSION['partidas' . $_GET['rand']] as $partida) {
                 // Si la partida tiene iddb igual a 0, significa que es un nuevo registro
                 if ($partida['iddb'] == 0) {
                     // Verificamos si el impuesto está marcado como Inactivo

@@ -1,7 +1,7 @@
 <?php
 session_start();
 // controlador.php
-require_once(__DIR__ .'/../globales/funcionesJaxon.php');
+require_once(__DIR__ . '/../globales/funcionesJaxon.php');
 use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
@@ -23,7 +23,7 @@ class almacenProductos extends alkesGlobal
 
             //consultas a la bd para obtener los datos necesarios para la consulta del producto
             $producto = $database->get('productos', '*', ['id' => $_GET['id']]);
-            $unidadSAT= $database->get('cfdi_claveprodserv', 'c_claveprodserv', ['id' => $producto['idc_claveprodserv']]);
+            $unidadSAT = $database->get('cfdi_claveprodserv', 'c_claveprodserv', ['id' => $producto['idc_claveprodserv']]);
 
             // Asignaciones a los campos
             $this->response->assign("idsubcategoria", "innerHTML", getSubcategorias($producto['idcategoria']));
@@ -60,7 +60,7 @@ class almacenProductos extends alkesGlobal
 
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' value='Guardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+            <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
                 <i class='bi bi-save'></i> Guardar
             </button>
         ");
@@ -194,7 +194,7 @@ class almacenProductos extends alkesGlobal
         }
 
         // Si la validación es exitosa, agregar el impuesto a la sesión
-        $_SESSION['partidas'.$_GET['rand']][] = [
+        $_SESSION['partidas' . $_GET['rand']][] = [
             'iddb' => 0,
             'impuesto' => $form['impuesto'],
             'tipoImpuesto' => $form['tipoImpuesto'],
@@ -234,7 +234,7 @@ class almacenProductos extends alkesGlobal
                     $cfdi_impuesto = $database->get('cfdi_impuesto', ['c_impuesto', 'descripcion'], ['id' => $impuesto['impuesto']]);
                     $cfdi_tipofactor = $database->get('cfdi_tipofactor', 'c_tipofactor', ['id' => $impuesto['tipoFactor']]);
                     $html .= '<tr>';
-                    $html .= '<td>' . htmlspecialchars($cfdi_impuesto['c_impuesto'].' - '.$cfdi_impuesto['descripcion']) . '</td>';
+                    $html .= '<td>' . htmlspecialchars($cfdi_impuesto['c_impuesto'] . ' - ' . $cfdi_impuesto['descripcion']) . '</td>';
                     $html .= '<td>' . htmlspecialchars($impuesto['tipoImpuesto']) . '</td>';
                     $html .= '<td>' . htmlspecialchars($cfdi_tipofactor) . '</td>';
                     $html .= '<td>' . htmlspecialchars($impuesto['porcentaje']) . '%</td>';
@@ -265,9 +265,9 @@ class almacenProductos extends alkesGlobal
     function eliminarImpuesto($index)
     {
         // Verificar si el índice existe en la sesión
-        if (isset($_SESSION['partidas'.$_GET['rand']][$index])) {
+        if (isset($_SESSION['partidas' . $_GET['rand']][$index])) {
             // Cambiar el estado del impuesto a 'Inactivo'
-            $_SESSION['partidas'.$_GET['rand']][$index]['estado'] = 'Inactivo';
+            $_SESSION['partidas' . $_GET['rand']][$index]['estado'] = 'Inactivo';
 
             // Devolver una respuesta con éxito (esto puede ser útil para notificaciones o actualizaciones)
             $this->alerta(
@@ -286,7 +286,7 @@ class almacenProductos extends alkesGlobal
                 "error",
             );
         }
-        
+
         $this->tablaImpuestos();
         // Retornar la respuesta Jaxon
         return $this->response;
@@ -369,7 +369,7 @@ class almacenProductos extends alkesGlobal
         if (!isset($_SESSION['partidas' . $_GET['rand']][$index])) {
             return $this->alerta('Error', 'No se encontró la partida a editar.', 'error');
         }
-    
+
         // Validar los datos
         $reglas = [
             'impuesto' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
@@ -395,7 +395,7 @@ class almacenProductos extends alkesGlobal
             // Retornar la respuesta Jaxon
             return $this->response;
         }
-    
+
         // Actualizar la partida en la sesión
         $_SESSION['partidas' . $_GET['rand']][$index] = [
             'iddb' => $form['iddb'],
@@ -405,7 +405,7 @@ class almacenProductos extends alkesGlobal
             'porcentaje' => $form['porcentaje'],
             'estado' => 'Activo', // Mantener o cambiar estado según el caso
         ];
-    
+
         // Mostrar un mensaje de éxito
         $this->alerta(
             "Éxito",
@@ -415,18 +415,17 @@ class almacenProductos extends alkesGlobal
             false,
             true
         );
-    
+
         // Actualizar la tabla en la vista
         $this->tablaImpuestos();
-    
+
         // Retornar la respuesta Jaxon
         return $this->response;
     }
 
     function validarUsoLoteSerie($form)
     {
-        if($form['kit']=='Sí')
-        {
+        if ($form['kit'] == 'Sí') {
             // Mostrar un mensaje de éxito
             $this->alerta(
                 "Invalido",
@@ -436,16 +435,15 @@ class almacenProductos extends alkesGlobal
                 false,
                 true
             );
-            $this->response->assign("lote_serie","value","No");
+            $this->response->assign("lote_serie", "value", "No");
         }
         // Retornar la respuesta Jaxon
         return $this->response;
     }
-    
+
     function validarUsoKit($form)
     {
-        if($form['lote_serie']=='Sí')
-        {
+        if ($form['lote_serie'] == 'Sí') {
             // Mostrar un mensaje de éxito
             $this->alerta(
                 "Invalido",
@@ -455,7 +453,7 @@ class almacenProductos extends alkesGlobal
                 false,
                 true
             );
-            $this->response->assign("kit","value","No");
+            $this->response->assign("kit", "value", "No");
         }
         // Retornar la respuesta Jaxon
         return $this->response;
@@ -505,10 +503,22 @@ class almacenProductos extends alkesGlobal
             );
             // Retornar la respuesta Jaxon
             return $this->response;
-        }
-        else
-        {
-            $this->guardar($form);
+        } else {
+            $resultadoValidacionRepetidoCodigoBarras = verificaRegistroRepetido("empresa", "productos", "codigo_barras", $form['codigo_barras'], $_GET['id']);
+            if ($resultadoValidacionRepetidoCodigoBarras) {
+                // El registro está repetido, mostrar un error
+                $this->alerta('Error', 'Ya existe existe un producto con este codigo de barras', 'error', 'codigo_barras', true, false);
+                return $this->response;
+            } else {
+                $resultadoValidacionRepetidoNombre = verificaRegistroRepetido("empresa", "productos", "nombre", $form['nombre'], $_GET['id']);
+                if ($resultadoValidacionRepetidoNombre) {
+                    // El registro está repetido, mostrar un error
+                    $this->alerta('Error', 'Ya existe existe un producto con este nombre', 'error', 'nombre', true, false);
+                    return $this->response;
+                } else {
+                    $this->guardar($form);
+                }
+            }
         }
         // Retornar la respuesta Jaxon
         return $this->response;
@@ -517,7 +527,7 @@ class almacenProductos extends alkesGlobal
     function guardar($form)
     {
         global $database; // instancia de Medoo
-
+        $this->response->assign("btnguardar", "disabled", "disabled"); //Deshabilitar boton de guardar para evitar que el usuario de click varias veces
         // Preparamos los datos a utilizar
         $data = [
             'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
@@ -546,51 +556,70 @@ class almacenProductos extends alkesGlobal
         // Si el 'id' de la URL es 0, realizamos una inserción
         if ($_GET['id'] == 0) {
             // Realizamos la inserción
-            $database->insert('productos', $data);
-            $insert_id = $database->id();
-            // Llamamos a la función guardarPartidas y pasamos el id del nuevo producto
-            $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo producto
-            $this->alerta(
-                "Exito",
-                "Producto registrado correctamente.",
-                "success",
-                null,
-                true,
-                false,
-                "index.php"
-            );
+            try {
+                // Insertar un nuevo registro si no existe ID
+                $database->insert('productos', $data);
+                $insert_id = $database->id();
+                // Llamamos a la función guardarPartidas y pasamos el id del nuevo producto
+                $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo producto
+                $this->alerta(
+                    "¡GUARDADO!",
+                    "El producto ha sido guardado con exito",
+                    "success",
+                    null,
+                    true,
+                    false,
+                    "index.php"
+                );
+            } catch (PDOException $e) {
+                $this->alerta(
+                    "¡ERROR AL GUARDAR!",
+                    "El producto no se pudo guardar correctamente, por favor reporte este problema con el administrador del sistema",
+                    "error"
+                );
+            }
         }
         // Si el 'id' no es 0, actualizamos el registro correspondiente
         else {
             // Realizamos la actualización
-            $database->update('productos', $data, ['id' => $_GET['id']]);
-            // Llamamos a la función guardarPartidas y pasamos el id del producto
-            $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del producto actualizado
-            $this->alerta(
-                "Exito",
-                "Producto actualizado correctamente.",
-                "success",
-                null,
-                true,
-                false,
-                "index.php"
-            );
+
+            try {
+                // Insertar un nuevo registro si no existe ID
+                $database->update('productos', $data, ['id' => $_GET['id']]);
+                // Llamamos a la función guardarPartidas y pasamos el id del producto
+                $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del producto actualizado
+                $this->alerta(
+                    "¡ACTUALIZADO!",
+                    "El producto ha sido actualizado con exito.",
+                    "success",
+                    null,
+                    true,
+                    false,
+                    "index.php"
+                );
+            } catch (PDOException $e) {
+                $this->alerta(
+                    "¡ERROR AL ACTUALIZAR!",
+                    "El producto no se pudo actualizar correctamente, por favor reporte este problema con el administrador del sistema",
+                    "error"
+                );
+            }
         }
 
         // Retornar la respuesta Jaxon
         return $this->response;
     }
 
-    
+
 
     function guardarPartidas($idproducto)
     {
         global $database; // instancia de Medoo
 
         // Verificamos si la sesión contiene las partidas
-        if (isset($_SESSION['partidas'.$_GET['rand']]) && is_array($_SESSION['partidas'.$_GET['rand']])) {
+        if (isset($_SESSION['partidas' . $_GET['rand']]) && is_array($_SESSION['partidas' . $_GET['rand']])) {
             // Iteramos sobre las partidas
-            foreach ($_SESSION['partidas'.$_GET['rand']] as $partida) {
+            foreach ($_SESSION['partidas' . $_GET['rand']] as $partida) {
                 // Si la partida tiene iddb igual a 0, significa que es un nuevo registro
                 if ($partida['iddb'] == 0) {
                     // Verificamos si el impuesto está marcado como Inactivo
@@ -634,10 +663,9 @@ class almacenProductos extends alkesGlobal
     {
         global $database;
         //consultas a la bd para obtener los datos necesarios para la consulta de los impuestos
-        $impuestos = $database->select("productos_impuestos", "*", [ "idproducto" => $_GET['id']]);
-        foreach($impuestos as $impuesto)
-        {
-            $_SESSION['partidas'.$_GET['rand']][] = [
+        $impuestos = $database->select("productos_impuestos", "*", ["idproducto" => $_GET['id']]);
+        foreach ($impuestos as $impuesto) {
+            $_SESSION['partidas' . $_GET['rand']][] = [
                 'iddb' => $impuesto['id'],
                 'impuesto' => $impuesto['idc_impuesto'],
                 'tipoImpuesto' => $impuesto['tipo'],

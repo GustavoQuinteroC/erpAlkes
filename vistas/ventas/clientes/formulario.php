@@ -227,7 +227,6 @@ if (file_exists($pathControlador)) {
                                                                 <select id="estado" name="estado" class="form-select">
                                                                     <option value="Activo">Activo</option>
                                                                     <option value="Inactivo">Inactivo</option>
-                                                                    <option value="Suspendido">Suspendido</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -309,7 +308,7 @@ if (file_exists($pathControlador)) {
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-briefcase"></i></span>
                                                                 <select id="idc_regimen" name="idc_regimen"
-                                                                    onchange="JaxonalmacenClientes.cambiarUsoCfdi(this.value);"
+                                                                    onchange="JaxonventasClientes.cambiarUsoCfdi(this.value);"
                                                                     class="form-select select2-field">
                                                                     <?php echo getCfdiRegimene(); ?>
                                                                 </select>
@@ -430,7 +429,7 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-mailbox"></i></span>
                                                                 <input type="text" class="form-control"
                                                                     id="codigo_postal" name="codigo_postal"
-                                                                    placeholder="Código Postal" onchange="JaxonalmacenClientes.ajustesCodigoPostal(this.value);">
+                                                                    placeholder="Código Postal" onchange="JaxonventasClientes.ajustesCodigoPostal(this.value);">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -569,7 +568,7 @@ if (file_exists($pathControlador)) {
     </div>
     <?= scriptsHtml(); ?>
     <script>
-        JaxonalmacenClientes.inializarFormulario();
+        JaxonventasClientes.inializarFormulario();
     </script>
 </body>
 
