@@ -718,10 +718,16 @@ function columnasTablas($modulo, $submodulo, $subsubmodulo, $uso)
         return;
     }
 
-    // Obtener las columnas asociadas al uso y la tabla
-    $columnas = $database->select("tablas_columnas", "*", [
+    // Obtener el id del registro de tablas_columnas asociado al uso y la tabla
+    $idTablasColumnas = $database->get("tablas_columnas", "id", [
         "uso" => $uso,
         "idtabla" => $tabla[0]['id']
+    ]);
+
+    //obtener las columnas utilizando el idTablasColumnas
+    $columnas = $database->get("tablas_columnas_usuarios", "*", [
+        "idtablas_columnas" => $idTablasColumnas,
+        "idusuario" => $_SESSION['idusuario']
     ]);
 
     if (empty($columnas)) {
@@ -730,7 +736,7 @@ function columnasTablas($modulo, $submodulo, $subsubmodulo, $uso)
     }
 
     // Convertir la cadena de columnas en un array
-    $columnNames = explode(',', $columnas[0]['columnas']);
+    $columnNames = explode(',', $columnas['columnas']);
 
     // Mapear las columnas al formato DataTables
     $columns = [];
@@ -771,10 +777,16 @@ function ordenTablas($modulo, $submodulo, $subsubmodulo, $uso)
         return;
     }
 
-    // Obtener las columnas asociadas al uso y la tabla
-    $resultado = $database->select("tablas_columnas", ["orden", "indice_orden"], [
+    //obtener el idTablasColumnas asociado al uso y la tabla
+    $idTablasColumnas = $database->get("tablas_columnas", "id", [
         "uso" => $uso,
         "idtabla" => $tabla[0]['id']
+    ]);
+
+    // Obtener las columnas asociadas al idTablasColumnas
+    $resultado = $database->get("tablas_columnas_usuarios", ["orden", "indice_orden"], [
+        "idtablas_columnas" => $idTablasColumnas,
+        "idusuario" => $_SESSION['idusuario']
     ]);
 
     if (empty($resultado)) {
@@ -783,8 +795,8 @@ function ordenTablas($modulo, $submodulo, $subsubmodulo, $uso)
 
     // Crear el array con los valores de orden e índice
     $orden = [
-        'orden' => $resultado[0]['orden'],         // Orden obtenido de la base de datos
-        'indice' => $resultado[0]['indice_orden']  // Índice del orden
+        'orden' => $resultado['orden'],         // Orden obtenido de la base de datos
+        'indice' => $resultado['indice_orden']  // Índice del orden
     ];
 
     return $orden;

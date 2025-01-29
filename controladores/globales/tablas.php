@@ -24,9 +24,13 @@ if (empty($tabla)) {
     echo "<th>No hay datos disponibles</th>";
     return;
 } else {
-    $campos = $database->select("tablas_columnas", "columnas", [
+    $idTablasColumnas = $database->get("tablas_columnas", "id", [
         "uso" => $uso,
         "idtabla" => $tabla[0]['id']
+    ]);
+    $campos = $database->get("tablas_columnas_usuarios", "columnas", [
+        "idtablas_columnas" => $idTablasColumnas,
+        "idusuario" => $_SESSION['idusuario']
     ]);
 
 }
@@ -41,7 +45,7 @@ if (empty($campos)) {
 $primaryKey = 'id';
 
 // Convertir la cadena de columnas en un array
-$columnNames = explode(',', $campos[0]);
+$columnNames = explode(',', $campos);
 
 // Mapear las columnas al formato de DataTables
 $columns = array();
