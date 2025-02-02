@@ -142,7 +142,7 @@ class alkesGlobal
         $html .= '</div>';
         $html .= '<div class="modal-body">';
         $html .= '<form id="formModalSeleccion">';
-        $html .= '<table id="tablaModalSeleccion" class="table table-striped table-bordered" style="width:100%">';
+        $html .= '<table id="tablaModalSeleccion" class="table table-striped table-hover display" style="width:100%">';
         
         // Añadir las columnas de la tabla y cerrar etiquetas necesarias
         $columnas = columnasTablas($modulo, $submodulo, $subsubmodulo, $uso);
@@ -456,7 +456,7 @@ class alkesGlobal
         $html .= '<div class="modal-body">';
         $html .= '<!-- Aquí va la tabla para la modal -->';
         $html .= '<form id="formModalSeleccion">';
-        $html .= '<table id="tablaModalSeleccion" class="table table-striped table-bordered" style="width:100%">';
+        $html .= '<table id="tablaModalSeleccion" class="table table-striped table-hover display" style="width:100%">';
         $html .= '<thead>';
         $html .= '<tr>';
 
