@@ -10,6 +10,7 @@ global $database; // Usaremos esta variable para acceder a Medoo
 $modulo = $_GET['modulo'];
 $submodulo = $_GET['submodulo'];
 $subsubmodulo = $_GET['subsubmodulo'];
+$idalmacen = $_GET['idalmacen'];
 $filtro = $_GET['filtro'];
 $uso = $_GET['uso'];
 
@@ -71,7 +72,7 @@ $baseWhere = $tabla[0]['condicion_principal'];
 $where = $baseWhere;
 $where = str_replace('{empresa}', "idempresa=" . addslashes($_SESSION['idempresa']), $where);
 $where = str_replace('{sucursal}', "idsucursal=" . addslashes($_SESSION['sucursal']), $where);
-$where = str_replace('{almacen}', "idalmacen=" . addslashes($_SESSION['almacen']), $where);
+$where = str_replace('{almacen}', "idalmacen=" . addslashes($_GET['idalmacen']), $where);
 
 // Añadir la condición del filtro
 $where .= " AND " . $filtroData[0];
