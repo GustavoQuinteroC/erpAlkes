@@ -689,7 +689,8 @@ function filtrosTablas($modulo, $submodulo, $subsubmodulo)
 
     // Obtener los filtros asociados a la tabla
     $filtros = $database->select("tablas_filtros", ["nombre", "condicion"], [
-        "idtabla" => $tabla[0]['id']
+        "idtabla" => $tabla[0]['id'],
+        "estado" => "Activo",
     ]);
 
     // Construir el array de retorno con los nombres de los filtros
@@ -809,8 +810,9 @@ function getProductosTipos()
     $registros = $database->select("productos_tipos", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
         }
@@ -824,10 +826,13 @@ function getCategorias()
 {
     global $database;
     $registros = $database->select("categorias", "*", [
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activa",
         "ORDER" => ["id" => "ASC"]
     ]);
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
         }
@@ -842,10 +847,13 @@ function getSubcategorias($categoria)
     global $database;
     $registros = $database->select("subcategorias", "*", [
         "idcategoria" => $categoria,
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activa",
         "ORDER" => ["id" => "ASC"]
     ]);
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
         }
@@ -860,10 +868,13 @@ function getSubsubcategorias($subcategoria)
     global $database;
     $registros = $database->select("subsubcategorias", "*", [
         "idsubcategoria" => $subcategoria,
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activa",
         "ORDER" => ["id" => "ASC"]
     ]);
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
         }
@@ -880,9 +891,9 @@ function getCfdiClaveUnidades()
     $registros = $database->select("cfdi_claveunidad", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $simbolo = !empty($registro['simbolo']) ? " (" . htmlspecialchars($registro['simbolo']) . ")" : "";
@@ -901,9 +912,9 @@ function getCfdiClaveProdServ()
     $registros = $database->select("cfdi_claveprodserv", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $palabras_similares = !empty($registro['palabras_similares']) ? " (" . htmlspecialchars($registro['palabras_similares']) . ")" : "";
@@ -923,9 +934,9 @@ function getCfdiMoneda()
     $registros = $database->select("cfdi_moneda", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_moneda']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
@@ -943,9 +954,9 @@ function getCfdiImpuesto()
     $registros = $database->select("cfdi_impuesto", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_impuesto']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
@@ -958,7 +969,7 @@ function getCfdiImpuesto()
 }
 
 
-function getsucursales()
+function getSucursales()
 {
     global $database;
     $registros = $database->select(
@@ -1032,9 +1043,9 @@ function getCfdiTipoFactor()
     $registros = $database->select("cfdi_tipofactor", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_tipofactor']) . '</option>';
@@ -1046,15 +1057,15 @@ function getCfdiTipoFactor()
     return $options;
 }
 
-function getCfdiRegimene()
+function getCfdiRegimen()
 {
     global $database;
     $registros = $database->select("cfdi_regimenfiscal", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_regimenfiscal']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
@@ -1072,9 +1083,9 @@ function getCfdiMetodoPago()
     $registros = $database->select("cfdi_metodopago", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_metodopago']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
@@ -1108,8 +1119,9 @@ function getCfdiUsoCfdi($idregimen = null)
     }
 
     // Construir las opciones para el select
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
                         htmlspecialchars($registro['c_usocfdi']) . " - " . 
@@ -1128,9 +1140,9 @@ function getCfdiFormaPago()
     $registros = $database->select("cfdi_formapago", "*", [
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_formapago']) . " - " . htmlspecialchars($registro['descripcion']) . '</option>';
@@ -1149,9 +1161,9 @@ function getCfdiEstado()
         "c_pais" => "MEX",
         "ORDER" => ["id" => "ASC"]
     ]);
-
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['c_estado']) . " - " . htmlspecialchars($registro['nombre_estado']) . '</option>';
@@ -1183,8 +1195,9 @@ function getCfdiMunicipio($idestado)
     }
 
     // Construir las opciones para el select
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
                         htmlspecialchars($registro['descripcion']) .'</option>';
@@ -1215,8 +1228,9 @@ function getCfdiColonia($codigoPostal)
     }
 
     // Construir las opciones para el select
-    $options = '<option value="" selected disabled>Elije una opción...</option>';
+    $options = '';
     if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
                         htmlspecialchars($registro['nombre']) .'</option>';
@@ -1428,7 +1442,166 @@ function getParametro($parametro) {
     return $resultado;
 }
 
+function getAlmacenesMovimientosConceptos() {
+    // Acceder a la variable global de la base de datos
+    global $database;
 
+    $registros = $database->select("almacenes_movimientos_conceptos", "*", [
+        "ORDER" => ["naturaleza" => "ASC"]
+    ]);
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['naturaleza']) . " - " . htmlspecialchars($registro['concepto']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
+function getAlmacenesPorSucursal() {
+    // Acceder a la variable global de la base de datos
+    global $database;
+
+    $registros = $database->select("almacenes", "*", [
+        "idempresa" => $_SESSION['idempresa'],
+        "idsucursal" => $_SESSION['idsucursal'],
+        "estado" => "Activo",
+        "ORDER" => ["nombre" => "ASC"]
+    ]);
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . " - " . htmlspecialchars($registro['direccion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
+function getAlmacenesPorEmpresa() {
+    // Acceder a la variable global de la base de datos
+    global $database;
+
+    $registros = $database->select("almacenes", "*", [
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activo",
+        "ORDER" => ["nombre" => "ASC"]
+    ]);
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . " - " . htmlspecialchars($registro['direccion']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
+function getDirecciones($idsocio = null) {
+    global $database; // Asume que $database es una instancia de Medoo
+
+    // Inicializar un array para almacenar los resultados combinados
+    $registros = [];
+
+    // Consulta para direcciones de socios
+    if ($idsocio !== null) {
+        $registrosSocio = $database->select("direcciones", [
+            "id",
+            "nombre",
+            "cp"
+        ], [
+            "idempresa" => $_SESSION['idempresa'],
+            "estado" => "Activa",
+            "idsocio" => $idsocio,
+            "idsucursal" => 0,
+            "ORDER" => ["id" => "ASC"]
+        ]);
+
+        // Agregar el tipo 'Socio' a cada registro
+        foreach ($registrosSocio as $registro) {
+            $registro['tipo'] = 'Socio';
+            $registros[] = $registro;
+        }
+    }
+
+    // Consulta para direcciones de sucursales
+    if ($_SESSION['idsucursal'] !== null) {
+        $registrosSucursal = $database->select("direcciones", [
+            "id",
+            "nombre",
+            "cp"
+        ], [
+            "idempresa" => $_SESSION['idempresa'],
+            "estado" => "Activa",
+            "idsucursal" => $_SESSION['idsucursal'],
+            "idsocio" => 0,
+            "ORDER" => ["id" => "ASC"]
+        ]);
+
+        // Agregar el tipo 'Sucursal' a cada registro
+        foreach ($registrosSucursal as $registro) {
+            $registro['tipo'] = 'Sucursal';
+            $registros[] = $registro;
+        }
+    }
+
+    // Construir las opciones del select
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            $tipo = $registro['tipo'];
+            $nombre = htmlspecialchars($registro['nombre']);
+            $cp = htmlspecialchars($registro['cp']);
+            $id = htmlspecialchars($registro['id']);
+            $options .= '<option value="' . $id . '">' . $tipo . ' - ' . $nombre . ' (' . $cp . ')</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+function getSocios() {
+    // Acceder a la variable global de la base de datos
+    global $database;
+
+    // Realizar la consulta con las condiciones adicionales
+    $registros = $database->select("socios", "*", [
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activo",
+        "ORDER" => ["nombre_comercial" => "ASC"],
+        "OR" => [
+            "nivel" => "Empresa",
+            "AND" => [
+                "nivel" => "Sucursal",
+                "idsucursal" => $_SESSION['idsucursal']
+            ]
+        ]
+    ]);
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['rfc']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
 
 
 
