@@ -128,7 +128,7 @@ class alkesGlobal
         return $this->response;
     }
 
-    function modalSeleccionServerSide($modulo, $submodulo, $subsubmodulo, $filtroSeleccionado = '', $uso = '', $funcionCallBack = '', $multiple = false, $parametrosAdicionales = '', $tituloModal = '')
+    function modalSeleccionServerSide($modulo, $submodulo, $subsubmodulo, $idalmacen=0, $filtroSeleccionado = '', $uso = '', $funcionCallBack = '', $multiple = false, $parametrosAdicionales = '', $tituloModal = '')
     {
         $filtros = filtrosTablas($modulo, $submodulo, $uso);
         $html = '';
@@ -160,7 +160,7 @@ class alkesGlobal
         $this->response->script('$("#modalSeleccion").modal("show");');
 
         // Configuración de DataTable con parámetros comunes
-        $ajaxUrl = '/controladores/globales/tablas.php?modulo=' . $modulo . '&submodulo=' . $submodulo . '&subsubmodulo=' . $subsubmodulo . '&filtro=' . $filtroSeleccionado . '&uso=' . $uso;
+        $ajaxUrl = '/controladores/globales/tablas.php?modulo=' . $modulo . '&submodulo=' . $submodulo . '&subsubmodulo=' . $subsubmodulo . '&idalmacen=' . $idalmacen . '&filtro=' . $filtroSeleccionado . '&uso=' . $uso;
         $tableId = '#tablaModalSeleccion';
         $pageLength = 7;
         $lengthMenu = '[[7, 10, 20], [7, 10, 20]]';
@@ -515,8 +515,84 @@ class alkesGlobal
     }
 
     
+    public function deshabilitaSelect($nombreDelSelect)
+{
+    $this->response->script("
+        (function() {
+            const select = $('#$nombreDelSelect'); // Usamos jQuery para compatibilidad con Select2
 
+            // Verificar si el select está utilizando Select2
+            if (select.hasClass('select2-hidden-accessible')) {
+                // Es un Select2
+                const select2Container = select.next('.select2-container');
 
+                // Deshabilitar la interacción con el Select2
+                select2Container.off('click'); // Evitar que se abra el dropdown
+                select2Container.css('pointer-events', 'none'); // Evitar cualquier interacción
+                select2Container.css('cursor', 'not-allowed'); // Cambiar el cursor a 'not-allowed'
+            } else {
+                // Es un select normal
+                const nativeSelect = select.get(0); // Obtener el elemento nativo del select
+
+                // Guardar las funciones de los eventos en propiedades del select
+                nativeSelect.handleMousedown = function(e) {
+                    e.preventDefault(); // Evita que se abra el dropdown
+                    this.blur(); // Quita el foco del select
+                };
+
+                nativeSelect.handleKeydown = function(e) {
+                    e.preventDefault(); // Evita que se cambie la selección con el teclado
+                };
+
+                // Agregar los eventos
+                nativeSelect.addEventListener('mousedown', nativeSelect.handleMousedown);
+                nativeSelect.addEventListener('keydown', nativeSelect.handleKeydown);
+
+                // Cambiar el cursor a 'not-allowed' para indicar que no es interactivo
+                nativeSelect.style.cursor = 'not-allowed';
+            }
+        })();
+    ");
+    return $this->response;
+}
+
+public function habilitaSelect($nombreDelSelect)
+{
+    $this->response->script("
+        (function() {
+            const select = $('#$nombreDelSelect'); // Usamos jQuery para compatibilidad con Select2
+
+            // Verificar si el select está utilizando Select2
+            if (select.hasClass('select2-hidden-accessible')) {
+                // Es un Select2
+                const select2Container = select.next('.select2-container');
+
+                // Habilitar la interacción con el Select2
+                select2Container.on('click', function(e) {
+                    select.select2('open'); // Abrir el dropdown al hacer clic
+                });
+                select2Container.css('pointer-events', 'auto'); // Restaurar interacción
+                select2Container.css('cursor', 'pointer'); // Restaurar cursor predeterminado
+            } else {
+                // Es un select normal
+                const nativeSelect = select.get(0); // Obtener el elemento nativo del select
+
+                // Restaurar la interacción con el select
+                if (nativeSelect.handleMousedown) {
+                    nativeSelect.removeEventListener('mousedown', nativeSelect.handleMousedown); // Eliminar evento personalizado
+                }
+                if (nativeSelect.handleKeydown) {
+                    nativeSelect.removeEventListener('keydown', nativeSelect.handleKeydown); // Eliminar evento personalizado
+                }
+
+                // Restaurar el cursor predeterminado
+                nativeSelect.style.cursor = 'default';
+            }
+        })();
+    ");
+
+    return $this->response;
+}
     
 
 }
