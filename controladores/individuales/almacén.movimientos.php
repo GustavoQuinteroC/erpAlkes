@@ -171,6 +171,57 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function addProductos($form)
+    {
+        // Verifica si el array 'seleccion' existe y no está vacío
+        if (isset($form['seleccion']) && is_array($form['seleccion'])) {
+            foreach ($form['seleccion'] as $idalmacenes_productos) {
+                // Agrega un nuevo array a la sesión con el idalmacenes_productos correspondiente
+                $_SESSION['partidas' . $_GET['rand']][] = [
+                    'iddb' => 0,
+                    'idalmacenes_productos' => $idalmacenes_productos,
+                    'cantidad' => 0,
+                    'estado' => 'Activo',
+                    'lotes' => [
+                        // Ejemplo de lote predefinido, puedes agregar más lotes o dejar este array vacío según sea necesario
+                        [
+                            'iddb' => 0,
+                            'lote' => 'a',
+                            'serie' => 'b',
+                            'pedimento' => 'c',
+                            'fabricacion' => '2024-02-13',
+                            'caducidad' => '2027-06-30',
+                            'cantidad' => 0,
+                            'estado' => 'Activo'
+                        ],
+                        [
+                            'iddb' => 0,
+                            'lote' => 'b',
+                            'serie' => 'b',
+                            'pedimento' => 'c',
+                            'fabricacion' => '2024-02-13',
+                            'caducidad' => '2027-06-30',
+                            'cantidad' => 0,
+                            'estado' => 'Activo'
+                        ],
+                        [
+                            'iddb' => 0,
+                            'lote' => 'c',
+                            'serie' => 'b',
+                            'pedimento' => 'c',
+                            'fabricacion' => '2024-02-13',
+                            'caducidad' => '2027-06-30',
+                            'cantidad' => 0,
+                            'estado' => 'Activo'
+                        ]
+                    ]
+                ];
+            }
+        }
+        $this->tablaPartidas();
+        return $this->response;
+    }
+
 }
 
 
