@@ -145,6 +145,32 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function modalSeleccionarProductos($form)
+    {
+        if(empty($form['idconcepto']))
+        {
+            $this->alerta("Invalido", "Primero elije un concepto", "error", "idconcepto");
+        }
+        elseif(empty($form['idalmacen']))
+        {
+            $this->alerta("Invalido", "Primero elije un almacén", "error", "idalmacen");
+        }
+        else
+        {
+            global $database;
+            $naturaleza = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
+            if($naturaleza=='Entrada')
+            {
+                $this->modalSeleccionServerSide('almacén', 'inventario', '', $form['idalmacen'], 'Principal', 'Modal', 'JaxonalmacenMovimientos.addProductos', true, '', 'Seleccionar Productos');
+            }
+            elseif($naturaleza=='Salida')
+            {
+                $this->modalSeleccionServerSide('almacén', 'inventario', '', $form['idalmacen'], 'Con Existencia', 'Modal', 'JaxonalmacenMovimientos.addProductos', true, '', 'Seleccionar Productos');
+            }
+        }
+        return $this->response;
+    }
+
 }
 
 
