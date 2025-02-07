@@ -222,6 +222,60 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function tablaPartidas()
+    {
+        // Iniciar la respuesta de script
+        $script = "tablaPartidas.clear();"; // Limpiar la tabla
+        $i = 1;
+
+        // Verificar si el índice de sesión existe para evitar errores
+        if (!isset($_SESSION['partidas' . $_GET['rand']])) {
+            $this->response->script("console.error('No se encontraron partidas.');");
+            return $this->response;
+        }
+
+        foreach ($_SESSION['partidas' . $_GET['rand']] as $index => $partida) {
+            if ($partida['estado'] == 'Activo') {
+                global $database;
+                
+                // Obtener datos necesarios de la base de datos
+                $almacenes_producto = $database->get("almacenes_productos", "*", ["id" => $partida['idalmacenes_productos']]);
+                $producto = $database->get("productos", "*", ["id" => $almacenes_producto['idproducto']]);
+                $cfdi_claveunidad = $database->get("cfdi_claveunidad", "*", ["id" => $producto['idc_claveunidad']]);
+
+                // Construcción de la fila de la tabla
+                $fila = [
+                    $i,
+                    htmlspecialchars($producto['codigo_barras']),
+                    htmlspecialchars($producto['nombre']),
+                    htmlspecialchars($producto['descripcion']),
+                    htmlspecialchars($cfdi_claveunidad['nombre']),
+                    htmlspecialchars($almacenes_producto['existencia']),
+                    "<input type='number' class='form-control cantidad-input' value='" . htmlspecialchars($partida['cantidad']) . "' 
+                        data-idpartida='" . htmlspecialchars($partida['iddb']) . "' min='0' 
+                        onfocus='JaxonalmacenMovimientos.validaSiTieneLote($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"))'>",
+                    "<button type='button' class='btn btn-sm btn-danger' title='Eliminar' 
+                        onclick='JaxonalmacenMovimientos.desactivarPartida($index)'>
+                        <i class='bi bi-trash'></i>
+                    </button>"
+                ];
+
+                // Convertir la fila a formato JavaScript
+                $filaJS = json_encode($fila);
+                $script .= "tablaPartidas.row.add($filaJS);";  // Agregar la fila
+                $i++;
+            }
+        }
+
+        // Dibujar la tabla con los nuevos datos
+        $script .= "tablaPartidas.draw();";
+
+        // Agregar el script a la respuesta de Jaxon
+        $this->response->script($script);
+
+        return $this->response;
+    }
+
 }
 
 
