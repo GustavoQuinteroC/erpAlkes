@@ -414,6 +414,43 @@ class almacenMovimientos extends alkesGlobal
 
         return $this->response;
     }
+
+    function eliminarFilaLotes($indiceDelArreglo, $indiceLote)
+    {
+        // Verificar que el índice del lote exista
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'][$indiceLote])) {
+            // Marcar el lote como 'Inactivo'
+            $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'][$indiceLote]['estado'] = 'Inactivo';
+        }
+
+        // Redibujar solo el cuerpo de la tabla de lotes
+        $this->generarTablaLotes($indiceDelArreglo);
+
+        return $this->response;
+    }
+
+    function agregarFilaLotes($indiceDelArreglo)
+    {
+        // Crear un nuevo lote con valores vacíos o predefinidos
+        $nuevoLote = [
+            'iddb' => 0,
+            'lote' => '',
+            'serie' => '',
+            'pedimento' => '',
+            'fabricacion' => '',
+            'caducidad' => '',
+            'cantidad' => 0,
+            'estado' => 'Activo'
+        ];
+
+        // Agregar el nuevo lote al arreglo de lotes de la sesión
+        $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'][] = $nuevoLote;
+
+        // Redibujar solo el cuerpo de la tabla de lotes
+        $this->generarTablaLotes($indiceDelArreglo);
+
+        return $this->response;
+    }
 }
 
 
