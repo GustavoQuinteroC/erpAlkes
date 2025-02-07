@@ -7,7 +7,11 @@ use Medoo\Medoo;
 
 class almacenMovimientos extends alkesGlobal
 {
-    
+    function inializarFormulario()
+    {
+        $this->response->assign('fechahora', 'value', date('Y-m-d\TH:i'));
+        return $this->response;
+    }
 
 }
 
