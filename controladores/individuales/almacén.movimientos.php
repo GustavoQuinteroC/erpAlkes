@@ -13,6 +13,12 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function modalSeleccionarSocio()
+    {
+        $this->modalSeleccionServerSide('global', 'socios', '', 0, 'Activos', 'Modal', 'JaxonalmacenMovimientos.cargarSocio', false, '', 'Selecciona Un Socio');
+        return $this->response;
+    }
+
 }
 
 
