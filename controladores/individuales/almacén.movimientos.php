@@ -276,6 +276,25 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function validaSiTieneLote($indiceDelArreglo, $form)
+    {
+        global $database;
+        $almacenes_producto = $database->get("almacenes_productos", "*", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
+        $producto = $database->get("productos", "*", ["id" => $almacenes_producto['idproducto']]);
+        if($producto['lote_serie']=='Sí')
+        {
+            $naturalezaConcepto = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
+            if($naturalezaConcepto=='Salida')
+            {
+                $this->modalSeleccionLotesConsulta($indiceDelArreglo);
+            }
+            elseif($naturalezaConcepto=='Entrada')
+            {
+                $this->modalSeleccionLotes($indiceDelArreglo);
+            }
+        }
+        return $this->response;
+    }
 }
 
 
