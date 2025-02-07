@@ -134,7 +134,7 @@ class alkesGlobal
         $html = '';
 
         // Construcción específica para el modal
-        $html .= '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel" aria-hidden="true">';
+        $html .= '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel">';
         $html .= '<div class="modal-dialog modal-xl" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
@@ -217,7 +217,7 @@ class alkesGlobal
     public function modalFormulario($campos, $titulo, $funcionCallBack, $parametrosAdicionales = '')
     {
         // Crear el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalFormularioLabel" aria-hidden="true">';
+        $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalFormularioLabel">';
         $html .= '<div class="modal-dialog">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
@@ -447,7 +447,7 @@ class alkesGlobal
     public function modalSeleccion($titulo, $columnas, $data, $funcionCallBack, $multiple = false, $parametrosAdicionales = '')
     {
         // Crea el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel" aria-hidden="true">';
+        $html = '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel">';
         $html .= '<div class="modal-dialog modal-lg" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header bg-secondary">';
