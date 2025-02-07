@@ -389,6 +389,31 @@ class almacenMovimientos extends alkesGlobal
         $this->response->assign("tablaLotesBody", "innerHTML", $html);
         return $this->response;
     }
+
+    function guardaDatoLotes($valor, $indicePartida, $indiceLote, $campo)
+    {
+        // Validar que el índice de la partida y el lote existan en la sesión
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote])) {
+            // Actualizar el campo correspondiente en el array de la sesión
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote][$campo] = $valor;
+
+            // Llamar a validaLote para realizar las verificaciones adicionales
+            $resultadoValidacion = $this->validaLote($indicePartida, $indiceLote);
+
+            if ($resultadoValidacion['error']) {
+                // Si hay un error, mostrar un mensaje de alerta
+                $this->alerta("Error en la validación de Lote", $resultadoValidacion['mensaje'], "error");
+            }
+
+            // Redibujar la tabla solo con los lotes actualizados
+            $this->generarTablaLotes($indicePartida);
+        } else {
+            // En caso de que el lote no exista, devolver un mensaje de error
+            $this->alerta("Error interno", "El lote especificado no existe, favor de comunicar este error con el administrador del sistema.", "error");
+        }
+
+        return $this->response;
+    }
 }
 
 
