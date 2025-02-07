@@ -67,6 +67,17 @@ if (file_exists($pathControlador)) {
                                                         almacen validar si hay existencia para poder procesar la
                                                         solicitud (esto siempre y cuando la empresa no permita el
                                                         inventario negativo)</li>
+                                                    <li>Hacer la funcion global validarPermisoPorModulo($modulo,
+                                                        $submodulo, $subsubmodulo), la cual nos retornara true si el
+                                                        usuario tiene el permiso de ver el modulo y false si es que el
+                                                        usuario no tiene el permioso de ver el modulo</li>
+                                                    <li>llevar backorders de documentos como solicitudes, ordenes,
+                                                        cotizaciones y remisiones con triggers en la base de datos</li>
+                                                    <li>al hacer documentos que tengan que ver con dinero validar
+                                                        descuento del cliente/proveedor o descuento de la sucursal</li>
+                                                    <li>Al mostrar lotes, en todos los casos mostrar alerta con lotes
+                                                        proximos a vencer</li>
+                                                    <li>Hacer una bitacora</li>
                                                 </ul>
                                             </li>
                                             <li class="list-group-item">
@@ -90,7 +101,9 @@ if (file_exists($pathControlador)) {
                                                 <strong>Usuarios</strong>
                                                 <ul>
                                                     <li>poner 4 columnas en los permisos (ver, editar, ver todos los
-                                                        registros en el listado, ver dashboard)</li>
+                                                        registros en el listado (aunque aqui pudiera haber subcolumnas
+                                                        por ejemplo: ver listado: completo, sucursal, usuario), ver
+                                                        dashboard)</li>
                                                 </ul>
                                             </li>
                                             <li class="list-group-item">

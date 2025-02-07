@@ -310,7 +310,7 @@ if (file_exists($pathControlador)) {
                                                                 <select id="idc_regimen" name="idc_regimen"
                                                                     onchange="JaxonventasClientes.cambiarUsoCfdi(this.value);"
                                                                     class="form-select select2-field">
-                                                                    <?php echo getCfdiRegimene(); ?>
+                                                                    <?php echo getCfdiRegimen(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
