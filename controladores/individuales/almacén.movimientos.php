@@ -129,6 +129,22 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function desactivarTodasLasPartidas()
+    {
+        // Verifica si existe la sesión de partidas
+        if (isset($_SESSION['partidas' . $_GET['rand']])) {
+            // Recorre todas las partidas y cambia su estado a 'Inactivo'
+            foreach ($_SESSION['partidas' . $_GET['rand']] as &$partida) {
+                $partida['estado'] = 'Inactivo';
+            }
+        }
+
+        // Actualiza la tabla para reflejar los cambios
+        $this->tablaPartidas();
+
+        return $this->response;
+    }
+
 }
 
 
