@@ -366,16 +366,85 @@ class almacenMovimientos extends alkesGlobal
         // Mostrar el modal con Bootstrap 5
         $this->response->script('new bootstrap.Modal(document.getElementById("modalSeleccionLotes")).show();');
 
-        // Eliminar el elemento si es que se cierra y ejecutar la función validarLotes
+        // Eliminar el elemento si es que se cierra y ejecutar la función validarLotesAlCerrarModal
         $this->response->script('
             if (!$("#modalSeleccionLotes").data("evento-registrado")) {
                 $("#modalSeleccionLotes").on("hidden.bs.modal", function () {
-                    JaxonalmacenMovimientos.validarLotes(' . $indiceDelArreglo . ');
+                    JaxonalmacenMovimientos.validarLotesAlCerrarModal(' . $indiceDelArreglo . ');
                     $(this).remove();
                 });
                 $("#modalSeleccionLotes").data("evento-registrado", true);
             }
         ');
+
+        return $this->response;
+    }
+
+    function validarLotesAlCerrarModal()
+    {
+        foreach ($_SESSION['partidas' . $_GET['rand']] as $indicePartida => $partida) {
+            foreach ($partida['lotes'] as $indiceLote => $lote) {
+                if ($lote['estado'] !== 'Activo') {
+                    continue; // Solo validar lotes con estado "Activo"
+                }
+
+                // Verificar que al menos uno de los campos "lote" o "serie" esté registrado
+                if (empty($lote['lote']) && empty($lote['serie'])) {
+                    $this->alerta("Error de validación", "El lote {$indiceLote} de la partida {$indicePartida} debe tener al menos el campo Lote o Serie registrado.", "error");
+                    return $this->response;
+                }
+
+                // Setear fechas a "0000-00-00" si están vacías
+                if (empty($lote['fabricacion'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
+                }
+                if (empty($lote['caducidad'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
+                }
+
+                // Verificar que el campo "lote" no exceda 254 caracteres
+                if (strlen($lote['lote']) > 254) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = substr($lote['lote'], 0, 254);
+                    $this->alerta("Error de validación", "El campo Lote del lote {$indiceLote} de la partida {$indicePartida} no puede exceder 254 caracteres.", "error");
+                    return $this->response;
+                }
+
+                // Verificar que el campo "serie" no exceda 254 caracteres
+                if (strlen($lote['serie']) > 254) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = substr($lote['serie'], 0, 254);
+                    $this->alerta("Error de validación", "El campo Serie del lote {$indiceLote} de la partida {$indicePartida} no puede exceder 254 caracteres.", "error");
+                    return $this->response;
+                }
+
+                // Verificar que el campo "pedimento" no exceda 254 caracteres
+                if (strlen($lote['pedimento']) > 254) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = substr($lote['pedimento'], 0, 254);
+                    $this->alerta("Error de validación", "El campo Pedimento del lote {$indiceLote} de la partida {$indicePartida} no puede exceder 254 caracteres.", "error");
+                    return $this->response;
+                }
+
+                // Verificar que la fecha de fabricación sea válida (formato: YYYY-MM-DD)
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lote['fabricacion'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
+                    $this->alerta("Error de validación", "La fecha de fabricación del lote {$indiceLote} de la partida {$indicePartida} no es válida. Se ha ajustado a '0000-00-00'.", "error");
+                    return $this->response;
+                }
+
+                // Verificar que la fecha de caducidad sea válida (formato: YYYY-MM-DD)
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lote['caducidad'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
+                    $this->alerta("Error de validación", "La fecha de caducidad del lote {$indiceLote} de la partida {$indicePartida} no es válida. Se ha ajustado a '0000-00-00'.", "error");
+                    return $this->response;
+                }
+
+                // Verificar que la cantidad sea un número válido (hasta 12 dígitos y 4 decimales)
+                if (!preg_match('/^\d{1,12}(\.\d{1,4})?$/', $lote['cantidad'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'] = 1;
+                    $this->alerta("Error de validación", "La cantidad del lote {$indiceLote} de la partida {$indicePartida} no es válida. Se ha ajustado a 1.", "error");
+                    return $this->response;
+                }
+            }
+        }
 
         return $this->response;
     }
@@ -403,8 +472,6 @@ class almacenMovimientos extends alkesGlobal
         $this->response->assign("tablaLotesBody", "innerHTML", $html);
         return $this->response;
     }
-
-    
 
     function validaDatosLote($indicePartida, $indiceLote)
     {
@@ -447,8 +514,47 @@ class almacenMovimientos extends alkesGlobal
             ];
         }
 
+        // Verificar que el campo "lote" no exceda 254 caracteres
+        if (strlen($loteActual['lote']) > 254) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = substr($loteActual['lote'], 0, 254);
+            return ['error' => true, 'mensaje' => 'El campo Lote no puede exceder 254 caracteres, se ha ajustado a 254 caracteres.'];
+        }
+
+        // Verificar que el campo "serie" no exceda 254 caracteres
+        if (strlen($loteActual['serie']) > 254) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = substr($loteActual['serie'], 0, 254);
+            return ['error' => true, 'mensaje' => 'El campo Serie no puede exceder 254 caracteres, se ha ajustado a 254 caracteres.'];
+        }
+
+        // Verificar que el campo "pedimento" no exceda 254 caracteres
+        if (strlen($loteActual['pedimento']) > 254) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = substr($loteActual['pedimento'], 0, 254);
+            return ['error' => true, 'mensaje' => 'El campo Pedimento no puede exceder 254 caracteres, se ha ajustado a 254 caracteres.'];
+        }
+
+        // Verificar que la fecha de fabricación sea válida (formato: YYYY-MM-DD)
+        if (!empty($loteActual['fabricacion']) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $loteActual['fabricacion'])) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
+            return ['error' => true, 'mensaje' => 'La fecha de fabricación no es válida. Se ha ajustado a "0000-00-00".'];
+        }
+
+        // Verificar que la fecha de caducidad sea válida (formato: YYYY-MM-DD)
+        if (!empty($loteActual['caducidad']) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $loteActual['caducidad'])) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
+            return ['error' => true, 'mensaje' => 'La fecha de caducidad no es válida. Se ha ajustado a "0000-00-00".'];
+        }
+
+        // Verificar que la cantidad sea un número válido (hasta 12 dígitos y 4 decimales)
+        if (!preg_match('/^\d{1,12}(\.\d{1,4})?$/', $loteActual['cantidad'])) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'] = 1;
+            return ['error' => true, 'mensaje' => 'La cantidad no es válida. Se ha ajustado a 1.'];
+        }
+
         return ['error' => false];
     }
+
+
+
 
     function guardaDatoLotes($valor, $indicePartida, $indiceLote, $campo)
     {
@@ -499,7 +605,7 @@ class almacenMovimientos extends alkesGlobal
             'pedimento' => '',
             'fabricacion' => '',
             'caducidad' => '',
-            'cantidad' => 0,
+            'cantidad' => 1,
             'estado' => 'Activo'
         ];
 
