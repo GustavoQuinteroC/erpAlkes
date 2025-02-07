@@ -110,10 +110,10 @@ class almacenAlmacenes extends alkesGlobal
         return $this->response;
     }
 
-    function modalAddProducto()
+    function modalSeleccionarProductos()
     {
         global $database;
-        $this->modalSeleccionServerSide('almacén', 'productos', '', 'Principal', 'Modal', 'JaxonalmacenAlmacenes.addProductos', true, '', 'Seleccionar Productos');
+        $this->modalSeleccionServerSide('almacén', 'productos', '', 0, 'Principal', 'Modal', 'JaxonalmacenAlmacenes.addProductos', true, '', 'Seleccionar Productos');
         return $this->response;
     }
 

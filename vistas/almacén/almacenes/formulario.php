@@ -123,7 +123,7 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-building"></i></span>
                                                                 <select id="idsucursal" name="idsucursal"
                                                                     class="form-select select2-field">
-                                                                    <?php echo getsucursales(); ?>
+                                                                    <?php echo getSucursales(); ?>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -189,7 +189,7 @@ if (file_exists($pathControlador)) {
                                             <div class="card-tools d-flex align-items-center gap-2">
                                                 <button tabindex="400" id="addImpuesto" name="addImpuesto"
                                                     class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
-                                                    onclick="JaxonalmacenAlmacenes.modalAddProducto();" type="button">
+                                                    onclick="JaxonalmacenAlmacenes.modalSeleccionarProductos();" type="button">
                                                     <span class="bi bi-plus-lg me-1"></span> Agregar
                                                 </button>
                                                 <button tabindex="400" id="addImpuesto" name="addImpuesto"
