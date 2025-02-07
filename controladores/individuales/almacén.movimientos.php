@@ -390,6 +390,50 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function validaLote($indicePartida, $indiceLote)
+    {
+        $loteActual = $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote];
+        $loteActualId = "{$loteActual['lote']}|{$loteActual['serie']}|{$loteActual['fabricacion']}|{$loteActual['caducidad']}";
+
+        // Verificar si la combinación lote-serie-fabricación-caducidad ya existe en otros lotes
+        foreach ($_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'] as $index => $lote) {
+            if ($index !== $indiceLote) {
+                $loteId = "{$lote['lote']}|{$lote['serie']}|{$lote['fabricacion']}|{$lote['caducidad']}";
+                if ($loteId === $loteActualId) {
+                    // Si se encuentra una combinación repetida, limpiar los campos conflictivos
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = '';
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = '';
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = '';
+                    
+                    return [
+                        'error' => true,
+                        'mensaje' => 'La combinación de Lote, Serie, Fabricación y Caducidad ya existe. Los campos han sido limpiados.'
+                    ];
+                }
+            }
+        }
+
+        // Verificar que la cantidad no sea 0 o negativa
+        if (isset($loteActual['cantidad']) && $loteActual['cantidad'] <= 0) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'] = 1;
+            return [
+                'error' => true,
+                'mensaje' => 'La cantidad no puede ser 0 o negativa. Se ha ajustado a 1.'
+            ];
+        }
+
+        // Verificar que la fecha de fabricación no sea posterior al día de hoy
+        if (!empty($loteActual['fabricacion']) && strtotime($loteActual['fabricacion']) > time()) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = date('Y-m-d');
+            return [
+                'error' => true,
+                'mensaje' => 'La fecha de fabricación no puede ser posterior al día de hoy. Se ha ajustado a la fecha actual.'
+            ];
+        }
+
+        return ['error' => false];
+    }
+
     function guardaDatoLotes($valor, $indicePartida, $indiceLote, $campo)
     {
         // Validar que el índice de la partida y el lote existan en la sesión
