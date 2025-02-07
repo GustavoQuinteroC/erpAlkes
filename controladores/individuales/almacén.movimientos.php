@@ -404,7 +404,9 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
-    function validaLote($indicePartida, $indiceLote)
+    
+
+    function validaDatosLote($indicePartida, $indiceLote)
     {
         $loteActual = $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote];
         $loteActualId = "{$loteActual['lote']}|{$loteActual['serie']}|{$loteActual['fabricacion']}|{$loteActual['caducidad']}";
@@ -455,8 +457,8 @@ class almacenMovimientos extends alkesGlobal
             // Actualizar el campo correspondiente en el array de la sesión
             $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote][$campo] = $valor;
 
-            // Llamar a validaLote para realizar las verificaciones adicionales
-            $resultadoValidacion = $this->validaLote($indicePartida, $indiceLote);
+            // Llamar a validaDatosLote para realizar las verificaciones adicionales
+            $resultadoValidacion = $this->validaDatosLote($indicePartida, $indiceLote);
 
             if ($resultadoValidacion['error']) {
                 // Si hay un error, mostrar un mensaje de alerta
