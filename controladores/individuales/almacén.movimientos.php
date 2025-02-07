@@ -276,6 +276,20 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function desactivarPartida($indice)
+    {
+        // Verifica si existe la sesión de partidas y si el índice es válido
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indice])) {
+            // Cambia el estado de la partida específica a 'Inactivo'
+            $_SESSION['partidas' . $_GET['rand']][$indice]['estado'] = 'Inactivo';
+        }
+
+        // Actualiza la tabla para reflejar los cambios
+        $this->tablaPartidas();
+
+        return $this->response;
+    }
+
     function validaSiTieneLote($indiceDelArreglo, $form)
     {
         global $database;
