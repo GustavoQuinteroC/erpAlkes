@@ -295,6 +295,100 @@ class almacenMovimientos extends alkesGlobal
         }
         return $this->response;
     }
+
+    function modalSeleccionLotes($indiceDelArreglo)
+    {
+        global $database;
+
+        // Crear el HTML de la ventana modal
+        $html = '<div class="modal fade" id="modalSeleccionLotes" tabindex="-1" aria-labelledby="modalSeleccionLotesLabel">';
+        $html .= '<div class="modal-dialog modal-xl" role="document">';
+        $html .= '<div class="modal-content">';
+        $html .= '<div class="modal-header text-bg-' . getEnfasis() . ' d-flex justify-content-between align-items-center">';
+        $html .= '<h5 class="modal-title" id="modalSeleccionLotesLabel">Selección de Lotes</h5>';
+        $html .= '<div class="d-flex align-items-center gap-2">';
+        $html .= '<button tabindex="400" id="addLote" name="addLote" class="btn btn-sm border ' . getTextColor() . ' bg-transparent" onclick="JaxonalmacenMovimientos.agregarFilaLotes(' . $indiceDelArreglo . ');" type="button">';
+        $html .= '<span class="bi bi-plus-lg me-1"></span> Agregar';
+        $html .= '</button>';
+        $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<div class="modal-body">';
+        $html .= '<div class="table-responsive">';
+        $html .= '<table class="table table-borderless" id="tablaLotes">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>No. de Lote</th>';
+        $html .= '<th>No. de Serie</th>';
+        $html .= '<th>No. de Pedimento</th>';
+        $html .= '<th>Fecha de Fabricación</th>';
+        $html .= '<th>Fecha de Caducidad</th>';
+        $html .= '<th>Cantidad</th>';
+        $html .= '<th>Acciones</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody id="tablaLotesBody">';
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<div class="modal-footer">';
+        $html .= '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Remover cualquier modal previo
+        $this->response->remove('modalSeleccionLotes');
+
+        // Insertar el nuevo modal
+        $this->response->append("modales", "innerHTML", $html);
+
+        // Generación del contenido de la tabla de lotes
+        $this->generarTablaLotes($indiceDelArreglo);
+
+        // Mostrar el modal con Bootstrap 5
+        $this->response->script('new bootstrap.Modal(document.getElementById("modalSeleccionLotes")).show();');
+
+        // Eliminar el elemento si es que se cierra y ejecutar la función validarLotes
+        $this->response->script('
+            if (!$("#modalSeleccionLotes").data("evento-registrado")) {
+                $("#modalSeleccionLotes").on("hidden.bs.modal", function () {
+                    JaxonalmacenMovimientos.validarLotes(' . $indiceDelArreglo . ');
+                    $(this).remove();
+                });
+                $("#modalSeleccionLotes").data("evento-registrado", true);
+            }
+        ');
+
+        return $this->response;
+    }
+
+    function generarTablaLotes($indiceDelArreglo)
+    {
+        // Obtener los lotes activos de la sesión
+        $lotes = $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] ?? [];
+        $lotesActivos = array_filter($lotes, function ($lote) {
+            return $lote['estado'] == 'Activo';
+        });
+
+        $html = '';
+        foreach ($lotesActivos as $index => $lote) {
+            $html .= '<tr>';
+            $html .= '<td><input type="text" class="form-control" id="lote_' . $indiceDelArreglo . '_' . $index . '" value="' . htmlspecialchars($lote['lote'] ?? '') . '" onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'lote\')"></td>';
+            $html .= '<td><input type="text" class="form-control" id="serie_' . $indiceDelArreglo . '_' . $index . '" value="' . htmlspecialchars($lote['serie'] ?? '') . '" onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'serie\')"></td>';
+            $html .= '<td><input type="text" class="form-control" id="pedimento_' . $indiceDelArreglo . '_' . $index . '" value="' . htmlspecialchars($lote['pedimento'] ?? '') . '" onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'pedimento\')"></td>';
+            $html .= '<td><input type="date" class="form-control" id="fabricacion_' . $indiceDelArreglo . '_' . $index . '" value="' . (!empty($lote['fabricacion']) ? date('Y-m-d', strtotime($lote['fabricacion'])) : '') . '" onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'fabricacion\')"></td>';
+            $html .= '<td><input type="date" class="form-control" id="caducidad_' . $indiceDelArreglo . '_' . $index . '" value="' . (!empty($lote['caducidad']) ? date('Y-m-d', strtotime($lote['caducidad'])) : '') . '"onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'caducidad\')"></td>';
+            $html .= '<td><input type="number" class="form-control" id="cantidad_' . $indiceDelArreglo . '_' . $index . '" value="' . htmlspecialchars($lote['cantidad'] ?? 0) . '"onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'cantidad\')"></td>';
+            $html .= '<td><button type="button" class="btn btn-danger" onclick="JaxonalmacenMovimientos.eliminarFilaLotes(' . $indiceDelArreglo . ', ' . $index . ')"><i class="bi bi-trash"></i></button></td>';
+            $html .= '</tr>';
+        }
+        $this->response->assign("tablaLotesBody", "innerHTML", $html);
+        return $this->response;
+    }
 }
 
 
