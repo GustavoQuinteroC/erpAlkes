@@ -182,39 +182,7 @@ class almacenMovimientos extends alkesGlobal
                     'idalmacenes_productos' => $idalmacenes_productos,
                     'cantidad' => 0,
                     'estado' => 'Activo',
-                    'lotes' => [
-                        // Ejemplo de lote predefinido, puedes agregar más lotes o dejar este array vacío según sea necesario
-                        [
-                            'iddb' => 0,
-                            'lote' => 'a',
-                            'serie' => 'b',
-                            'pedimento' => 'c',
-                            'fabricacion' => '2024-02-13',
-                            'caducidad' => '2027-06-30',
-                            'cantidad' => 0,
-                            'estado' => 'Activo'
-                        ],
-                        [
-                            'iddb' => 0,
-                            'lote' => 'b',
-                            'serie' => 'b',
-                            'pedimento' => 'c',
-                            'fabricacion' => '2024-02-13',
-                            'caducidad' => '2027-06-30',
-                            'cantidad' => 0,
-                            'estado' => 'Activo'
-                        ],
-                        [
-                            'iddb' => 0,
-                            'lote' => 'c',
-                            'serie' => 'b',
-                            'pedimento' => 'c',
-                            'fabricacion' => '2024-02-13',
-                            'caducidad' => '2027-06-30',
-                            'cantidad' => 0,
-                            'estado' => 'Activo'
-                        ]
-                    ]
+                    'lotes' => []
                 ];
             }
         }
@@ -312,8 +280,6 @@ class almacenMovimientos extends alkesGlobal
 
     function modalSeleccionLotes($indiceDelArreglo)
     {
-        global $database;
-
         // Crear el HTML de la ventana modal
         $html = '<div class="modal fade" id="modalSeleccionLotes" tabindex="-1" aria-labelledby="modalSeleccionLotesLabel">';
         $html .= '<div class="modal-dialog modal-xl" role="document">';
@@ -380,7 +346,7 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
-    function validarLotesAlCerrarModal()
+    function validarLotesAlCerrarModal($indiceDelArreglo)
     {
         foreach ($_SESSION['partidas' . $_GET['rand']] as $indicePartida => $partida) {
             foreach ($partida['lotes'] as $indiceLote => $lote) {
@@ -393,10 +359,10 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['estado'] = 'Inactivo';
                     $this->alerta(
                         "Lote desactivado", 
-                        "El lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no tiene Lote ni Serie registrados. Se ha eliminado.", 
+                        "Un lote y/o serie de la partida no tiene Lote ni Serie registrados. Se ha eliminado.", 
                         "warning"
                     );
-                    continue;
+                    return $this->response;
                 }
 
                 // Setear fechas a "0000-00-00" si están vacías
@@ -412,7 +378,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = substr($lote['lote'], 0, 254);
                     $this->alerta(
                         "Error de validación", 
-                        "El campo Lote del lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no puede exceder 254 caracteres. Se ha ajustado a 254 caracteres", 
+                        "El campo Lote de un lote y/o serie de la partida no puede exceder 254 caracteres. Se ha ajustado a 254 caracteres", 
                         "error"
                     );
                     return $this->response;
@@ -423,7 +389,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = substr($lote['serie'], 0, 254);
                     $this->alerta(
                         "Error de validación", 
-                        "El campo Serie del lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no puede exceder 254 caracteres. Se ha ajustado a 254 caracteres", 
+                        "El campo Serie de un lote y/o serie de la partida no puede exceder 254 caracteres. Se ha ajustado a 254 caracteres", 
                         "error"
                     );
                     return $this->response;
@@ -434,7 +400,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = substr($lote['pedimento'], 0, 254);
                     $this->alerta(
                         "Error de validación", 
-                        "El campo Pedimento del lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no puede exceder 254 caracteres. Se ha ajustado a 254 caracteres", 
+                        "El campo Pedimento de un lote y/o serie de la partida no puede exceder 254 caracteres. Se ha ajustado a 254 caracteres", 
                         "error"
                     );
                     return $this->response;
@@ -445,7 +411,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
                     $this->alerta(
                         "Error de validación", 
-                        "La fecha de fabricación del lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no es válida. Se ha ajustado a '0000-00-00'.", 
+                        "La fecha de fabricación de un lote y/o serie de la partida no es válida. Se ha ajustado a '0000-00-00'.", 
                         "error"
                     );
                     return $this->response;
@@ -456,7 +422,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
                     $this->alerta(
                         "Error de validación", 
-                        "La fecha de caducidad del lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no es válida. Se ha ajustado a '0000-00-00'.", 
+                        "La fecha de caducidad de un lote y/o serie de la partida no es válida. Se ha ajustado a '0000-00-00'.", 
                         "error"
                     );
                     return $this->response;
@@ -467,7 +433,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'] = 1;
                     $this->alerta(
                         "Error de validación", 
-                        "La cantidad del lote " . ($indiceLote + 1) . " de la partida " . ($indicePartida + 1) . " no es válida. Se ha ajustado a 1.", 
+                        "La cantidad del lote de un lote y/o serie de la partida no es válida. Se ha ajustado a 1.", 
                         "error"
                     );
                     return $this->response;
@@ -476,10 +442,33 @@ class almacenMovimientos extends alkesGlobal
         }
 
         // Mensaje de validación completada
-        $this->alerta("Validación completada", "Todos los lotes han sido validados correctamente.", "success");
+        $this->alerta("Validación completada", "Todos los lotes han sido validados correctamente.", "success", "", false, true);
+        $this->ajusteCantidad($indiceDelArreglo);
+        $this->tablaPartidas();
         return $this->response;
     }
 
+    function ajusteCantidad($indiceDelArreglo)
+    {
+        // Verificar que la partida exista en la sesión
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo])) {
+            $lotes = $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] ?? [];
+
+            // Sumar las cantidades de todos los lotes activos
+            $cantidadTotal = array_reduce($lotes, function ($carry, $lote) {
+                return $carry + ($lote['estado'] == 'Activo' ? (int)$lote['cantidad'] : 0);
+            }, 0);
+
+            // Actualizar la cantidad en la partida
+            $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad'] = $cantidadTotal;
+
+            // Redibujar la tabla para reflejar el cambio si es necesario
+            $this->generarTablaLotes($indiceDelArreglo);
+        } else {
+            // En caso de que la partida no exista, devolver un mensaje de error
+            $this->alerta("Error interno", "La partida especificada no existe. Por favor, comuníquese con el administrador del sistema.", "error");
+        }
+    }
 
     function generarTablaLotes($indiceDelArreglo)
     {
@@ -597,7 +586,39 @@ class almacenMovimientos extends alkesGlobal
 
             if ($resultadoValidacion['error']) {
                 // Si hay un error, mostrar un mensaje de alerta
-                $this->alerta("Error en la validación de Lote", $resultadoValidacion['mensaje'], "error");
+                $this->alerta("Error en la validación", $resultadoValidacion['mensaje'], "error");
+            }
+            else
+            {
+                if($campo=='lote' or $campo=='serie')
+                {
+                    global $database;
+                    $almacenes_producto = $database->get("almacenes_productos", "*", [
+                        "id" => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['idalmacenes_productos']
+                    ]);
+    
+                    $almacenes_productos_lote = $database->get("almacenes_productos_lotes", "*", [
+                        "idproducto" => $almacenes_producto['idproducto'],
+                        "idalmacen"  => $almacenes_producto['idalmacen'],
+                        "lote"       => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'],
+                        "serie"      => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie']
+                    ]);
+    
+                    if ($almacenes_productos_lote) {
+                        
+                        $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote] = [
+                            'iddb'        => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['iddb'],  // El ID real del lote en la base de datos
+                            'lote'        => $almacenes_productos_lote['lote'],
+                            'serie'       => $almacenes_productos_lote['serie'],
+                            'pedimento'   => $almacenes_productos_lote['pedimento'],
+                            'fabricacion' => $almacenes_productos_lote['fabricacion'],
+                            'caducidad'   => $almacenes_productos_lote['caducidad'],
+                            'cantidad'    => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'],
+                            'estado'      => 'Activo'  // Mantiene el estado como "Activo"
+                        ];
+                        $this->alerta("Lote y/o serie encontrados", "Se han llenado automaticamente los campos restantes", "success", null, false, true);
+                    }
+                }
             }
 
             // Redibujar la tabla solo con los lotes actualizados
