@@ -110,7 +110,8 @@ if (file_exists($pathControlador)) {
                                                                 <!-- Botón para autorizar el cambio -->
                                                                 <button class="btn btn-warning" type="button"
                                                                     id="cambiarConcepto"
-                                                                    onclick="JaxonalmacenMovimientos.modalConfirmacionHabilitaConcepto();" disabled>
+                                                                    onclick="JaxonalmacenMovimientos.modalConfirmacionHabilitaConcepto();"
+                                                                    disabled>
                                                                     <i class="bi bi-arrow-repeat"></i>
                                                                 </button>
                                                             </div>
@@ -134,7 +135,8 @@ if (file_exists($pathControlador)) {
                                                                 <!-- Botón para autorizar el cambio -->
                                                                 <button class="btn btn-warning" type="button"
                                                                     id="cambiarAlmacen"
-                                                                    onclick="JaxonalmacenMovimientos.modalConfirmacionHabilitaAlmacen();" disabled>
+                                                                    onclick="JaxonalmacenMovimientos.modalConfirmacionHabilitaAlmacen();"
+                                                                    disabled>
                                                                     <i class="bi bi-arrow-repeat"></i>
                                                                 </button>
                                                             </div>
@@ -303,7 +305,13 @@ if (file_exists($pathControlador)) {
                                     desarrollador:</label>
                                 <div class="col-sm-8">
                                     <p id="notas" class="form-text text-muted">
-                                        1- restringir el poder agregar productos de tipo no inventariable.
+                                        1- al procesar el movimiento volver a comprobar la existencia en caso de ser un
+                                        movimiento de tipo salida.
+                                        1- validar existencia en partidas.
+                                        1- hacer una funcion validacantidadpartida y hacer todas las actualizaciones
+                                        desde esa funcion, esa funcion se encargara de hacer la consulta a la base de
+                                        datos sobre el inventario y en caso de no ajustar, entonces pondra tanto la
+                                        partida como sus lotes en 0.
                                     </p>
                                 </div>
                             </div>

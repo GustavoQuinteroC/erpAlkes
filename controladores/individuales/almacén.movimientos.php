@@ -173,30 +173,63 @@ class almacenMovimientos extends alkesGlobal
 
     function addProductos($form)
     {
+        $productosDuplicados = []; // Almacena los nombres de los productos duplicados
+        $productosAgregados = false;
+
         // Verifica si el array 'seleccion' existe y no está vacío
         if (isset($form['seleccion']) && is_array($form['seleccion'])) {
             foreach ($form['seleccion'] as $idalmacenes_productos) {
-                // Agrega un nuevo array a la sesión con el idalmacenes_productos correspondiente
-                $_SESSION['partidas' . $_GET['rand']][] = [
-                    'iddb' => 0,
-                    'idalmacenes_productos' => $idalmacenes_productos,
-                    'cantidad' => 0,
-                    'estado' => 'Activo',
-                    'lotes' => []
-                ];
+                // Verifica si el producto ya existe en las partidas con estado "Activo"
+                $existe = false;
+                foreach ($_SESSION['partidas' . $_GET['rand']] as $partida) {
+                    if ($partida['idalmacenes_productos'] == $idalmacenes_productos && $partida['estado'] === 'Activo') {
+                        $existe = true;
+                        break;
+                    }
+                }
+
+                if ($existe) {
+                    global $database;
+                    // Obtener el nombre del producto para el mensaje de duplicado
+                    $almacenes_producto = $database->get("almacenes_productos", "idproducto", ["id" => $idalmacenes_productos]);
+                    $producto = $database->get("productos", "nombre", ["id" => $almacenes_producto]);
+                    $productosDuplicados[] = $producto ?: "Producto desconocido"; // Evitar nombres vacíos
+                } else {
+                    // Agrega el nuevo producto si no es duplicado
+                    $_SESSION['partidas' . $_GET['rand']][] = [
+                        'iddb' => 0,
+                        'idalmacenes_productos' => $idalmacenes_productos,
+                        'cantidad' => 0,
+                        'estado' => 'Activo',
+                        'lotes' => []
+                    ];
+                    $productosAgregados = true;
+                }
             }
         }
+
+        // Muestra la tabla de partidas actualizada
         $this->tablaPartidas();
+
+        // Generar alertas según el resultado de las validaciones
+        if (!empty($productosDuplicados)) {
+            $mensaje = "Algunos productos ya existían en las partidas y no se agregaron:<br>" . implode("<br>", $productosDuplicados);
+            $this->alerta("Productos duplicados", $mensaje, "warning");
+        } elseif ($productosAgregados) {
+            $this->alerta("Productos agregados", "Los productos seleccionados se agregaron correctamente.", "success");
+        } else {
+            $this->alerta("Sin cambios", "No se agregó ningún producto.", "info");
+        }
+
         return $this->response;
     }
 
+
     function tablaPartidas()
     {
-        // Iniciar la respuesta de script
         $script = "tablaPartidas.clear();"; // Limpiar la tabla
         $i = 1;
 
-        // Verificar si el índice de sesión existe para evitar errores
         if (!isset($_SESSION['partidas' . $_GET['rand']])) {
             $this->response->script("console.error('No se encontraron partidas.');");
             return $this->response;
@@ -205,7 +238,7 @@ class almacenMovimientos extends alkesGlobal
         foreach ($_SESSION['partidas' . $_GET['rand']] as $index => $partida) {
             if ($partida['estado'] == 'Activo') {
                 global $database;
-                
+
                 // Obtener datos necesarios de la base de datos
                 $almacenes_producto = $database->get("almacenes_productos", "*", ["id" => $partida['idalmacenes_productos']]);
                 $producto = $database->get("productos", "*", ["id" => $almacenes_producto['idproducto']]);
@@ -221,24 +254,20 @@ class almacenMovimientos extends alkesGlobal
                     htmlspecialchars($almacenes_producto['existencia']),
                     "<input type='number' class='form-control cantidad-input' value='" . htmlspecialchars($partida['cantidad']) . "' 
                         data-idpartida='" . htmlspecialchars($partida['iddb']) . "' min='0' 
-                        onfocus='JaxonalmacenMovimientos.validaSiTieneLote($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"))'>",
+                        onblur='JaxonalmacenMovimientos.validaCantidad(jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"), this.value, " . $almacenes_producto['existencia'] . ")'>",
                     "<button type='button' class='btn btn-sm btn-danger' title='Eliminar' 
                         onclick='JaxonalmacenMovimientos.desactivarPartida($index)'>
                         <i class='bi bi-trash'></i>
                     </button>"
-                ];
-
+                ];                
                 // Convertir la fila a formato JavaScript
                 $filaJS = json_encode($fila);
-                $script .= "tablaPartidas.row.add($filaJS);";  // Agregar la fila
+                $script .= "tablaPartidas.row.add($filaJS);";
                 $i++;
             }
         }
 
-        // Dibujar la tabla con los nuevos datos
         $script .= "tablaPartidas.draw();";
-
-        // Agregar el script a la respuesta de Jaxon
         $this->response->script($script);
 
         return $this->response;
@@ -344,113 +373,6 @@ class almacenMovimientos extends alkesGlobal
         ');
 
         return $this->response;
-    }
-
-    function validarLotesAlCerrarModal($indiceDelArreglo)
-    {
-        $errores = [];  // Array para acumular mensajes de alerta
-        $i=0;
-        $j=0;
-        foreach ($_SESSION['partidas' . $_GET['rand']] as $indicePartida => $partida) {
-            if ($partida['estado'] !== 'Activo') {
-                continue; // Solo validar lotes con estado "Activo"
-            }
-            $i++;
-            foreach ($partida['lotes'] as $indiceLote => $lote) {
-                if ($lote['estado'] !== 'Activo') {
-                    continue; // Solo validar lotes con estado "Activo"
-                }
-                $j++;
-                // Verificar que al menos uno de los campos "lote" o "serie" esté registrado
-                if (empty($lote['lote']) && empty($lote['serie'])) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['estado'] = 'Inactivo';
-                    $errores[] = "El lote $j de la partida $i no tiene Lote ni Serie registrados. Se ha eliminado.";
-                    continue;
-                }
-
-                // Setear fechas a "0000-00-00" si están vacías
-                if (empty($lote['fabricacion'])) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
-                }
-                if (empty($lote['caducidad'])) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
-                }
-
-                // Verificar que el campo "lote" no exceda 254 caracteres
-                if (strlen($lote['lote']) > 254) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = substr($lote['lote'], 0, 254);
-                    $errores[] = "El campo Lote del lote $j de la partida $i excedía 254 caracteres. Se ha ajustado.";
-                }
-
-                // Verificar que el campo "serie" no exceda 254 caracteres
-                if (strlen($lote['serie']) > 254) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = substr($lote['serie'], 0, 254);
-                    $errores[] = "El campo Serie del lote $j de la partida $i excedía 254 caracteres. Se ha ajustado.";
-                }
-
-                // Verificar que el campo "pedimento" no exceda 254 caracteres
-                if (strlen($lote['pedimento']) > 254) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = substr($lote['pedimento'], 0, 254);
-                    $errores[] = "El campo Pedimento del lote $j de la partida $i excedía 254 caracteres. Se ha ajustado.";
-                }
-
-                // Verificar que la fecha de fabricación sea válida (formato: YYYY-MM-DD)
-                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lote['fabricacion'])) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
-                    $errores[] = "La fecha de fabricación del lote $j de la partida $i no era válida. Se ha ajustado a '0000-00-00'.";
-                }
-
-                // Verificar que la fecha de caducidad sea válida (formato: YYYY-MM-DD)
-                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lote['caducidad'])) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
-                    $errores[] = "La fecha de caducidad del lote $j de la partida $i no era válida. Se ha ajustado a '0000-00-00'.";
-                }
-
-                // Verificar que la cantidad sea un número válido (hasta 12 dígitos y 4 decimales)
-                if (!preg_match('/^\d{1,12}(\.\d{1,4})?$/', $lote['cantidad'])) {
-                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'] = 1;
-                    $errores[] = "La cantidad del lote $j de la partida $i no era válida. Se ha ajustado a 1.";
-                }
-            }
-        }
-
-        // Mostrar todas las alertas juntas
-        if (!empty($errores)) {
-            $this->alerta(
-                "Errores de validación", 
-                implode("<br>", $errores), 
-                "error"
-            );
-        } else {
-            $this->alerta("Validación completada", "Todos los lotes han sido validados correctamente.", "success");
-        }
-
-        $this->ajusteCantidad($indiceDelArreglo);
-        $this->tablaPartidas();
-        return $this->response;
-    }
-
-
-    function ajusteCantidad($indiceDelArreglo)
-    {
-        // Verificar que la partida exista en la sesión
-        if (isset($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo])) {
-            $lotes = $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] ?? [];
-
-            // Sumar las cantidades de todos los lotes activos
-            $cantidadTotal = array_reduce($lotes, function ($carry, $lote) {
-                return $carry + ($lote['estado'] == 'Activo' ? (int)$lote['cantidad'] : 0);
-            }, 0);
-
-            // Actualizar la cantidad en la partida
-            $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad'] = $cantidadTotal;
-
-            // Redibujar la tabla para reflejar el cambio si es necesario
-            $this->generarTablaLotes($indiceDelArreglo);
-        } else {
-            // En caso de que la partida no exista, devolver un mensaje de error
-            $this->alerta("Error interno", "La partida especificada no existe. Por favor, comuníquese con el administrador del sistema.", "error");
-        }
     }
 
     function generarTablaLotes($indiceDelArreglo)
@@ -650,6 +572,114 @@ class almacenMovimientos extends alkesGlobal
 
         return $this->response;
     }
+
+    function validarLotesAlCerrarModal($indiceDelArreglo)
+    {
+        $errores = [];  // Array para acumular mensajes de alerta
+        $i=0;
+        $j=0;
+        foreach ($_SESSION['partidas' . $_GET['rand']] as $indicePartida => $partida) {
+            if ($partida['estado'] !== 'Activo') {
+                continue; // Solo validar lotes con estado "Activo"
+            }
+            $i++;
+            foreach ($partida['lotes'] as $indiceLote => $lote) {
+                if ($lote['estado'] !== 'Activo') {
+                    continue; // Solo validar lotes con estado "Activo"
+                }
+                $j++;
+                // Verificar que al menos uno de los campos "lote" o "serie" esté registrado
+                if (empty($lote['lote']) && empty($lote['serie'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['estado'] = 'Inactivo';
+                    $errores[] = "El lote $j de la partida $i no tiene Lote ni Serie registrados. Se ha eliminado.";
+                    continue;
+                }
+
+                // Setear fechas a "0000-00-00" si están vacías
+                if (empty($lote['fabricacion'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
+                }
+                if (empty($lote['caducidad'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
+                }
+
+                // Verificar que el campo "lote" no exceda 254 caracteres
+                if (strlen($lote['lote']) > 254) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = substr($lote['lote'], 0, 254);
+                    $errores[] = "El campo Lote del lote $j de la partida $i excedía 254 caracteres. Se ha ajustado.";
+                }
+
+                // Verificar que el campo "serie" no exceda 254 caracteres
+                if (strlen($lote['serie']) > 254) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = substr($lote['serie'], 0, 254);
+                    $errores[] = "El campo Serie del lote $j de la partida $i excedía 254 caracteres. Se ha ajustado.";
+                }
+
+                // Verificar que el campo "pedimento" no exceda 254 caracteres
+                if (strlen($lote['pedimento']) > 254) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = substr($lote['pedimento'], 0, 254);
+                    $errores[] = "El campo Pedimento del lote $j de la partida $i excedía 254 caracteres. Se ha ajustado.";
+                }
+
+                // Verificar que la fecha de fabricación sea válida (formato: YYYY-MM-DD)
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lote['fabricacion'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['fabricacion'] = '0000-00-00';
+                    $errores[] = "La fecha de fabricación del lote $j de la partida $i no era válida. Se ha ajustado a '0000-00-00'.";
+                }
+
+                // Verificar que la fecha de caducidad sea válida (formato: YYYY-MM-DD)
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lote['caducidad'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['caducidad'] = '0000-00-00';
+                    $errores[] = "La fecha de caducidad del lote $j de la partida $i no era válida. Se ha ajustado a '0000-00-00'.";
+                }
+
+                // Verificar que la cantidad sea un número válido (hasta 12 dígitos y 4 decimales)
+                if (!preg_match('/^\d{1,12}(\.\d{1,4})?$/', $lote['cantidad'])) {
+                    $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'] = 1;
+                    $errores[] = "La cantidad del lote $j de la partida $i no era válida. Se ha ajustado a 1.";
+                }
+            }
+        }
+
+        // Mostrar todas las alertas juntas
+        if (!empty($errores)) {
+            $this->alerta(
+                "Errores de validación", 
+                implode("<br>", $errores), 
+                "error"
+            );
+        } else {
+            $this->alerta("Validación completada", "Todos los lotes han sido validados correctamente.", "success");
+        }
+
+        $this->ajusteCantidad($indiceDelArreglo);
+        $this->tablaPartidas();
+        return $this->response;
+    }
+
+
+    function ajusteCantidad($indiceDelArreglo)
+    {
+        // Verificar que la partida exista en la sesión
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo])) {
+            $lotes = $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] ?? [];
+
+            // Sumar las cantidades de todos los lotes activos
+            $cantidadTotal = array_reduce($lotes, function ($carry, $lote) {
+                return $carry + ($lote['estado'] == 'Activo' ? (int)$lote['cantidad'] : 0);
+            }, 0);
+
+            // Actualizar la cantidad en la partida
+            $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad'] = $cantidadTotal;
+
+            // Redibujar la tabla para reflejar el cambio si es necesario
+            $this->generarTablaLotes($indiceDelArreglo);
+        } else {
+            // En caso de que la partida no exista, devolver un mensaje de error
+            $this->alerta("Error interno", "La partida especificada no existe. Por favor, comuníquese con el administrador del sistema.", "error");
+        }
+    }
+
 }
 
 
