@@ -216,14 +216,13 @@ class almacenMovimientos extends alkesGlobal
             $mensaje = "Algunos productos ya existían en las partidas y no se agregaron:<br>" . implode("<br>", $productosDuplicados);
             $this->alerta("Productos duplicados", $mensaje, "warning");
         } elseif ($productosAgregados) {
-            $this->alerta("Productos agregados", "Los productos seleccionados se agregaron correctamente.", "success");
+            
         } else {
             $this->alerta("Sin cambios", "No se agregó ningún producto.", "info");
         }
 
         return $this->response;
     }
-
 
     function tablaPartidas()
     {
@@ -254,12 +253,13 @@ class almacenMovimientos extends alkesGlobal
                     htmlspecialchars($almacenes_producto['existencia']),
                     "<input type='number' class='form-control cantidad-input' value='" . htmlspecialchars($partida['cantidad']) . "' 
                         data-idpartida='" . htmlspecialchars($partida['iddb']) . "' min='0' 
-                        onblur='JaxonalmacenMovimientos.validaCantidad(jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"), this.value, " . $almacenes_producto['existencia'] . ")'>",
+                        onfocus='JaxonalmacenMovimientos.validaSiTieneLote($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"))' 
+                        onblur='JaxonalmacenMovimientos.validaCantidadPartida($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"), this.value)'>",
                     "<button type='button' class='btn btn-sm btn-danger' title='Eliminar' 
                         onclick='JaxonalmacenMovimientos.desactivarPartida($index)'>
                         <i class='bi bi-trash'></i>
                     </button>"
-                ];                
+                ];
                 // Convertir la fila a formato JavaScript
                 $filaJS = json_encode($fila);
                 $script .= "tablaPartidas.row.add($filaJS);";
@@ -271,6 +271,61 @@ class almacenMovimientos extends alkesGlobal
         $this->response->script($script);
 
         return $this->response;
+    }
+
+    function validaCantidadPartida($indiceDelArreglo, $form, $cantidadIntentada)
+    {
+        if (preg_match('/^\d{1,12}(\.\d{1,4})?$/', $cantidadIntentada)) {
+            // La cantidad es válida
+            global $database;
+            $naturalezaConcepto = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
+            
+            if ($naturalezaConcepto == 'Salida') {
+                $existenciaRealActual = $database->get("almacenes_productos", "existencia", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
+                
+                // Validar que no exceda la existencia del almacén seleccionado
+                if ($cantidadIntentada > $existenciaRealActual) {
+                    $this->resetCantidadPartidaYLotes($indiceDelArreglo);
+                    $this->alerta(
+                        "Cantidad inválida",
+                        "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida, incluyendo sus lotes o series, han sido reiniciadas a 0.",
+                        "error"
+                    );
+                }
+                else
+                {
+                    $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad']=$cantidadIntentada;
+                }
+            }
+            else
+                {
+                    $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad']=$cantidadIntentada;
+                }
+        } else {
+            // La cantidad es inválida (no cumple con el formato de 12 dígitos enteros y 4 decimales)
+            $this->resetCantidadPartidaYLotes($indiceDelArreglo);
+            $this->alerta(
+                "Formato de cantidad inválido",
+                "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida, incluyendo sus lotes o series, han sido reiniciadas a 0.",
+                "error"
+            );
+        }
+        // Muestra la tabla de partidas actualizada
+        $this->tablaPartidas();
+        return $this->response;
+    }
+
+    function resetCantidadPartidaYLotes($indiceDelArreglo)
+    {
+        // Poner la cantidad de la partida en 0
+        $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad'] = 0;
+        
+        // Poner las cantidades de todos los lotes o series en 0
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes']) && is_array($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'])) {
+            foreach ($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] as &$lote) {
+                $lote['cantidad'] = 0;
+            }
+        }
     }
 
     function desactivarPartida($indice)
@@ -648,15 +703,12 @@ class almacenMovimientos extends alkesGlobal
                 implode("<br>", $errores), 
                 "error"
             );
-        } else {
-            $this->alerta("Validación completada", "Todos los lotes han sido validados correctamente.", "success");
         }
 
         $this->ajusteCantidad($indiceDelArreglo);
         $this->tablaPartidas();
         return $this->response;
     }
-
 
     function ajusteCantidad($indiceDelArreglo)
     {
@@ -674,6 +726,9 @@ class almacenMovimientos extends alkesGlobal
 
             // Redibujar la tabla para reflejar el cambio si es necesario
             $this->generarTablaLotes($indiceDelArreglo);
+
+            //validar que la cantidad cumpla con todos los requisitos
+            $this->response->script("JaxonalmacenMovimientos.validaCantidadPartida($indiceDelArreglo, jaxon.getFormValues('formulario" . $_GET['rand'] . "'), $cantidadTotal);");
         } else {
             // En caso de que la partida no exista, devolver un mensaje de error
             $this->alerta("Error interno", "La partida especificada no existe. Por favor, comuníquese con el administrador del sistema.", "error");
@@ -681,7 +736,6 @@ class almacenMovimientos extends alkesGlobal
     }
 
 }
-
 
 $jaxon = jaxon();
 $jaxon->register(Jaxon::CALLABLE_CLASS, almacenMovimientos::class);
