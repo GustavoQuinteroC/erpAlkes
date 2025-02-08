@@ -316,7 +316,7 @@ class alkesGlobal
 
         $script = 'Swal.fire({
             title: "' . $titulo . '",
-            text: "' . $mensaje . '",
+            html: "' . $mensaje . '",  // Usar "html" en lugar de "text"
             showConfirmButton: ' . ($boton ? 'true' : 'false') . ',
             ' . $mostrarTimer . '
             icon: "' . $icono . '",
