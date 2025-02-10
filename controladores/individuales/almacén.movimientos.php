@@ -121,7 +121,7 @@ class almacenMovimientos extends alkesGlobal
 
             // Restaurar el evento onchange original para los selects que tienen onchange y necesiten un change (select2)
             document.getElementById("idconcepto").onchange = function() {
-                JaxonalmacenMovimientos.deshabilitaAlmacen();
+                JaxonalmacenMovimientos.deshabilitaConcepto();
             };
         ');
         $this->response->assign("cambiarConcepto", "disabled", "disabled");
@@ -288,9 +288,11 @@ class almacenMovimientos extends alkesGlobal
                     $this->resetCantidadPartidaYLotes($indiceDelArreglo);
                     $this->alerta(
                         "Cantidad inválida",
-                        "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida, incluyendo sus lotes o series, han sido reiniciadas a 0.",
+                        "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida, incluyendo sus lotes o series (en caso de tenerlos), han sido reiniciadas a 0.",
                         "error"
                     );
+                    $this->generarTablaLotes($indiceDelArreglo);
+                    $this->generarTablaLotesConsulta($indiceDelArreglo);
                 }
                 else
                 {
@@ -298,15 +300,15 @@ class almacenMovimientos extends alkesGlobal
                 }
             }
             else
-                {
-                    $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad']=$cantidadIntentada;
-                }
+            {
+                $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad']=$cantidadIntentada;
+            }
         } else {
             // La cantidad es inválida (no cumple con el formato de 12 dígitos enteros y 4 decimales)
             $this->resetCantidadPartidaYLotes($indiceDelArreglo);
             $this->alerta(
                 "Formato de cantidad inválido",
-                "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida, incluyendo sus lotes o series, han sido reiniciadas a 0.",
+                "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida, incluyendo sus lotes o series (en caso de tenerlos), han sido reiniciadas a 0.",
                 "error"
             );
         }
@@ -362,6 +364,68 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+
+    function modalSeleccionLotesConsulta($indiceDelArreglo)
+    {
+        // Crear el HTML de la ventana modal
+        $html = '<div class="modal fade" id="modalSeleccionLotesConsulta" tabindex="-1" aria-labelledby="modalSeleccionLotesConsultaLabel">';
+        $html .= '<div class="modal-dialog modal-xl" role="document">';
+        $html .= '<div class="modal-content">';
+        $html .= '<div class="modal-header text-bg-' . getEnfasis() . ' d-flex justify-content-between align-items-center">';
+        $html .= '<h5 class="modal-title" id="modalSeleccionLotesConsultaLabel">Selección de Lotes (Salida)</h5>';
+        $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+        $html .= '</div>';
+        $html .= '<div class="modal-body">';
+        $html .= '<div class="table-responsive">';
+        $html .= '<table class="table table-borderless" id="tablaLotesConsulta">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>No. de Lote</th>';
+        $html .= '<th>No. de Serie</th>';
+        $html .= '<th>No. de Pedimento</th>';
+        $html .= '<th>Fecha de Fabricación</th>';
+        $html .= '<th>Fecha de Caducidad</th>';
+        $html .= '<th>Existencia</th>';
+        $html .= '<th>Cantidad a Salir</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody id="tablaLotesConsultaBody">';
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<div class="modal-footer">';
+        $html .= '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Remover cualquier modal previo
+        $this->response->remove('modalSeleccionLotesConsulta');
+
+        // Insertar el nuevo modal
+        $this->response->append("modales", "innerHTML", $html);
+
+        // Generación del contenido de la tabla de lotes
+        $this->generarTablaLotesConsulta($indiceDelArreglo);
+
+        // Mostrar el modal con Bootstrap 5
+        $this->response->script('new bootstrap.Modal(document.getElementById("modalSeleccionLotesConsulta")).show();');
+
+        // Eliminar el elemento si es que se cierra y ejecutar la función validarLotesConsultaAlCerrarModal
+        $this->response->script('
+            if (!$("#modalSeleccionLotesConsulta").data("evento-registrado")) {
+                $("#modalSeleccionLotesConsulta").on("hidden.bs.modal", function () {
+                    $(this).remove();
+                });
+                $("#modalSeleccionLotesConsulta").data("evento-registrado", true);
+            }
+        ');
+        return $this->response;
+    }
+
     function modalSeleccionLotes($indiceDelArreglo)
     {
         // Crear el HTML de la ventana modal
@@ -371,7 +435,7 @@ class almacenMovimientos extends alkesGlobal
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . ' d-flex justify-content-between align-items-center">';
         $html .= '<h5 class="modal-title" id="modalSeleccionLotesLabel">Selección de Lotes</h5>';
         $html .= '<div class="d-flex align-items-center gap-2">';
-        $html .= '<button tabindex="400" id="addLote" name="addLote" class="btn btn-sm border ' . getTextColor() . ' bg-transparent" onclick="JaxonalmacenMovimientos.agregarFilaLotes(' . $indiceDelArreglo . ');" type="button">';
+        $html .= '<button tabindex="400" id="addLote" name="addLote" class="btn btn-sm border ' . getTextColor() . ' bg-transparent" onclick="JaxonalmacenMovimientos.agregarFilaLote(' . $indiceDelArreglo . ');" type="button">';
         $html .= '<span class="bi bi-plus-lg me-1"></span> Agregar';
         $html .= '</button>';
         $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
@@ -430,6 +494,48 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
+    function generarTablaLotesConsulta($indiceDelArreglo)
+    {
+        global $database;
+
+        // Obtener el producto y almacén de la partida actual
+        $almacenProducto = $database->get("almacenes_productos", "*", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
+
+        // Obtener los lotes existentes para el producto y almacén
+        $lotesExistentes = $database->select("almacenes_productos_lotes", "*", [
+            "idproducto" => $almacenProducto['idproducto'],
+            "idalmacen" => $almacenProducto['idalmacen'],
+            "existencia[>]" => 0 // Solo lotes con existencia mayor a 0
+        ]);
+
+        $html = '';
+        foreach ($lotesExistentes as $lote) {
+            // Buscar la cantidad en el array de la sesión
+            $cantidadLote = 0;
+            foreach ($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] as $loteSesion) {
+                if ($loteSesion['iddbapl'] == $lote['id']) {
+                    $cantidadLote = $loteSesion['cantidad']; // Usar la cantidad almacenada en el array de la sesión
+                    break;
+                }
+            }
+
+            // Generar la fila de la tabla con la cantidad prellenada
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($lote['lote']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($lote['serie']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($lote['pedimento']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($lote['fabricacion']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($lote['caducidad']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($lote['existencia']) . '</td>';
+            $html .= '<td><input type="number" class="form-control cantidad-salida" min="0" max="' . htmlspecialchars($lote['existencia']) . '" value="' . htmlspecialchars($cantidadLote) . '" onblur="JaxonalmacenMovimientos.guardaLoteConsulta(' . $indiceDelArreglo . ', this.value, ' . $lote['id'] . ')"></td>';
+            $html .= '</tr>';
+        }
+
+        $this->response->assign("tablaLotesConsultaBody", "innerHTML", $html);
+        return $this->response;
+    }
+
+
     function generarTablaLotes($indiceDelArreglo)
     {
         // Obtener los lotes activos de la sesión
@@ -451,6 +557,97 @@ class almacenMovimientos extends alkesGlobal
             $html .= '</tr>';
         }
         $this->response->assign("tablaLotesBody", "innerHTML", $html);
+        return $this->response;
+    }
+
+    function guardaLoteConsulta($indicePartida, $cantidadIntentada, $idLote)
+    {
+        // Validar que la cantidad no exceda la existencia del lote
+        global $database;
+        $lote = $database->get("almacenes_productos_lotes", "*", ["id" => $idLote]);
+
+        if ($cantidadIntentada > $lote['existencia']) {
+            $this->alerta("Error", "La cantidad no puede exceder la existencia del lote.", "error");
+            $this->generarTablaLotesConsulta($indicePartida);
+            return $this->response;
+        }
+        // Buscar el lote en la sesión o agregarlo si no existe
+        $loteIndex = array_search($idLote, array_column($_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'], 'iddbapl'));
+        //si no existe, entonces lo agregamos al array
+        if ($loteIndex === false) {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][] = [
+                'iddb' => 0,
+                'iddbapl' => $idLote,
+                'cantidad' => $cantidadIntentada,
+                'estado' => 'Activo'
+            ];
+        } else {
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$loteIndex]['cantidad'] = $cantidadIntentada;
+        }
+
+        // Redibujar solo el cuerpo de la tabla de lotes
+        $this->generarTablaLotesConsulta($indicePartida);
+        //sumar la cantidad de lotes y asignarselo al elemetno del array partidas
+        $this->ajusteCantidad($indicePartida);
+        // Redibujar solo el cuerpo de la tabla de partidas
+        $this->tablaPartidas();
+        return $this->response;
+    }
+
+    function guardaDatoLotes($valor, $indicePartida, $indiceLote, $campo)
+    {
+        // Validar que el índice de la partida y el lote existan en la sesión
+        if (isset($_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote])) {
+            // Actualizar el campo correspondiente en el array de la sesión
+            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote][$campo] = $valor;
+
+            // Llamar a validaDatosLote para realizar las verificaciones adicionales
+            $resultadoValidacion = $this->validaDatosLote($indicePartida, $indiceLote);
+
+            if ($resultadoValidacion['error']) {
+                // Si hay un error, mostrar un mensaje de alerta
+                $this->alerta("Error en la validación", $resultadoValidacion['mensaje'], "error");
+            }
+            else
+            {
+                if($campo=='lote' or $campo=='serie')
+                {
+                    global $database;
+                    $almacenes_producto = $database->get("almacenes_productos", "*", [
+                        "id" => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['idalmacenes_productos']
+                    ]);
+    
+                    $almacenes_productos_lote = $database->get("almacenes_productos_lotes", "*", [
+                        "idproducto" => $almacenes_producto['idproducto'],
+                        "idalmacen"  => $almacenes_producto['idalmacen'],
+                        "lote"       => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'],
+                        "serie"      => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie']
+                    ]);
+    
+                    if ($almacenes_productos_lote) {
+                        
+                        $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote] = [
+                            'iddb'        => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['iddb'],  // El ID real del lote en la base de datos
+                            'lote'        => $almacenes_productos_lote['lote'],
+                            'serie'       => $almacenes_productos_lote['serie'],
+                            'pedimento'   => $almacenes_productos_lote['pedimento'],
+                            'fabricacion' => $almacenes_productos_lote['fabricacion'],
+                            'caducidad'   => $almacenes_productos_lote['caducidad'],
+                            'cantidad'    => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'],
+                            'estado'      => 'Activo'  // Mantiene el estado como "Activo"
+                        ];
+                        $this->alerta("Lote y/o serie encontrados", "Se han llenado automaticamente los campos restantes", "success", null, false, true);
+                    }
+                }
+            }
+
+            // Redibujar la tabla solo con los lotes actualizados
+            $this->generarTablaLotes($indicePartida);
+        } else {
+            // En caso de que el lote no exista, devolver un mensaje de error
+            $this->alerta("Error interno", "El lote especificado no existe, favor de comunicar este error con el administrador del sistema.", "error");
+        }
+
         return $this->response;
     }
 
@@ -534,63 +731,6 @@ class almacenMovimientos extends alkesGlobal
         return ['error' => false];
     }
 
-    function guardaDatoLotes($valor, $indicePartida, $indiceLote, $campo)
-    {
-        // Validar que el índice de la partida y el lote existan en la sesión
-        if (isset($_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote])) {
-            // Actualizar el campo correspondiente en el array de la sesión
-            $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote][$campo] = $valor;
-
-            // Llamar a validaDatosLote para realizar las verificaciones adicionales
-            $resultadoValidacion = $this->validaDatosLote($indicePartida, $indiceLote);
-
-            if ($resultadoValidacion['error']) {
-                // Si hay un error, mostrar un mensaje de alerta
-                $this->alerta("Error en la validación", $resultadoValidacion['mensaje'], "error");
-            }
-            else
-            {
-                if($campo=='lote' or $campo=='serie')
-                {
-                    global $database;
-                    $almacenes_producto = $database->get("almacenes_productos", "*", [
-                        "id" => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['idalmacenes_productos']
-                    ]);
-    
-                    $almacenes_productos_lote = $database->get("almacenes_productos_lotes", "*", [
-                        "idproducto" => $almacenes_producto['idproducto'],
-                        "idalmacen"  => $almacenes_producto['idalmacen'],
-                        "lote"       => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'],
-                        "serie"      => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie']
-                    ]);
-    
-                    if ($almacenes_productos_lote) {
-                        
-                        $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote] = [
-                            'iddb'        => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['iddb'],  // El ID real del lote en la base de datos
-                            'lote'        => $almacenes_productos_lote['lote'],
-                            'serie'       => $almacenes_productos_lote['serie'],
-                            'pedimento'   => $almacenes_productos_lote['pedimento'],
-                            'fabricacion' => $almacenes_productos_lote['fabricacion'],
-                            'caducidad'   => $almacenes_productos_lote['caducidad'],
-                            'cantidad'    => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'],
-                            'estado'      => 'Activo'  // Mantiene el estado como "Activo"
-                        ];
-                        $this->alerta("Lote y/o serie encontrados", "Se han llenado automaticamente los campos restantes", "success", null, false, true);
-                    }
-                }
-            }
-
-            // Redibujar la tabla solo con los lotes actualizados
-            $this->generarTablaLotes($indicePartida);
-        } else {
-            // En caso de que el lote no exista, devolver un mensaje de error
-            $this->alerta("Error interno", "El lote especificado no existe, favor de comunicar este error con el administrador del sistema.", "error");
-        }
-
-        return $this->response;
-    }
-
     function eliminarFilaLotes($indiceDelArreglo, $indiceLote)
     {
         // Verificar que el índice del lote exista
@@ -605,7 +745,7 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
-    function agregarFilaLotes($indiceDelArreglo)
+    function agregarFilaLote($indiceDelArreglo)
     {
         // Crear un nuevo lote con valores vacíos o predefinidos
         $nuevoLote = [
@@ -720,12 +860,6 @@ class almacenMovimientos extends alkesGlobal
             $cantidadTotal = array_reduce($lotes, function ($carry, $lote) {
                 return $carry + ($lote['estado'] == 'Activo' ? (int)$lote['cantidad'] : 0);
             }, 0);
-
-            // Actualizar la cantidad en la partida
-            $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad'] = $cantidadTotal;
-
-            // Redibujar la tabla para reflejar el cambio si es necesario
-            $this->generarTablaLotes($indiceDelArreglo);
 
             //validar que la cantidad cumpla con todos los requisitos
             $this->response->script("JaxonalmacenMovimientos.validaCantidadPartida($indiceDelArreglo, jaxon.getFormValues('formulario" . $_GET['rand'] . "'), $cantidadTotal);");
