@@ -9,7 +9,40 @@ class almacenMovimientos extends alkesGlobal
 {
     function inializarFormulario()
     {
-        $this->response->assign('fechahora', 'value', date('Y-m-d\TH:i'));
+        $rand = $_GET['rand']; // Obtener el valor dinámico
+        $this->response->append("botonera-contenedor", "innerHTML", "
+            <button class='btn btn-primary btn-sm' type='button' id='btnborrador' name='btnborrador' onclick='JaxonalmacenMovimientos.validar(jaxon.getFormValues(\"formulario{$rand}\"), 'borrador');'>
+                <i class='bi bi-floppy'></i> Borrador
+            </button>
+        ");
+        $this->response->append("botonera-contenedor", "innerHTML", "
+            <button class='btn btn-success btn-sm' type='button' id='btnprocesar' name='btnprocesar' onclick='JaxonalmacenMovimientos.validar(jaxon.getFormValues(\"formulario{$rand}\"), 'procesar');'>
+                <i class='bi bi-check2-circle'></i> Procesar
+            </button>
+        ");
+        $this->response->append("botonera-contenedor", "innerHTML", "
+            <button class='btn btn-danger btn-sm' type='button' id='btncancelar' name='btncancelar' onclick='JaxonalmacenMovimientos.validar(jaxon.getFormValues(\"formulario{$rand}\"), 'cancelar');'>
+                <i class='bi bi-x-circle'></i> Cancelar
+            </button>
+        ");
+        if($_GET['id']==0)
+        {
+            $this->response->assign('fechahora', 'value', date('Y-m-d\TH:i'));
+
+        }
+        else
+        {
+            if (!validarEmpresaPorRegistro("almacenes_movimientos", $_GET['id'])) {
+                $this->alerta(
+                    "¡ERROR GRAVE!",
+                    "Este registro no pertenece a esta empresa. Por favor, reporte este problema de inmediato y con la mayor discreción posible; usted será recompensado por ello. Mientras le damos respuesta, es importante que no abandone esta ventana",
+                    "error"
+                );
+                return $this->response;
+            } else {
+                //hacer lo que se tenga que hacer en consulta
+            }
+        }
         return $this->response;
     }
 
@@ -165,7 +198,8 @@ class almacenMovimientos extends alkesGlobal
             }
             elseif($naturaleza=='Salida')
             {
-                $this->modalSeleccionServerSide('almacén', 'inventario', '', $form['idalmacen'], 'Con Existencia', 'Modal', 'JaxonalmacenMovimientos.addProductos', true, '', 'Seleccionar Productos');
+                $filtro= getParametro('inventario_negativo')?'Principal':'Con Existencia';
+                $this->modalSeleccionServerSide('almacén', 'inventario', '', $form['idalmacen'], $filtro, 'Modal', 'JaxonalmacenMovimientos.addProductos', true, '', 'Seleccionar Productos');
             }
         }
         return $this->response;
@@ -257,7 +291,7 @@ class almacenMovimientos extends alkesGlobal
                         onblur='JaxonalmacenMovimientos.validaCantidadPartida($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"), this.value)'>",
                     "<button type='button' class='btn btn-sm btn-danger' title='Eliminar' 
                         onclick='JaxonalmacenMovimientos.desactivarPartida($index)'>
-                        <i class='bi bi-trash'></i>
+                        <i class='bi bi-x-circle'></i>
                     </button>"
                 ];
                 // Convertir la fila a formato JavaScript
@@ -284,11 +318,12 @@ class almacenMovimientos extends alkesGlobal
                 $existenciaRealActual = $database->get("almacenes_productos", "existencia", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
                 
                 // Validar que no exceda la existencia del almacén seleccionado
-                if ($cantidadIntentada > $existenciaRealActual) {
+                if ($cantidadIntentada > $existenciaRealActual and !getParametro('inventario_negativo')) {
                     $this->resetCantidadPartidaYLotes($indiceDelArreglo);
+                    $mensajeLotes=getParametro('lotes')?", incluyendo sus lotes o series (en caso de tenerlos)":"";
                     $this->alerta(
                         "Cantidad inválida",
-                        "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida, incluyendo sus lotes o series (en caso de tenerlos), han sido reiniciadas a 0.",
+                        "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida$mensajeLotes, han sido reiniciadas a 0.",
                         "error"
                     );
                     $this->generarTablaLotes($indiceDelArreglo);
@@ -306,9 +341,10 @@ class almacenMovimientos extends alkesGlobal
         } else {
             // La cantidad es inválida (no cumple con el formato de 12 dígitos enteros y 4 decimales)
             $this->resetCantidadPartidaYLotes($indiceDelArreglo);
+            $mensajeLotes=getParametro('lotes')?", incluyendo sus lotes o series (en caso de tenerlos)":"";
             $this->alerta(
                 "Formato de cantidad inválido",
-                "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida, incluyendo sus lotes o series (en caso de tenerlos), han sido reiniciadas a 0.",
+                "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida$mensajeLotes, han sido reiniciadas a 0.",
                 "error"
             );
         }
@@ -501,12 +537,18 @@ class almacenMovimientos extends alkesGlobal
         // Obtener el producto y almacén de la partida actual
         $almacenProducto = $database->get("almacenes_productos", "*", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
 
-        // Obtener los lotes existentes para el producto y almacén
-        $lotesExistentes = $database->select("almacenes_productos_lotes", "*", [
+        // Construir la consulta para obtener los lotes existentes
+        $criteriosConsulta = [
             "idproducto" => $almacenProducto['idproducto'],
-            "idalmacen" => $almacenProducto['idalmacen'],
-            "existencia[>]" => 0 // Solo lotes con existencia mayor a 0
-        ]);
+            "idalmacen"  => $almacenProducto['idalmacen']
+        ];
+        // Determinar si se permite inventario negativo
+        if (!getParametro('inventario_negativo')) {
+            $criteriosConsulta["existencia[>]"] = 0; // Solo lotes con existencia mayor a 0 si no se permite inventario negativo
+        }
+
+        // Obtener los lotes existentes para el producto y almacén
+        $lotesExistentes = $database->select("almacenes_productos_lotes", "*", $criteriosConsulta);
 
         $html = '';
         foreach ($lotesExistentes as $lote) {
@@ -527,13 +569,14 @@ class almacenMovimientos extends alkesGlobal
             $html .= '<td>' . htmlspecialchars($lote['fabricacion']) . '</td>';
             $html .= '<td>' . htmlspecialchars($lote['caducidad']) . '</td>';
             $html .= '<td>' . htmlspecialchars($lote['existencia']) . '</td>';
-            $html .= '<td><input type="number" class="form-control cantidad-salida" min="0" max="' . htmlspecialchars($lote['existencia']) . '" value="' . htmlspecialchars($cantidadLote) . '" onblur="JaxonalmacenMovimientos.guardaLoteConsulta(' . $indiceDelArreglo . ', this.value, ' . $lote['id'] . ')"></td>';
+            $html .= '<td><input type="number" class="form-control cantidad-salida" min="0" value="' . htmlspecialchars($cantidadLote) . '" onblur="JaxonalmacenMovimientos.guardaLoteConsulta(' . $indiceDelArreglo . ', this.value, ' . $lote['id'] . ')"></td>';
             $html .= '</tr>';
         }
 
         $this->response->assign("tablaLotesConsultaBody", "innerHTML", $html);
         return $this->response;
     }
+
 
 
     function generarTablaLotes($indiceDelArreglo)
@@ -553,7 +596,7 @@ class almacenMovimientos extends alkesGlobal
             $html .= '<td><input type="date" class="form-control" id="fabricacion_' . $indiceDelArreglo . '_' . $index . '" value="' . (!empty($lote['fabricacion']) ? date('Y-m-d', strtotime($lote['fabricacion'])) : '') . '" onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'fabricacion\')"></td>';
             $html .= '<td><input type="date" class="form-control" id="caducidad_' . $indiceDelArreglo . '_' . $index . '" value="' . (!empty($lote['caducidad']) ? date('Y-m-d', strtotime($lote['caducidad'])) : '') . '"onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'caducidad\')"></td>';
             $html .= '<td><input type="number" class="form-control" id="cantidad_' . $indiceDelArreglo . '_' . $index . '" value="' . htmlspecialchars($lote['cantidad'] ?? 0) . '"onblur="JaxonalmacenMovimientos.guardaDatoLotes(this.value, ' . $indiceDelArreglo . ', ' . $index . ', \'cantidad\')"></td>';
-            $html .= '<td><button type="button" class="btn btn-danger" onclick="JaxonalmacenMovimientos.eliminarFilaLotes(' . $indiceDelArreglo . ', ' . $index . ')"><i class="bi bi-trash"></i></button></td>';
+            $html .= '<td><button type="button" class="btn btn-danger" onclick="JaxonalmacenMovimientos.eliminarFilaLotes(' . $indiceDelArreglo . ', ' . $index . ')"><i class="bi bi-x-circle"></i></button></td>';
             $html .= '</tr>';
         }
         $this->response->assign("tablaLotesBody", "innerHTML", $html);
@@ -566,7 +609,7 @@ class almacenMovimientos extends alkesGlobal
         global $database;
         $lote = $database->get("almacenes_productos_lotes", "*", ["id" => $idLote]);
 
-        if ($cantidadIntentada > $lote['existencia']) {
+        if ($cantidadIntentada > $lote['existencia'] and !getParametro('inventario_negativo')) {
             $this->alerta("Error", "La cantidad no puede exceder la existencia del lote.", "error");
             $this->generarTablaLotesConsulta($indicePartida);
             return $this->response;
