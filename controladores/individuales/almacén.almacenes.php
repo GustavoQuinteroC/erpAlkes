@@ -44,7 +44,7 @@ class almacenAlmacenes extends alkesGlobal
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
             <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenAlmacenes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
-                <i class='bi bi-save'></i> Guardar
+                <i class='bi bi-floppy'></i> Guardar
             </button>
         ");
         return $this->response;
@@ -228,7 +228,7 @@ class almacenAlmacenes extends alkesGlobal
                 if ($producto['estado'] == 'Activo') {
                     // Mostrar X si está Activo
                     $html .= '<button type="button" class="btn btn-sm btn-danger" onclick="JaxonalmacenAlmacenes.desactivarProducto(' . $index . ');">';
-                    $html .= '<i class="bi bi-trash"></i>'; // X de eliminación
+                    $html .= '<i class="bi bi-x-circle"></i>'; // X de eliminación
                     $html .= '</button>';
                 } elseif ($producto['estado'] == 'Inactivo') {
                     // Mostrar palomita si está Inactivo

@@ -81,7 +81,7 @@ class comprasProveedores extends alkesGlobal
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
             <button class='btn btn-primary btn-sm' id='btnguardar' name='btnguardar' type='button' onclick='JaxoncomprasProveedores.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
-                <i class='bi bi-save'></i> Guardar
+                <i class='bi bi-floppy'></i> Guardar
             </button>
         ");
         return $this->response;

@@ -61,7 +61,7 @@ class almacenProductos extends alkesGlobal
         $rand = $_GET['rand']; // Obtener el valor dinámico
         $this->response->append("botonera-contenedor", "innerHTML", "
             <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
-                <i class='bi bi-save'></i> Guardar
+                <i class='bi bi-floppy'></i> Guardar
             </button>
         ");
 
@@ -240,7 +240,7 @@ class almacenProductos extends alkesGlobal
                     $html .= '<td>' . htmlspecialchars($impuesto['porcentaje']) . '%</td>';
                     $html .= '<td>';
                     $html .= '<button type="button" class="btn btn-sm btn-danger" onclick="JaxonalmacenProductos.eliminarImpuesto(' . $index . ');">';
-                    $html .= '<i class="bi bi-trash"></i>';
+                    $html .= '<i class="bi bi-x-circle"></i>';
                     $html .= '</button>';
                     $html .= '<button type="button" class="btn btn-sm btn-primary" onclick="JaxonalmacenProductos.modalEditImpuesto(' . $index . ');">';
                     $html .= '<i class="bi bi-pencil-square"></i>';

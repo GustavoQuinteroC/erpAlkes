@@ -629,7 +629,9 @@ function botones()
                 <div class=\"row\">
                     <!-- Botonera alineada a la derecha -->
                     <div class=\"col-12 text-end\" id=\"botonera-contenedor\">
-                        <a href=\"formulario.php?id=0&rand={$random_number}\" class=\"btn btn-primary btn-sm\">Nuevo</a>
+                        <a href=\"formulario.php?id=0&rand={$random_number}\" class=\"btn btn-primary btn-sm\">
+                            <i class=\"bi bi-plus-lg\"></i> Nuevo
+                        </a>
                     </div>
                 </div>
             </div>

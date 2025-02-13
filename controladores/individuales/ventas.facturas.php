@@ -132,7 +132,7 @@ class ventasFacturas extends alkesGlobal
                         '" . $almacenes_producto['existencia'] . "',
                         `<input type='number' class='form-control cantidad-input' value='" . $partida['cantidad'] . "' data-idpartida='" . $partida['iddb'] . "' min='0' onfocus='JaxonventasFacturas.validaLoteSerieKit($index, jaxon.getFormValues('formulario".$_GET['rand']."'))'>`,
                         `<button type='button' class='btn btn-sm btn-danger' title='Eliminar' onclick='JaxonventasFacturas.desactivarPartida($index)'>
-                            <i class='bi bi-trash'></i>
+                            <i class='bi bi-x-circle'></i>
                         </button>`
                     ]);
                 ";
