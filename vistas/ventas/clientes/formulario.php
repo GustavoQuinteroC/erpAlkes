@@ -544,6 +544,50 @@ if (file_exists($pathControlador)) {
                             <div class="row">
                                 <div class="col-12">
                                     <div class="card mb-4">
+                                        <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                            <h3 class="card-title">Listado de subcuentas</h3>
+                                            <div class="card-tools d-flex align-items-center gap-2">
+                                                <button tabindex="400" id="addSubcuenta" name="addSubcuenta"
+                                                    class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
+                                                    onclick="JaxonventasClientes.modalSeleccionarSubcuentas();"
+                                                    type="button">
+                                                    <span class="bi bi-plus-lg me-1"></span> Agregar
+                                                </button>
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-collapse" title="Collapse">
+                                                    <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                                    <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                    data-lte-toggle="card-remove" title="Remove">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Tabla con DataTables (inicialmente vacía) -->
+                                            <table id="tablaPartidas" class="table table-striped table-hover display"
+                                                style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Clave</th>
+                                                        <th>Nombre comercial</th>
+                                                        <th>Estado</th>
+                                                        <th>Vencimiento</th>
+                                                        <th>Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Las filas se llenarán dinámicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card mb-4">
                                         <div class="card-body">
                                             <!-- Campo de notas -->
                                             <div class="form-group row mb-3">
@@ -569,6 +613,20 @@ if (file_exists($pathControlador)) {
     <?= scriptsHtml(); ?>
     <script>
         JaxonventasClientes.inializarFormulario();
+    </script>
+    <script>
+        // Inicializar DataTable
+        var tablaPartidas = $('#tablaPartidas').DataTable({
+            language: {
+                url: '/plugins/datatables/es-ES.json' // Español
+            },
+            responsive: true,
+            ordering: true,
+            searching: true,
+            paging: false,
+            info: false,
+            lengthChange: false
+        });
     </script>
 </body>
 

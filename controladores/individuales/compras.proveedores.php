@@ -160,7 +160,7 @@ class comprasProveedores extends alkesGlobal
             'idc_colonia' => ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
             'credito_monto_proveedor' => ['obligatorio' => true, 'tipo' => 'float', 'min_val' => 0.0000, 'max_val' => 99999999.9999],
             'credito_dias_proveedor' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 0],
-            'notas' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'notas' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 500],
         ];
 
         // Validar el formulario

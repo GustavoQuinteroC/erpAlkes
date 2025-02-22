@@ -24,7 +24,7 @@ class ventasClientes extends alkesGlobal
                 );
                 return $this->response;
             } else {
-                //consultas a la bd para obtener los datos necesarios para la consulta del almacén
+                // Consultas a la BD para obtener los datos necesarios para la consulta del almacén
                 $socio = $database->get('socios', '*', ['id' => $_GET['id']]);
 
                 // Asignaciones a los campos
@@ -56,6 +56,7 @@ class ventasClientes extends alkesGlobal
                 $this->response->assign("idc_estado", "innerHTML", getCfdiEstado());
                 $this->response->assign("idc_municipio", "innerHTML", getCfdiMunicipio($socio['idc_estado']));
                 $this->response->assign("idc_colonia", "innerHTML", getCfdiColonia($socio['codigo_postal']));
+
                 // Actualizar select2 sin disparar el evento onchange
                 $this->response->script('
                     // Desactivar temporalmente el evento onchange para los selects que tienen onchange y necesiten un change (select2)
@@ -76,6 +77,10 @@ class ventasClientes extends alkesGlobal
                         JaxonventasClientes.cambiarUsoCfdi(this.value);
                     };
                 ');
+
+                // Cargar las subcuentas del socio
+                $this->cargarSubcuentas($socio['id']);
+                $this->tablaSubcuentas();
             }
         }
         $rand = $_GET['rand']; // Obtener el valor dinámico
@@ -86,6 +91,172 @@ class ventasClientes extends alkesGlobal
         ");
         return $this->response;
     }
+
+    function cargarSubcuentas($idsociopadre)
+    {
+        global $database;
+
+        // Consultar las subcuentas del socio
+        $subcuentas = $database->select('socios_subcuentas', ['id', 'idsocio_hijo', 'estado', 'fecha_vencimiento'], ['idsocio_padre' => $idsociopadre]);
+
+        // Verificar si se encontraron subcuentas
+        if (empty($subcuentas)) {
+            // Si no hay subcuentas, inicializar el array vacío
+            $_SESSION['partidas' . $_GET['rand']] = [];
+        } else {
+            // Iterar sobre las subcuentas y llenarlas en la sesión
+            $_SESSION['partidas' . $_GET['rand']] = [];
+            foreach ($subcuentas as $subcuenta) {
+                $_SESSION['partidas' . $_GET['rand']][] = [
+                    'iddb' => $subcuenta['id'],               // El ID de la subcuenta
+                    'idsubcuenta' => $subcuenta['idsocio_hijo'], // El ID del socio hijo (subcuenta)
+                    'estado' => $subcuenta['estado'],          // Estado de la subcuenta
+                    'fecha_vencimiento' => date('Y-m-d', strtotime($subcuenta['fecha_vencimiento'])) // Solo la fecha (formato Y-m-d)
+                ];
+            }
+        }
+
+        // No es necesario generar HTML, solo llenamos la sesión
+        return $this->response;
+    }
+
+    function modalSeleccionarSubcuentas()
+    {
+        $this->modalSeleccionServerSide('ventas', 'clientes', '', 0, 'Activos', 'Modal', 'JaxonventasClientes.agregarSubcuentas', false, '', 'Selecciona los socios');
+        return $this->response;
+    }
+
+    function agregarSubcuentas($form)
+    {
+        // Si la sesión de partidas aún no está definida, inicializarla
+        if (!isset($_SESSION['partidas' . $_GET['rand']])) {
+            $_SESSION['partidas' . $_GET['rand']] = [];
+        }
+
+        // Verificar si el idsubcuenta ya existe en la sesión
+        foreach ($_SESSION['partidas' . $_GET['rand']] as $subcuenta) {
+            if ($subcuenta['idsubcuenta'] == $form['seleccion']) {
+                $this->alerta("Error", "La subcuenta ya está agregada.", "error");
+                return $this->response;
+            }
+        }
+
+        // Agregar la nueva subcuenta si no está duplicada
+        $_SESSION['partidas' . $_GET['rand']][] = [
+            'iddb' => 0,
+            'idsubcuenta' => $form['seleccion'],
+            'estado' => 'Activo',
+            'fecha_vencimiento' => date('Y-m-d', strtotime('+1 day')) // Fecha de mañana
+        ];
+
+        $this->tablaSubcuentas();
+        return $this->response;
+    }
+
+    function tablaSubcuentas()
+    {
+        $script = "tablaPartidas.clear();"; // Limpiar la tabla
+
+        global $database;
+
+        foreach ($_SESSION['partidas' . $_GET['rand']] as $index => $subcuenta) {
+            if ($subcuenta['estado'] == 'Activo' || $subcuenta['estado'] == 'Inactivo') {
+                // Obtener datos del socio (cliente)
+                $socio = $database->get("socios", ["clave", "nombre_comercial"], ["id" => $subcuenta['idsubcuenta']]);
+
+                if (!$socio) {
+                    continue; // Si no se encuentra el socio, se omite esta entrada
+                }
+
+                // Botón dinámico según el estado
+                $botonAccion = ($subcuenta['estado'] == 'Activo') ?
+                    "<button type='button' class='btn btn-sm btn-danger' title='Desactivar' 
+                        onclick='JaxonventasClientes.desactivarSubcuenta($index)'>
+                        <i class='bi bi-x-circle'></i>
+                    </button>" :
+                    "<button type='button' class='btn btn-sm btn-success' title='Activar' 
+                        onclick='JaxonventasClientes.activarSubcuenta($index)'>
+                        <i class='bi bi-check-circle'></i>
+                    </button>";
+
+                // Input de fecha de vencimiento
+                $inputFecha = "<input type='date' class='form-control' value='" . htmlspecialchars($subcuenta['fecha_vencimiento']) . "'
+                    onblur='JaxonventasClientes.actualizarFechaVencimiento($index, this.value)'>";
+
+                // Construcción de la fila de la tabla
+                $fila = [
+                    htmlspecialchars($socio['clave']), // Clave del socio
+                    htmlspecialchars($socio['nombre_comercial']), // Nombre comercial
+                    htmlspecialchars($subcuenta['estado']), // Estado
+                    $inputFecha, // Input de fecha
+                    $botonAccion // Botón de activar/desactivar
+                ];
+
+                // Convertir la fila a formato JavaScript
+                $filaJS = json_encode($fila);
+                $script .= "tablaPartidas.row.add($filaJS);";
+            }
+        }
+
+        $script .= "tablaPartidas.draw();";
+        $this->response->script($script);
+
+        return $this->response;
+    }
+
+    function actualizarFechaVencimiento($index, $nuevaFecha)
+    {
+
+        // Validar que la fecha es válida
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $nuevaFecha)) {
+            $this->alerta("Error", "Fecha no válida.", "error");
+            return $this->response;
+        }
+
+        // Actualizar la fecha de vencimiento en la sesión
+        $_SESSION['partidas' . $_GET['rand']][$index]['fecha_vencimiento'] = $nuevaFecha;
+
+        // Actualizar la tabla para reflejar los cambios
+        $this->tablaSubcuentas();
+
+        return $this->response;
+    }
+
+
+    function desactivarSubcuenta($index)
+    {
+        // Verificar que la subcuenta existe en la sesión
+        if (!isset($_SESSION['partidas' . $_GET['rand']][$index])) {
+            $this->response->script("console.error('Subcuenta no encontrada.');");
+            return $this->response;
+        }
+
+        // Cambiar el estado a "Inactivo"
+        $_SESSION['partidas' . $_GET['rand']][$index]['estado'] = 'Inactivo';
+
+        // Actualizar la tabla
+        $this->tablaSubcuentas();
+
+        return $this->response;
+    }
+
+    function activarSubcuenta($index)
+    {
+        // Verificar que la subcuenta existe en la sesión
+        if (!isset($_SESSION['partidas' . $_GET['rand']][$index])) {
+            $this->response->script("console.error('Subcuenta no encontrada.');");
+            return $this->response;
+        }
+
+        // Cambiar el estado a "Activo"
+        $_SESSION['partidas' . $_GET['rand']][$index]['estado'] = 'Activo';
+
+        // Actualizar la tabla
+        $this->tablaSubcuentas();
+
+        return $this->response;
+    }
+
 
     function cambiarUsoCfdi($idregimen)
     {
@@ -127,7 +298,8 @@ class ventasClientes extends alkesGlobal
 
     function validar($form)
     {
-        $facturacion = getParametro("facturacion");//devuelve 0 o 1 (true o false) para determinar si la empresa hace facturacion o no
+        $facturacion = getParametro("facturacion"); // Determina si la empresa hace facturación
+
         // Definir las reglas de validación
         $reglas = [
             'nombre_comercial' => ['obligatorio' => true, 'tipo' => 'string', 'min' => 1, 'max' => 254],
@@ -160,44 +332,55 @@ class ventasClientes extends alkesGlobal
             'idc_colonia' => ['obligatorio' => false, 'tipo' => 'int', 'min_val' => 1],
             'credito_monto_cliente' => ['obligatorio' => true, 'tipo' => 'float', 'min_val' => 0.0000, 'max_val' => 99999999.9999],
             'credito_dias_cliente' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 0],
-            'notas' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 254],
+            'notas' => ['obligatorio' => false, 'tipo' => 'string', 'max' => 500],
         ];
 
         // Validar el formulario
         $resultadoValidacion = validar_global($form, $reglas);
 
-        // Si hay un error en la validación
         if ($resultadoValidacion !== true) {
-            $error = $resultadoValidacion['error'];
-            $campo = $resultadoValidacion['campo'];
-
-            // Mostrar alerta con el error
-            $this->alerta(
-                "Error en la validación",
-                $error,
-                "error",
-                $campo
-            );
-            // Retornar la respuesta Jaxon
+            $this->alerta("Error en la validación", $resultadoValidacion['error'], "error", $resultadoValidacion['campo']);
             return $this->response;
-        } else {
-            $resultadoValidacionRepetidoRfc = verificaRegistroRepetido("empresa", "socios", "rfc", $form['rfc'], $_GET['id']);
-            if ($resultadoValidacionRepetidoRfc) {
-                // El registro está repetido, mostrar un error
-                $this->alerta('Error', 'Ya existe existe un cliente con este RFC', 'error', 'rfc', true, false);
-                return $this->response;
-            } else {
-                $this->guardar($form);
+        }
+
+        // Validar que los datos en $_SESSION['partidas' . $_GET['rand']] sean correctos
+        if (isset($_SESSION['partidas' . $_GET['rand']])) {
+            foreach ($_SESSION['partidas' . $_GET['rand']] as $index => $subcuenta) {
+                if ($subcuenta['idsubcuenta'] <= 0) {
+                    $this->alerta("Error", "El ID de subcuenta en la fila $index no es válido.", "error");
+                    return $this->response;
+                }
+
+                if (!isset($subcuenta['fecha_vencimiento']) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $subcuenta['fecha_vencimiento'])) {
+                    $this->alerta("Error", "La fecha de vencimiento de una subcuenta no es válida.", "error");
+                    return $this->response;
+                }
+
+                if (!isset($subcuenta['estado']) || !in_array($subcuenta['estado'], ['Activo', 'Inactivo'])) {
+                    $this->alerta("Error", "El estado de una subcuenta no es válido.", "error");
+                    return $this->response;
+                }
             }
         }
-        // Retornar la respuesta Jaxon
+
+        // Verificar si el RFC está repetido en la base de datos
+        $resultadoValidacionRepetidoRfc = verificaRegistroRepetido("empresa", "socios", "rfc", $form['rfc'], $_GET['id']);
+        if ($resultadoValidacionRepetidoRfc) {
+            $this->alerta('Error', 'Ya existe un cliente con este RFC', 'error', 'rfc', true, false);
+            return $this->response;
+        }
+
+        // Si todo es válido, proceder a guardar
+        $this->guardar($form);
+
         return $this->response;
     }
 
     function guardar($form)
     {
         global $database;
-        $this->response->assign("btnguardar", "disabled", "disabled"); //Deshabilitar boton de guardar para evitar que el usuario de click varias veces
+        $this->response->assign("btnguardar", "disabled", "disabled"); // Deshabilitar boton de guardar para evitar que el usuario de click varias veces
+        
         // Campos que se insertarán o actualizarán
         $datos = [
             'idsucursal' => $_SESSION['idsucursal'] ?? 0,
@@ -236,13 +419,18 @@ class ventasClientes extends alkesGlobal
             'notas' => $form['notas'] ?? '',
         ];
 
+        // Si el ID del socio es mayor a 0, es una actualización
         if ($_GET['id'] > 0) {
             try {
-                // Actualizar el registro si existe un ID
+                // Actualizar el registro del socio
                 $database->update('socios', $datos, ['id' => $_GET['id']]);
+
+                // Llamar a la función para guardar las subcuentas
+                $this->guardarSubcuentas($_GET['id']);
+
                 $this->alerta(
                     "¡ACTUALIZADO!",
-                    "El cliente ha sido actualizado con exito",
+                    "El cliente ha sido actualizado con éxito.",
                     "success",
                     null,
                     true,
@@ -252,17 +440,22 @@ class ventasClientes extends alkesGlobal
             } catch (PDOException $e) {
                 $this->alerta(
                     "¡ERROR AL ACTUALIZAR!",
-                    "El cliente no se pudo actualizar correctamente, por favor reporte este problema con el administrador del sistema",
+                    "El cliente no se pudo actualizar correctamente, por favor reporte este problema con el administrador del sistema.",
                     "error"
                 );
             }
         } else {
             try {
-                // Insertar un nuevo registro si no existe ID
+                // Insertar un nuevo socio
                 $database->insert('socios', $datos);
+                $nuevoSocioId = $database->lastInsertId(); // Obtener el ID del socio recién insertado
+
+                // Llamar a la función para guardar las subcuentas
+                $this->guardarSubcuentas($nuevoSocioId);
+
                 $this->alerta(
                     "¡CREADO!",
-                    "El cliente ha sido creado con exito",
+                    "El cliente ha sido creado con éxito.",
                     "success",
                     null,
                     true,
@@ -272,12 +465,45 @@ class ventasClientes extends alkesGlobal
             } catch (PDOException $e) {
                 $this->alerta(
                     "¡ERROR AL GUARDAR!",
-                    "El cliente no se pudo guardar correctamente, por favor reporte este problema con el administrador del sistema",
+                    "El cliente no se pudo guardar correctamente, por favor reporte este problema con el administrador del sistema.",
                     "error"
                 );
             }
         }
         // Retornar la respuesta Jaxon
+        return $this->response;
+    }
+
+    function guardarSubcuentas($idsocioPadre)
+    {
+        global $database;
+
+        foreach ($_SESSION['partidas' . $_GET['rand']] as $subcuenta) {
+            $idsubcuenta = $subcuenta['idsubcuenta'];
+            $estado = $subcuenta['estado'];
+            $fechaVencimiento = $subcuenta['fecha_vencimiento'];
+            $iddb = $subcuenta['iddb']; // Indica si el registro ya existe en la BD
+
+            try {
+                if ($iddb == 0) {
+                    // Insertar nueva subcuenta en la BD
+                    $database->insert('socios_subcuentas', [
+                        'idsocio_padre' => $idsocioPadre,
+                        'idsocio_hijo' => $idsubcuenta,
+                        'estado' => $estado,
+                        'fecha_vencimiento' => $fechaVencimiento
+                    ]);
+                } else {
+                    // Actualizar subcuenta existente en la BD
+                    $database->update('socios_subcuentas', [
+                        'estado' => $estado,
+                        'fecha_vencimiento' => $fechaVencimiento
+                    ], ['id' => $iddb]);
+                }
+            } catch (PDOException $e) {
+                return $this->response;
+            }
+        }
         return $this->response;
     }
 
