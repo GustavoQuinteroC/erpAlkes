@@ -78,6 +78,9 @@ if (file_exists($pathControlador)) {
                                                     <li>Al mostrar lotes, en todos los casos mostrar alerta con lotes
                                                         proximos a vencer</li>
                                                     <li>Hacer una bitacora</li>
+                                                    <li>Poner iconos con hipervinculos en los index, por ejemplo en una 
+                                                        tabla que traiga cliente poner un icono con un hyper vinculo a 
+                                                        consultar ese cliente</li>
                                                 </ul>
                                             </li>
                                             <li class="list-group-item">

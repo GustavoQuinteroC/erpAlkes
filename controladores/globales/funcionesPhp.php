@@ -1244,6 +1244,35 @@ function getCfdiColonia($codigoPostal)
     return $options;
 }
 
+function getSubcuentas($idsocio)
+{
+    global $database;
+
+    $registros = $database->select("socios_subcuentas", [
+        "[>]socios" => ["idsocio_hijo" => "id"]
+    ], [
+        "socios_subcuentas.id",
+        "socios.clave",
+        "socios.nombre_comercial",
+    ], [
+        "socios_subcuentas.idsocio_padre" => $idsocio,
+        "socios_subcuentas.estado" => 'Activo',
+        "ORDER" => ["socios.clave" => "ASC"]
+    ]);
+    
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['clave']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
 
 function validarEmpresaPorRegistro($tabla, $registro)
 {
@@ -1273,6 +1302,7 @@ function validar_global($form, $reglas)
         'url' => 'URL',
         'boolean' => 'booleano (verdadero o falso)',
         'date' => 'fecha',
+        'datetime' => 'fecha y hora'
     ];
 
     foreach ($form as $campo => $valor) {
@@ -1315,6 +1345,10 @@ function validar_global($form, $reglas)
             },
             'date' => function ($v) {
                 return strtotime($v) !== false;
+            },
+            'datetime' => function ($v) {
+                $d = DateTime::createFromFormat('Y-m-d\TH:i', $v);
+                return $d && $d->format('Y-m-d\TH:i') === $v;
             }
         ];
 
@@ -1361,6 +1395,8 @@ function validar_global($form, $reglas)
 
     return true; // Validación exitosa
 }
+
+
 
 function verificaRegistroRepetido($nivel, $tabla, $columna, $dato, $idb = 0)
 {
@@ -1509,7 +1545,7 @@ function getAlmacenesPorEmpresa() {
     return $options;
 }
 
-function getDirecciones($idsocio = null) {
+function getDirecciones($idsocio = null, $idsociosubcuenta = null) {
     global $database; // Asume que $database es una instancia de Medoo
 
     // Inicializar un array para almacenar los resultados combinados
@@ -1557,6 +1593,39 @@ function getDirecciones($idsocio = null) {
         }
     }
 
+    // Consulta para direcciones de subcuentas (socios hijos)
+    if ($idsociosubcuenta !== null) {
+        // Obtener el idsocio_hijo de la subcuenta
+        $subcuenta = $database->select("socios_subcuentas", [
+            "idsocio_hijo"
+        ], [
+            "id" => $idsociosubcuenta
+        ]);
+        // Si se encuentra un resultado
+        if (!empty($subcuenta)) {
+            $idsocio_hijo = $subcuenta[0]['idsocio_hijo'];
+
+            // Obtener las direcciones de la subcuenta (socios hijos)
+            $registrosSubcuenta = $database->select("direcciones", [
+                "id",
+                "nombre",
+                "cp"
+            ], [
+                "idempresa" => $_SESSION['idempresa'],
+                "estado" => "Activa",
+                "idsocio" => $idsocio_hijo, // Usar el idsocio_hijo
+                "idsucursal" => 0,
+                "ORDER" => ["id" => "ASC"]
+            ]);
+
+            // Agregar el tipo 'Subcuenta' a cada registro
+            foreach ($registrosSubcuenta as $registro) {
+                $registro['tipo'] = 'Subcuenta';
+                $registros[] = $registro;
+            }
+        }
+    }
+
     // Construir las opciones del select
     $options = '';
     if (!empty($registros)) {
@@ -1574,6 +1643,7 @@ function getDirecciones($idsocio = null) {
 
     return $options;
 }
+
 
 function getSocios() {
     // Acceder a la variable global de la base de datos
@@ -1603,6 +1673,39 @@ function getSocios() {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
     }
     return $options;
+}
+
+function validarExistenciaSalida($partidas) 
+{
+    global $database;
+    $errores = [];
+
+    foreach ($partidas as $partida) {
+        $idProducto = $database->get("almacenes_productos", "idproducto", ["id" => $partida['idalmacenes_productos']]);
+        $manejaLotes = $database->get("productos", "lote_serie", ["id" => $idProducto]);
+        
+        if ($manejaLotes == 'Sí') {
+            foreach ($partida['lotes'] as $lote) {
+                $existenciaLote = $database->get("almacenes_productos_lotes", "existencia", ["id" => $lote['iddbapl']]);
+                if ($lote['cantidad'] > $existenciaLote) {
+                    $nombreProducto = $database->get("productos", "nombre", ["id" => $idProducto]);
+                    $errores[] = "Algún lote y/o serie del producto '{$nombreProducto}' no tiene suficiente existencia.";
+                }
+            }
+        } else {
+            $existenciaTotal = $database->get("almacenes_productos", "existencia", ["id" => $partida['idalmacenes_productos']]);
+            if ($partida['cantidad'] > $existenciaTotal) {
+                $nombreProducto = $database->get("productos", "nombre", ["id" => $idProducto]);
+                $errores[] = "No hay suficiente existencia del producto '{$nombreProducto}'.";
+            }
+        }
+    }
+
+    if (!empty($errores)) {
+        return ["error" => implode("<br>", $errores)];
+    }
+
+    return true;
 }
 
 
