@@ -1681,9 +1681,14 @@ function validarExistenciaSalida($partidas)
     $errores = [];
 
     foreach ($partidas as $partida) {
+        // Saltar partidas inactivas
+        if (isset($partida['estado']) && $partida['estado'] == 'Inactivo') {
+            continue;
+        }
+
         $idProducto = $database->get("almacenes_productos", "idproducto", ["id" => $partida['idalmacenes_productos']]);
         $manejaLotes = $database->get("productos", "lote_serie", ["id" => $idProducto]);
-        
+
         if ($manejaLotes == 'Sí') {
             foreach ($partida['lotes'] as $lote) {
                 $existenciaLote = $database->get("almacenes_productos_lotes", "existencia", ["id" => $lote['iddbapl']]);
@@ -1707,6 +1712,128 @@ function validarExistenciaSalida($partidas)
 
     return true;
 }
+
+
+function registroLog($accion, $mensaje, $datos = [])
+{
+    // Carpeta base para logs
+    $baseDir = __DIR__ . '/../../logs';
+
+    // Obtener fecha y hora actuales
+    $anio = date('Y');
+    $mes = date('m');
+    $fechaActual = date('Y-m-d');
+    $horaActual = date('H:i:s');
+
+    // Estructura de carpetas: logs/AÑO/MES/
+    $logDir = "{$baseDir}/{$anio}/{$mes}";
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+    }
+
+    // Archivo log del día
+    $archivoLog = "{$logDir}/log_{$fechaActual}.log";
+
+    // Datos de contexto
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
+    $metodoHttp = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+    $url = (isset($_SERVER['REQUEST_URI']) ? ($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'CLI');
+    $sessionId = session_id() ?: 'Sin sesión';
+
+    // Convertir datos adicionales a JSON
+    $datosJson = json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    // Estructura de la línea de log
+    $log = [
+        'fecha_hora' => "{$fechaActual} {$horaActual}",
+        'idusuario' => $_SESSION['idusuario'] ?? 'Desconocido',
+        'idsucursal' => $_SESSION['idsucursal'],
+        'idempresa' => $_SESSION['idempresa'],
+        'id_sesion' => $sessionId,
+        'metodo_http' => $metodoHttp,
+        'accion' => $accion,
+        'mensaje' => $mensaje,
+        'datos' => $datosJson,
+        'navegador' => $userAgent,
+        'url' => $url,
+    ];
+
+    // Convertir a línea de texto para el archivo
+    $logLinea = implode(' | ', $log) . PHP_EOL;
+
+    // Escribir en el archivo
+    file_put_contents($archivoLog, $logLinea, FILE_APPEND | LOCK_EX);
+}
+
+function validaPermisoEditarModulo($modulo, $submodulo = null, $subsubmodulo = null)
+{
+    $permiso = false;
+    global $database;
+
+    $idUsuario = $_SESSION['idusuario'];
+
+    // Buscar el ID del módulo principal
+    $idModulo = $database->get("modulos", "id", [
+        "nombre" => $modulo,
+        "padre_id" => null
+    ]);
+
+    if (!$idModulo) {
+        return false; // Si no existe el módulo principal, no hay permiso
+    }
+
+    // Si no hay submódulos, verificar directamente el permiso sobre el módulo
+    if (!$submodulo) {
+        $permiso = $database->has("usuarios_modulos", [
+            "idusuario" => $idUsuario,
+            "idmodulo" => $idModulo,
+            "editar" => 1
+        ]);
+        return $permiso;
+    }
+
+    // Buscar el ID del submódulo (hijo del módulo principal)
+    $idSubmodulo = $database->get("modulos", "id", [
+        "nombre" => $submodulo,
+        "padre_id" => $idModulo
+    ]);
+
+    if (!$idSubmodulo) {
+        return false; // Si no existe el submódulo, no hay permiso
+    }
+
+    // Si no hay subsubmódulo, verificar directamente el permiso sobre el submódulo
+    if (!$subsubmodulo) {
+        $permiso = $database->has("usuarios_modulos", [
+            "idusuario" => $idUsuario,
+            "idmodulo" => $idSubmodulo,
+            "editar" => 1
+        ]);
+        return $permiso;
+    }
+
+    // Buscar el ID del subsubmódulo (hijo del submódulo)
+    $idSubsubmodulo = $database->get("modulos", "id", [
+        "nombre" => $subsubmodulo,
+        "padre_id" => $idSubmodulo
+    ]);
+
+    if (!$idSubsubmodulo) {
+        return false; // Si no existe el subsubmódulo, no hay permiso
+    }
+
+    // Verificar permiso sobre el subsubmódulo
+    $permiso = $database->has("usuarios_modulos", [
+        "idusuario" => $idUsuario,
+        "idmodulo" => $idSubsubmodulo,
+        "editar" => 1
+    ]);
+
+    return $permiso;
+}
+
+
+
 
 
 
