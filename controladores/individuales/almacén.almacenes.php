@@ -336,109 +336,88 @@ class almacenAlmacenes extends alkesGlobal
     function guardar($form)
     {
         global $database;
-        $this->response->assign("btnguardar", "disabled", "disabled"); //Deshabilitar boton de guardar para evitar que el usuario de click varias veces
-        $data = [
-            'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
-            'idsucursal' => isset($form['idsucursal']) ? $form['idsucursal'] : 0,
-            'idusuario_encargado' => isset($form['idusuario']) ? $form['idusuario'] : 0,
-            'nombre' => isset($form['nombre']) ? $form['nombre'] : '',
-            'direccion' => isset($form['direccion']) ? $form['direccion'] : '',
-            'capacidad_m3' => isset($form['capacidad']) ? $form['capacidad'] : 0,
-            'estado' => isset($form['estado']) ? $form['estado'] : 'Activo',
-            'principal' => isset($form['principal']) ? $form['principal'] : "No",
-            'consigna' => isset($form['consigna']) ? $form['consigna'] : "No"
-        ];
+        $this->response->assign("btnguardar", "disabled", "disabled"); // Deshabilitar botón de guardar para evitar que el usuario haga clic varias veces
 
-        // Si el 'id' de la URL es 0, realizamos una inserción
-        if ($_GET['id'] == 0) {
-            try {
-                // Realizamos la inserción
+        // Iniciar la transacción
+        $database->pdo->beginTransaction();
+
+        try {
+            $data = [
+                'idempresa' => isset($_SESSION['idempresa']) ? $_SESSION['idempresa'] : 0,
+                'idsucursal' => isset($form['idsucursal']) ? $form['idsucursal'] : 0,
+                'idusuario_encargado' => isset($form['idusuario']) ? $form['idusuario'] : 0,
+                'nombre' => isset($form['nombre']) ? $form['nombre'] : '',
+                'direccion' => isset($form['direccion']) ? $form['direccion'] : '',
+                'capacidad_m3' => isset($form['capacidad']) ? $form['capacidad'] : 0,
+                'estado' => isset($form['estado']) ? $form['estado'] : 'Activo',
+                'principal' => isset($form['principal']) ? $form['principal'] : "No",
+                'consigna' => isset($form['consigna']) ? $form['consigna'] : "No"
+            ];
+
+            // Si el 'id' de la URL es 0, realizamos una inserción
+            if ($_GET['id'] == 0) {
                 $database->insert('almacenes', $data);
                 $insert_id = $database->id();
-                // Llamamos a la función guardarPartidas y pasamos el id del nuevo Almacén
                 $this->guardarPartidas($insert_id); // Aquí pasamos el ID del nuevo Almacén
-                $this->alerta(
-                    "Exito",
-                    "Almacén registrado correctamente.",
-                    "success",
-                    null,
-                    true,
-                    false,
-                    "index.php"
-                );
-            } catch (PDOException $e) {
-                $this->alerta(
-                    "Error al guardar",
-                    "No se pudo registrar el almacén, por favor intente nuevamente o contacte con el administrador.",
-                    "error"
-                );
-            }
-        }
-        // Si el 'id' no es 0, actualizamos el registro correspondiente
-        else {
-            try {
-                // Realizamos la actualización
+            } else {
+                // Si el 'id' no es 0, actualizamos el registro correspondiente
                 $database->update('almacenes', $data, ['id' => $_GET['id']]);
-                // Llamamos a la función guardarPartidas y pasamos el id del Almacén
                 $this->guardarPartidas($_GET['id']); // Aquí pasamos el ID del Almacén actualizado
-                $this->alerta(
-                    "Exito",
-                    "Almacén actualizado correctamente.",
-                    "success",
-                    null,
-                    true,
-                    false,
-                    "index.php"
-                );
-            } catch (PDOException $e) {
-                $this->alerta(
-                    "Error al actualizar",
-                    "No se pudo actualizar el almacén, por favor intente nuevamente o contacte con el administrador.",
-                    "error"
-                );
             }
+
+            // Si todo va bien, confirmamos la transacción
+            $database->pdo->commit();
+
+            $this->alerta(
+                "Éxito",
+                "Almacén registrado/actualizado correctamente.",
+                "success",
+                null,
+                true,
+                false,
+                "index.php"
+            );
+        } catch (PDOException $e) {
+            // Si algo falla, revertimos la transacción
+            $database->pdo->rollBack();
+            $this->alerta(
+                "Error",
+                "No se pudo completar la operación, por favor intente nuevamente o contacte con el administrador.",
+                "error"
+            );
         }
+
         return $this->response;
     }
 
-
     function guardarPartidas($idalmacen)
     {
-        global $database; // instancia de Medoo
+        global $database;
 
-        // Verificamos si la sesión contiene las partidas
         if (isset($_SESSION['partidas' . $_GET['rand']]) && is_array($_SESSION['partidas' . $_GET['rand']])) {
-            // Iteramos sobre las partidas
             foreach ($_SESSION['partidas' . $_GET['rand']] as $partida) {
-                // Si la partida tiene iddb igual a 0, significa que es un nuevo registro
                 if ($partida['iddb'] == 0) {
-                    // Verificamos si el impuesto está marcado como Inactivo
                     if ($partida['estado'] == 'Inactivo') {
-                        // Si el impuesto está Inactivo, no insertamos la partida
                         continue;
                     }
-                    // Si el impuesto no está Inactivo, insertamos la nueva partida
                     $data = [
-                        'idalmacen' => $idalmacen, // ID del almacén desde la URL
+                        'idalmacen' => $idalmacen,
                         'idproducto' => $partida['idproducto'],
                         'existencia' => $partida['existencia'],
                         'estado' => $partida['estado'],
                         'ubicacion' => $partida['ubicacion'],
                     ];
-                    // Realizamos la inserción
                     $database->insert('almacenes_productos', $data);
                 } else {
-                    // Si iddb no es 0, significa que la partida ya existe, por lo que actualizamos
                     $data = [
                         'estado' => $partida['estado'],
                         'ubicacion' => $partida['ubicacion'],
                     ];
-                    // Realizamos la actualización
                     $database->update('almacenes_productos', $data, ['id' => $partida['iddb']]);
                 }
             }
         }
-        // Retornar la respuesta Jaxon
+
         return $this->response;
     }
 

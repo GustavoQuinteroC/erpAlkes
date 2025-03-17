@@ -181,7 +181,7 @@ class ventasClientes extends alkesGlobal
 
                 // Input de fecha de vencimiento
                 $inputFecha = "<input type='date' class='form-control' value='" . htmlspecialchars($subcuenta['fecha_vencimiento']) . "'
-                    onblur='JaxonventasClientes.actualizarFechaVencimiento($index, this.value)'>";
+                    onchange='JaxonventasClientes.actualizarFechaVencimiento($index, this.value)'>";
 
                 // Construcción de la fila de la tabla
                 $fila = [

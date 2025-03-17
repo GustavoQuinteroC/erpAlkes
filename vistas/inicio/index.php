@@ -78,9 +78,11 @@ if (file_exists($pathControlador)) {
                                                     <li>Al mostrar lotes, en todos los casos mostrar alerta con lotes
                                                         proximos a vencer</li>
                                                     <li>Hacer una bitacora</li>
-                                                    <li>Poner iconos con hipervinculos en los index, por ejemplo en una 
-                                                        tabla que traiga cliente poner un icono con un hyper vinculo a 
+                                                    <li>Poner hipervinculos en los index, por ejemplo en una
+                                                        tabla que traiga cliente poner un hyper vinculo a
                                                         consultar ese cliente</li>
+                                                    <li>Hacer historial de cambios en todos los documentos y modulos
+                                                    </li>
                                                 </ul>
                                             </li>
                                             <li class="list-group-item">
@@ -141,224 +143,233 @@ if (file_exists($pathControlador)) {
                                                         la tabla tablas_columnas_x_usuario</li>
                                                 </ul>
                                             </li>
+                                            <li class="list-group-item">
+                                                <strong>Almaceneces / movimientos</strong>
+                                                <ul>
+                                                    <li>No permitir cancelar movimientos que tengan una relacion con
+                                                        algun otro documento como facturas, notas de credito, traspasos,
+                                                        etc.</li>
+                                                </ul>
+                                            </li>
                                     </div>
+                                </div>
+                                </ul>
+                            </div>
+                            <div class="card-footer">Footer</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mb-4">
+                                <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                    <h3 class="card-title">Modulos terminados</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                            data-lte-toggle="card-collapse" title="Collapse">
+                                            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                            data-lte-toggle="card-remove" title="Remove">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <strong>Compras</strong>
+                                            <ul>
+                                                <li>Proveedores</li>
+                                            </ul>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <strong>Ventas</strong>
+                                            <ul>
+                                                <li>Clientes</li>
+                                            </ul>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <strong>Almacén</strong>
+                                            <ul>
+                                                <li>Productos</li>
+                                                <li>Almacenes</li>
+                                            </ul>
+                                        </li>
+
                                     </ul>
                                 </div>
                                 <div class="card-footer">Footer</div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card mb-4">
-                                    <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                        <h3 class="card-title">Modulos terminados</h3>
-                                        <div class="card-tools">
-                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                                data-lte-toggle="card-collapse" title="Collapse">
-                                                <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                                                <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                                data-lte-toggle="card-remove" title="Remove">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mb-4">
+                                <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                    <h3 class="card-title">Ventajas y desventajas</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                            data-lte-toggle="card-collapse" title="Collapse">
+                                            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                            data-lte-toggle="card-remove" title="Remove">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
                                     </div>
-                                    <div class="card-body">
-                                        <ul class="list-group">
-                                            <li class="list-group-item">
-                                                <strong>Compras</strong>
-                                                <ul>
-                                                    <li>Proveedores</li>
-                                                </ul>
-                                            </li>
-                                            <li class="list-group-item">
-                                                <strong>Ventas</strong>
-                                                <ul>
-                                                    <li>Clientes</li>
-                                                </ul>
-                                            </li>
-                                            <li class="list-group-item">
-                                                <strong>Almacén</strong>
-                                                <ul>
-                                                    <li>Productos</li>
-                                                    <li>Almacenes</li>
-                                                </ul>
-                                            </li>
-
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer">Footer</div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card mb-4">
-                                    <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                        <h3 class="card-title">Ventajas y desventajas</h3>
-                                        <div class="card-tools">
-                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                                data-lte-toggle="card-collapse" title="Collapse">
-                                                <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                                                <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                                data-lte-toggle="card-remove" title="Remove">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
+                                <div class="card-body">
+                                    <ul class="list-group">
                                         <ul class="list-group">
-                                            <ul class="list-group">
-                                                <li class="list-group-item">
-                                                    <strong>Ventajas</strong>
-                                                    <ul>
-                                                        <!-- Categoría: Personalización -->
-                                                        <li><strong>Personalización</strong>
-                                                            <ul>
-                                                                <li>Personalización de colores al nivel de usuario
-                                                                    (fondo y
-                                                                    énfasis).</li>
-                                                                <li>Columnas de tablas personalizables al nivel de
-                                                                    usuario.
-                                                                </li>
-                                                                <li>Personalización de procesos administrativos (por
-                                                                    ejemplo, elegir si los movimientos se facturan
-                                                                    directamente o si se hace un vale de almacén antes
-                                                                    de
-                                                                    facturar).</li>
-                                                            </ul>
-                                                        </li>
+                                            <li class="list-group-item">
+                                                <strong>Ventajas</strong>
+                                                <ul>
+                                                    <!-- Categoría: Personalización -->
+                                                    <li><strong>Personalización</strong>
+                                                        <ul>
+                                                            <li>Personalización de colores al nivel de usuario
+                                                                (fondo y
+                                                                énfasis).</li>
+                                                            <li>Columnas de tablas personalizables al nivel de
+                                                                usuario.
+                                                            </li>
+                                                            <li>Personalización de procesos administrativos (por
+                                                                ejemplo, elegir si los movimientos se facturan
+                                                                directamente o si se hace un vale de almacén antes
+                                                                de
+                                                                facturar).</li>
+                                                        </ul>
+                                                    </li>
 
-                                                        <!-- Categoría: Seguridad -->
-                                                        <li><strong>Seguridad</strong>
-                                                            <ul>
-                                                                <li>Validación de registros repetidos.</li>
-                                                                <li>Validación en tiempo real sobre usuarios inactivos
-                                                                    para
-                                                                    prevenir fraudes, deshabilitando el acceso
-                                                                    inmediatamente.</li>
-                                                                <li>Recuperación de contraseña vía correo electrónico.
-                                                                </li>
-                                                                <li>Validación de tipo de dato (números enteros,
-                                                                    decimales,
-                                                                    texto, expresiones regulares, etc.).</li>
-                                                                <li>Validación de campos requeridos mínimos para el
-                                                                    funcionamiento del sistema.</li>
-                                                                <li>Contraseñas encriptadas.</li>
-                                                                <li>Protección contra ataques de fuerza bruta.</li>
-                                                                <li>Protección contra inyeccion SQL.</li>
-                                                            </ul>
-                                                        </li>
+                                                    <!-- Categoría: Seguridad -->
+                                                    <li><strong>Seguridad</strong>
+                                                        <ul>
+                                                            <li>Validación de registros repetidos.</li>
+                                                            <li>Validación en tiempo real sobre usuarios inactivos
+                                                                para
+                                                                prevenir fraudes, deshabilitando el acceso
+                                                                inmediatamente.</li>
+                                                            <li>Recuperación de contraseña vía correo electrónico.
+                                                            </li>
+                                                            <li>Validación de tipo de dato (números enteros,
+                                                                decimales,
+                                                                texto, expresiones regulares, etc.).</li>
+                                                            <li>Validación de campos requeridos mínimos para el
+                                                                funcionamiento del sistema.</li>
+                                                            <li>Contraseñas encriptadas.</li>
+                                                            <li>Protección contra ataques de fuerza bruta.</li>
+                                                            <li>Protección contra inyeccion SQL.</li>
+                                                        </ul>
+                                                    </li>
 
-                                                        <!-- Categoría: Funcionalidad General -->
-                                                        <li><strong>Funcionalidad General</strong>
-                                                            <ul>
-                                                                <li>Carga rápida de datos, sin importar la cantidad de
-                                                                    registros.</li>
-                                                                <li>Opción "Recuérdame" en el inicio de sesión.</li>
-                                                                <li>Exportación de listados a Excel, portapapeles o
-                                                                    impresión directa.</li>
-                                                                <li>Control de consecutivos (folios, cantidad de
-                                                                    dígitos,
-                                                                    prefijos, etc.).</li>
-                                                                <li>Gestión de usuarios, roles y permisos.</li>
-                                                            </ul>
-                                                        </li>
+                                                    <!-- Categoría: Funcionalidad General -->
+                                                    <li><strong>Funcionalidad General</strong>
+                                                        <ul>
+                                                            <li>Carga rápida de datos, sin importar la cantidad de
+                                                                registros.</li>
+                                                            <li>Opción "Recuérdame" en el inicio de sesión.</li>
+                                                            <li>Exportación de listados a Excel, portapapeles o
+                                                                impresión directa.</li>
+                                                            <li>Control de consecutivos (folios, cantidad de
+                                                                dígitos,
+                                                                prefijos, etc.).</li>
+                                                            <li>Gestión de usuarios, roles y permisos.</li>
+                                                        </ul>
+                                                    </li>
 
-                                                        <!-- Categoría: Soporte y Capacitación -->
-                                                        <li><strong>Soporte y Capacitación</strong>
-                                                            <ul>
-                                                                <li>Soporte extendido vía WhatsApp (lunes a sábado de
-                                                                    8:00
-                                                                    a.m. a 8:00 p.m.).</li>
-                                                                <li>Academia con cursos sobre:
-                                                                    <ul>
-                                                                        <li>Uso del sistema.</li>
-                                                                        <li>Protección contra ciberamenazas.</li>
-                                                                        <li>Buenas prácticas para redactar correos
-                                                                            empresariales.</li>
-                                                                        <li>Etc.</li>
-                                                                    </ul>
-                                                                </li>
-                                                            </ul>
-                                                        </li>
+                                                    <!-- Categoría: Soporte y Capacitación -->
+                                                    <li><strong>Soporte y Capacitación</strong>
+                                                        <ul>
+                                                            <li>Soporte extendido vía WhatsApp (lunes a sábado de
+                                                                8:00
+                                                                a.m. a 8:00 p.m.).</li>
+                                                            <li>Academia con cursos sobre:
+                                                                <ul>
+                                                                    <li>Uso del sistema.</li>
+                                                                    <li>Protección contra ciberamenazas.</li>
+                                                                    <li>Buenas prácticas para redactar correos
+                                                                        empresariales.</li>
+                                                                    <li>Etc.</li>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
 
-                                                        <!-- Categoría: Gestión de Inventarios y Productos -->
-                                                        <li><strong>Gestión de Inventarios y Productos</strong>
-                                                            <ul>
-                                                                <li>Manejo de múltiples sucursales.</li>
-                                                                <li>Manejo de ubicaciones específicas en el almacén para
-                                                                    cada producto.</li>
-                                                                <li>Soporte para productos con lotes y números de serie.
-                                                                </li>
-                                                                <li>Soporte para productos tipo kit (compuestos de
-                                                                    varios
-                                                                    productos).</li>
-                                                                <li>Soporte para productos de tipo servicio.</li>
-                                                                <li>Gestión de productos con venta a granel (por
-                                                                    ejemplo,
-                                                                    vender 0.385 kg).</li>
-                                                                <li>Categorización de productos en tres niveles:
-                                                                    categoría,
-                                                                    subcategoría y subsubcategoría.</li>
-                                                                <li>Control de inventarios por almacén.</li>
-                                                                <li>Manejo de múltiples almacenes por sucursal.</li>
-                                                                <li>Trazabilidad de productos (kardex).</li>
-                                                                <li>Alerta de inventario bajo (stock mínimo configurado
-                                                                    por
-                                                                    producto y por almacén).</li>
-                                                            </ul>
-                                                        </li>
+                                                    <!-- Categoría: Gestión de Inventarios y Productos -->
+                                                    <li><strong>Gestión de Inventarios y Productos</strong>
+                                                        <ul>
+                                                            <li>Manejo de múltiples sucursales.</li>
+                                                            <li>Manejo de ubicaciones específicas en el almacén para
+                                                                cada producto.</li>
+                                                            <li>Soporte para productos con lotes y números de serie.
+                                                            </li>
+                                                            <li>Soporte para productos tipo kit (compuestos de
+                                                                varios
+                                                                productos).</li>
+                                                            <li>Soporte para productos de tipo servicio.</li>
+                                                            <li>Gestión de productos con venta a granel (por
+                                                                ejemplo,
+                                                                vender 0.385 kg).</li>
+                                                            <li>Categorización de productos en tres niveles:
+                                                                categoría,
+                                                                subcategoría y subsubcategoría.</li>
+                                                            <li>Control de inventarios por almacén.</li>
+                                                            <li>Manejo de múltiples almacenes por sucursal.</li>
+                                                            <li>Trazabilidad de productos (kardex).</li>
+                                                            <li>Alerta de inventario bajo (stock mínimo configurado
+                                                                por
+                                                                producto y por almacén).</li>
+                                                        </ul>
+                                                    </li>
 
-                                                        <!-- Categoría: Reportes y Análisis -->
-                                                        <li><strong>Reportes y Análisis</strong>
-                                                            <ul>
-                                                                <li>Generación de reportes personalizables (ventas,
-                                                                    inventarios, movimientos, etc.).</li>
-                                                                <li>Dashboard interactivo con métricas clave del
-                                                                    negocio.
-                                                                </li>
-                                                                <li>Facturación electrónica (Facturas, complementos de
-                                                                    pago,
-                                                                    notas de crédito, carta porte).</li>
-                                                            </ul>
-                                                        </li>
+                                                    <!-- Categoría: Reportes y Análisis -->
+                                                    <li><strong>Reportes y Análisis</strong>
+                                                        <ul>
+                                                            <li>Generación de reportes personalizables (ventas,
+                                                                inventarios, movimientos, etc.).</li>
+                                                            <li>Dashboard interactivo con métricas clave del
+                                                                negocio.
+                                                            </li>
+                                                            <li>Facturación electrónica (Facturas, complementos de
+                                                                pago,
+                                                                notas de crédito, carta porte).</li>
+                                                        </ul>
+                                                    </li>
 
-                                                        <!-- Categoría: Facilidad de Uso -->
-                                                        <li><strong>Facilidad de Uso</strong>
-                                                            <ul>
-                                                                <li>Tutorial interactivo inicial al ingresar al sistema
-                                                                    por
-                                                                    primera vez.</li>
-                                                                <li>Función de búsqueda avanzada para encontrar
-                                                                    rápidamente
-                                                                    registros.</li>
-                                                            </ul>
-                                                        </li>
-                                                    </ul>
-                                                </li>
+                                                    <!-- Categoría: Facilidad de Uso -->
+                                                    <li><strong>Facilidad de Uso</strong>
+                                                        <ul>
+                                                            <li>Tutorial interactivo inicial al ingresar al sistema
+                                                                por
+                                                                primera vez.</li>
+                                                            <li>Función de búsqueda avanzada para encontrar
+                                                                rápidamente
+                                                                registros.</li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+
+                                        <li class="list-group-item">
+                                            <strong>Desventajas</strong>
+                                            <ul>
+                                                <li></li>
                                             </ul>
-
-                                            <li class="list-group-item">
-                                                <strong>Desventajas</strong>
-                                                <ul>
-                                                    <li></li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer">Footer</div>
+                                        </li>
+                                    </ul>
                                 </div>
+                                <div class="card-footer">Footer</div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
-            <?= botones(); ?>
         </div>
+        </main>
+        <?= botones(); ?>
+    </div>
     </div>
     <?= scriptsHtml(); ?>
 </body>
