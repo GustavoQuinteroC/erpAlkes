@@ -71,7 +71,7 @@ $baseWhere = $tabla[0]['condicion_principal'];
 // Reemplazar variables en $baseWhere
 $where = $baseWhere;
 $where = str_replace('{empresa}', "idempresa=" . addslashes($_SESSION['idempresa']), $where);
-$where = str_replace('{sucursal}', "idsucursal=" . addslashes($_SESSION['sucursal']), $where);
+$where = str_replace('{sucursal}', "idsucursal=" . addslashes($_SESSION['idsucursal']), $where);
 $where = str_replace('{almacen}', "idalmacen=" . addslashes($_GET['idalmacen']), $where);
 
 // Añadir la condición del filtro

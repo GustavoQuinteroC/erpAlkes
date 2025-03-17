@@ -182,7 +182,7 @@ class SSP
             if ( $requestColumn['searchable'] == 'true' ) {
                 if(!empty($column['db'])){
                     $binding = self::bind( $bindings, '%'.$str.'%', PDO::PARAM_STR );
-                    $globalSearch[] = "`".$column['db']."` COLLATE utf8mb4_unicode_ci LIKE ".$binding;
+                    $globalSearch[] = "`".$column['db']."` LIKE ".$binding;
                 }
             }
         }
@@ -201,7 +201,7 @@ class SSP
              $str != '' ) {
                 if(!empty($column['db'])){
                     $binding = self::bind( $bindings, '%'.$str.'%', PDO::PARAM_STR );
-                    $columnSearch[] = "`".$column['db']."` COLLATE utf8mb4_unicode_ci LIKE ".$binding;
+                    $columnSearch[] = "`".$column['db']."` LIKE ".$binding;
                 }
             }
         }
@@ -456,7 +456,7 @@ class SSP
 				"mysql:host={$sql_details['host']};dbname={$sql_details['db']}",
 				$sql_details['user'],
 				$sql_details['pass'],
-				array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci" )
+				array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4" )
 			);
 			
 		} catch (PDOException $e) {
