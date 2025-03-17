@@ -86,9 +86,29 @@ if (file_exists($pathControlador)) {
                                                                     onchange="JaxonalmacenMovimientos.cargarSocio({ seleccion: this.value });">
                                                                     <?php echo getSocios(); ?>
                                                                 </select>
-                                                                <button class="btn btn-outline-secondary" type="button"
+                                                                <button class="btn btn-outline-secondary" type="button" id="botonBuscarSocio" name="botonBuscarSocio"
                                                                     title="Buscar socio"
                                                                     onclick="JaxonalmacenMovimientos.modalSeleccionarSocio();">
+                                                                    <i class="bi bi-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Campo: idsubcuenta (select vacío con botón de búsqueda) -->
+                                                    <div class="form-group row mb-3">
+                                                        <label for="idsubcuenta"
+                                                            class="col-sm-4 col-form-label text-start">Subcuenta</label>
+                                                        <div class="col-sm-8">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i
+                                                                        class="bi bi-person"></i></span>
+                                                                <select id="idsubcuenta" name="idsubcuenta"
+                                                                    class="form-select select2-field"
+                                                                    onchange="JaxonalmacenMovimientos.cargarSubcuenta({ seleccion: this.value }, document.getElementById('idsocio').value);">
+                                                                </select>
+                                                                <button class="btn btn-outline-secondary" type="button" id="botonBuscarSubcuenta" name="botonBuscarSubcuenta"
+                                                                    title="Buscar subcuenta"
+                                                                    onclick="JaxonalmacenMovimientos.modalSeleccionarSubcuenta(document.getElementById('idsocio').value);">
                                                                     <i class="bi bi-search"></i>
                                                                 </button>
                                                             </div>
@@ -210,9 +230,9 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-map"></i></span>
-                                                                <textarea class="form-control"
+                                                                <textarea class="form-control" readOnly
                                                                     id="detalleDireccion_origen"
-                                                                    name="detalleDireccion_origen" rows="4"></textarea>
+                                                                    name="detalleDireccion_origen" rows="5"></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -241,9 +261,9 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-map"></i></span>
-                                                                <textarea class="form-control"
+                                                                <textarea class="form-control" readOnly
                                                                     id="detalleDireccion_destino"
-                                                                    name="detalleDireccion_destino" rows="4"></textarea>
+                                                                    name="detalleDireccion_destino" rows="5"></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -259,7 +279,7 @@ if (file_exists($pathControlador)) {
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
                                             <h3 class="card-title">Productos agregados</h3>
                                             <div class="card-tools d-flex align-items-center gap-2">
-                                                <button tabindex="400" id="addImpuesto" name="addImpuesto"
+                                                <button tabindex="400" id="addPartidas" name="addPartidas"
                                                     class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
                                                     onclick="JaxonalmacenMovimientos.modalSeleccionarProductos(jaxon.getFormValues('formulario<?= $_GET['rand'] ?>'));"
                                                     type="button">
@@ -282,7 +302,7 @@ if (file_exists($pathControlador)) {
                                                 style="width:100%">
                                                 <thead>
                                                     <tr>
-                                                        <th>#</th>
+                                                        <th>Renglon</th>
                                                         <th>Código de Barras</th>
                                                         <th>Nombre</th>
                                                         <th>Descripción</th>
@@ -300,18 +320,29 @@ if (file_exists($pathControlador)) {
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <!-- Campo de notas -->
+                                            <div class="form-group row mb-3">
+                                                <label for="notas"
+                                                    class="col-sm-2 col-form-label text-start">Notas</label>
+                                                <div class="col-sm-10">
+                                                    <textarea class="form-control" id="notas" name="notas" rows="5"
+                                                        placeholder="Escribe tus notas aquí..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group row mb-3">
                                 <label for="notas" class="col-sm-4 col-form-label text-start">Notas del
                                     desarrollador:</label>
                                 <div class="col-sm-8">
                                     <p id="notas" class="form-text text-muted">
-                                        1- al procesar el movimiento volver a comprobar la existencia en caso de ser un
-                                        movimiento de tipo salida.
-                                        1- validar existencia en partidas.
-                                        1- hacer una funcion validacantidadpartida y hacer todas las actualizaciones
-                                        desde esa funcion, esa funcion se encargara de hacer la consulta a la base de
-                                        datos sobre el inventario y en caso de no ajustar, entonces pondra tanto la
-                                        partida como sus lotes en 0.
+                                        1- validar existencia cuando se quiere cancelar un movimiento de tipo entrada, ya que al cancelar generaria una salida.
                                     </p>
                                 </div>
                             </div>
@@ -332,7 +363,7 @@ if (file_exists($pathControlador)) {
         // Inicializar DataTable
         var tablaPartidas = $('#tablaPartidas').DataTable({
             language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' // Español
+                url: '/plugins/datatables/es-ES.json' // Español
             },
             responsive: true,
             ordering: true,
