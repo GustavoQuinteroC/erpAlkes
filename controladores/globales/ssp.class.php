@@ -244,67 +244,67 @@ class SSP
 	 *  @return array          Server-side processing response array
 	 */
 	static function simple($request, $conn, $table, $primaryKey, $columns, $whereCustom = "")
-	{
-		$bindings = array();
-		$db = self::db($conn);
+{
+    $bindings = array();
+    $db = self::db($conn);
 
-		// Allow for a JSON string to be passed in
-		if (isset($request['json'])) {
-			$request = json_decode($request['json'], true);
-		}
+    // Allow for a JSON string to be passed in
+    if (isset($request['json'])) {
+        $request = json_decode($request['json'], true);
+    }
 
-		// Build the SQL query string from the request
-		$limit = self::limit($request, $columns);
-		$order = self::order($request, $columns);
-		$where = self::filter($request, $columns, $bindings);
+    // Build the SQL query string from the request
+    $limit = self::limit($request, $columns);
+    $order = self::order($request, $columns);
+    $where = self::filter($request, $columns, $bindings);
 
-		// If there's a custom where condition, append it to the existing where clause
-		if ($whereCustom) {
-			$where = $where ? $where . " AND " . $whereCustom : "WHERE " . $whereCustom;
-		}
+    // Si hay una condición personalizada, agrégala correctamente al WHERE existente
+    if ($whereCustom) {
+        $where = $where ? "$where AND $whereCustom" : "WHERE $whereCustom";
+    }
 
-		// Main query to actually get the data
-		$data = self::sql_exec(
-			$db,
-			$bindings,
-			"SELECT `" . implode("`, `", self::pluck($columns, 'db')) . "`
-         FROM `$table`
-         $where
-         $order
+    // Query principal para obtener los datos
+    $data = self::sql_exec(
+        $db,
+        $bindings,
+        "SELECT `" . implode("`, `", self::pluck($columns, 'db')) . "` 
+         FROM `$table` 
+         $where 
+         $order 
          $limit"
-		);
+    );
 
-		// Data set length after filtering
-		$resFilterLength = self::sql_exec(
-			$db,
-			$bindings,
-			"SELECT COUNT(`{$primaryKey}`)
-         FROM `$table`
+    // Conteo de registros después del filtrado
+    $resFilterLength = self::sql_exec(
+        $db,
+        $bindings,
+        "SELECT COUNT(`{$primaryKey}`) 
+         FROM `$table` 
          $where"
-		);
-		$recordsFiltered = $resFilterLength[0][0];
+    );
+    $recordsFiltered = $resFilterLength[0][0];
 
-		// Total data set length
-		$resTotalLength = self::sql_exec(
-			$db,
-			[],
-			"SELECT COUNT(`{$primaryKey}`)
-         FROM `$table`"
-		);
-		$recordsTotal = $resTotalLength[0][0];
+    // **Aquí aplicamos también la condición personalizada a recordsTotal**
+    $resTotalLength = self::sql_exec(
+        $db,
+        [],
+        "SELECT COUNT(`{$primaryKey}`) 
+         FROM `$table` 
+         " . ($whereCustom ? "WHERE $whereCustom" : "")
+    );
+    $recordsTotal = $resTotalLength[0][0];
 
-		/*
-		 * Output
-		 */
-		return array(
-			"draw" => isset($request['draw']) ?
-				intval($request['draw']) :
-				0,
-			"recordsTotal" => intval($recordsTotal),
-			"recordsFiltered" => intval($recordsFiltered),
-			"data" => self::data_output($columns, $data)
-		);
-	}
+    /*
+     * Output
+     */
+    return array(
+        "draw" => isset($request['draw']) ? intval($request['draw']) : 0,
+        "recordsTotal" => intval($recordsTotal),
+        "recordsFiltered" => intval($recordsFiltered),
+        "data" => self::data_output($columns, $data)
+    );
+}
+
 
 
 

@@ -88,5 +88,5 @@ $sql_details = array(
 
 // Pasar la condición WHERE personalizada al método simple
 echo json_encode(
-    SSP::simple($_GET, $sql_details, $tabla[0]['vista'], $primaryKey, $columns, $where)
+    SSP::complex($_GET, $sql_details, $tabla[0]['vista'], $primaryKey, $columns, null, $where)
 );
