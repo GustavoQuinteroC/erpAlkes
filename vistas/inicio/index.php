@@ -19,8 +19,6 @@ if (file_exists($pathControlador)) {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="<?= getBackground(); ?>">
 
@@ -93,6 +91,16 @@ if (file_exists($pathControlador)) {
                                                         pertenece el usuario</li>
                                                     <li>agregar stock minimo a cada producto en el almacen, por defecto
                                                         poner 0 para que si es 0, no mande la alerta</li>
+                                                    <li>si se intenta quitar un producto del almacen primero se debe de
+                                                        bajar su inventario a 0</li>
+                                                </ul>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <strong>Inventario</strong>
+                                                <ul>
+                                                    <li>no mostrar productos que no esten activos en la union al almacen
+                                                    </li>
+                                                    <li>no mostrar productos que no sean inventariables</li>
                                                 </ul>
                                             </li>
                                             <li class="list-group-item">
@@ -151,77 +159,74 @@ if (file_exists($pathControlador)) {
                                                         etc.</li>
                                                 </ul>
                                             </li>
+                                        </ul>
                                     </div>
+                                    <div class="card-footer">Footer</div>
                                 </div>
-                                </ul>
-                            </div>
-                            <div class="card-footer">Footer</div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card mb-4">
-                                <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                    <h3 class="card-title">Modulos terminados</h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                            data-lte-toggle="card-collapse" title="Collapse">
-                                            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                                            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                            data-lte-toggle="card-remove" title="Remove">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-group">
-                                        <li class="list-group-item">
-                                            <strong>Compras</strong>
-                                            <ul>
-                                                <li>Proveedores</li>
-                                            </ul>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <strong>Ventas</strong>
-                                            <ul>
-                                                <li>Clientes</li>
-                                            </ul>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <strong>Almacén</strong>
-                                            <ul>
-                                                <li>Productos</li>
-                                                <li>Almacenes</li>
-                                            </ul>
-                                        </li>
-
-                                    </ul>
-                                </div>
-                                <div class="card-footer">Footer</div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card mb-4">
-                                <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                    <h3 class="card-title">Ventajas y desventajas</h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                            data-lte-toggle="card-collapse" title="Collapse">
-                                            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                                            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
-                                            data-lte-toggle="card-remove" title="Remove">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-4">
+                                    <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                        <h3 class="card-title">Modulos terminados</h3>
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                data-lte-toggle="card-collapse" title="Collapse">
+                                                <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                                <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                data-lte-toggle="card-remove" title="Remove">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
                                     </div>
+                                    <div class="card-body">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <strong>Compras</strong>
+                                                <ul>
+                                                    <li>Proveedores</li>
+                                                </ul>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <strong>Ventas</strong>
+                                                <ul>
+                                                    <li>Clientes</li>
+                                                </ul>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <strong>Almacén</strong>
+                                                <ul>
+                                                    <li>Productos</li>
+                                                    <li>Almacenes</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer">Footer</div>
                                 </div>
-                                <div class="card-body">
-                                    <ul class="list-group">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-4">
+                                    <div class="card-header text-bg-<?= getEnfasis(); ?>">
+                                        <h3 class="card-title">Ventajas y desventajas</h3>
+                                        <div class="card-tools">
+                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                data-lte-toggle="card-collapse" title="Collapse">
+                                                <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                                <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
+                                                data-lte-toggle="card-remove" title="Remove">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
                                         <ul class="list-group">
                                             <li class="list-group-item">
                                                 <strong>Ventajas</strong>
@@ -351,25 +356,23 @@ if (file_exists($pathControlador)) {
                                                     </li>
                                                 </ul>
                                             </li>
+                                            <li class="list-group-item">
+                                                <strong>Desventajas</strong>
+                                                <ul>
+                                                    <li></li>
+                                                </ul>
+                                            </li>
                                         </ul>
-
-                                        <li class="list-group-item">
-                                            <strong>Desventajas</strong>
-                                            <ul>
-                                                <li></li>
-                                            </ul>
-                                        </li>
-                                    </ul>
+                                    </div>
+                                    <div class="card-footer">Footer</div>
                                 </div>
-                                <div class="card-footer">Footer</div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </main>
+            <?= botones(); ?>
         </div>
-        </main>
-        <?= botones(); ?>
-    </div>
     </div>
     <?= scriptsHtml(); ?>
 </body>

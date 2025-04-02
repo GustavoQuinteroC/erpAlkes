@@ -81,7 +81,7 @@ class alkesGlobal
 
     function listadosIndex($modulo, $submodulo, $subsubmodulo, $filtroSeleccionado = '', $uso = '')
     {
-        $filtros = filtrosTablas($modulo, $submodulo, $subsubmodulo, $uso);
+        $filtros = filtrosTablas($modulo, $submodulo, $subsubmodulo);
         $html = '';
     
         // Construcción específica para la vista normal
@@ -128,9 +128,58 @@ class alkesGlobal
         return $this->response;
     }
 
+    function listadosIndexInventario($modulo, $submodulo, $subsubmodulo, $filtroSeleccionado = '', $uso = '', $idalmacen = 0)
+    {
+        $filtros = filtrosTablas($modulo, $submodulo, $subsubmodulo);
+        $html = '';
+
+        // Construcción específica para la vista normal
+        $html .= '<ul class="nav nav-tabs">';
+        foreach ($filtros as $filtro) {
+            $html .= '<li id="' . $filtro['nombre'] . '" class="nav-item">';
+            $html .= '<a class="nav-link" href="#" title="' . $filtro['nombre'] . '" onclick="JaxonalkesGlobal.listadosIndexInventario(\'' . $modulo . '\', \'' . $submodulo . '\', \'' . $subsubmodulo . '\', \'' . $filtro['nombre'] . '\', \'' . $uso . '\', \'' . $idalmacen . '\');">' . $filtro['nombre'] . '</a>';
+            $html .= '</li>';
+        }
+        $html .= '</ul>';
+        $this->response->assign("filtros", "innerHTML", $html);
+
+        $html = '<table id="tablaListado" class="table table-striped table-hover display" style="width:100%">';
+
+        // Añadir las columnas de la tabla y cerrar etiquetas necesarias
+        $columnas = columnasTablas($modulo, $submodulo, $subsubmodulo, $uso);
+        $orden = ordenTablas($modulo, $submodulo, $subsubmodulo, $uso);
+        $html .= '<thead><tr>' . $columnas . '</tr></thead></table>';
+
+        $this->response->assign("tabla", "innerHTML", $html);
+
+        // Configuración de DataTable con parámetros comunes
+        $ajaxUrl = '/controladores/globales/tablas.php?modulo=' . $modulo . '&submodulo=' . $submodulo . '&subsubmodulo=' . $subsubmodulo . '&idalmacen=' . $idalmacen . '&filtro=' . $filtroSeleccionado . '&uso=' . $uso;
+        $pageLength = 10;
+        $lengthMenu = '[[10, 20, 50, 100, 500, 10000, 100000], [10, 20, 50, 100, 500, 10000, 100000]]';
+
+        // Construir $dom y $botonera
+        $dom = 'dom: "<\'top d-flex justify-content-between align-items-center\' <\'left\'l> <\'center\'B> <\'right\'f>>rtip",';
+        $botonera = 'buttons: ["copy", "excel", "print", "colvis"],';
+
+        // Script para inicializar DataTable
+        $this->response->script("\n        if ($.fn.DataTable.isDataTable('#tablaListado')) {\n            $('#tablaListado').DataTable().destroy();\n        }\n        $('#tablaListado').DataTable({\n            ajax: '$ajaxUrl',\n            responsive: true,\n            processing: true,\n            serverSide: true,\n            pageLength: $pageLength,\n            lengthMenu: $lengthMenu,\n            info: true,  // Aquí desactivamos la visualización de la información de los registros\n            $dom\n            $botonera\n            language: {\n                url: \"/plugins/datatables/es-ES.json\"\n            },\n            order: [[" . $orden['indice'] . ", '" . $orden['orden'] . "']]\n        });\n    ");
+
+        // Aplicar o remover clases 'active' en pestañas
+        foreach ($filtros as $filtro) {
+            $nombre = $filtro['nombre'];
+            if ($nombre == $filtroSeleccionado) {
+                $this->response->script('$("li[id=\"" + "' . $nombre . '" + "\"]").addClass("active"); $("li[id=\"" + "' . $nombre . '" + "\"] a").addClass("active");');
+            } else {
+                $this->response->script('$("li[id=\"" + "' . $nombre . '" + "\"]").removeClass("active"); $("li[id=\"" + "' . $nombre . '" + "\"] a").removeClass("active");');
+            }
+        }
+
+        return $this->response;
+    }
+
     function modalSeleccionServerSide($modulo, $submodulo, $subsubmodulo, $idalmacen=0, $filtroSeleccionado = '', $uso = '', $funcionCallBack = '', $multiple = false, $parametrosAdicionales = '', $tituloModal = '')
     {
-        $filtros = filtrosTablas($modulo, $submodulo, $uso);
+        $filtros = filtrosTablas($modulo, $submodulo, $subsubmodulo);
         $html = '';
 
         // Construcción específica para el modal

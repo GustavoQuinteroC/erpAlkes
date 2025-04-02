@@ -556,8 +556,13 @@ class almacenMovimientos extends alkesGlobal
 
                 // Determinar contenido del input y botones según editable
                 if ($editable) {
-                    $inputCantidad = "<input type='number' class='form-control cantidad-input' value='" . htmlspecialchars($partida['cantidad']) . "' 
-                        data-idpartida='" . htmlspecialchars($partida['iddb']) . "' min='0' 
+                    $inputCantidad = "<input type='number' 
+                        id='cantidad[".$index."]'
+                        name='cantidad[".$index."]'
+                        class='form-control cantidad-input' 
+                        value='" . htmlspecialchars($partida['cantidad']) . "' 
+                        data-indice='".$index."'
+                        min='0' 
                         onfocus='JaxonalmacenMovimientos.validaSiTieneLote($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"))' 
                         onchange='JaxonalmacenMovimientos.validaCantidadPartida($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"), this.value)'>";
                     
@@ -645,7 +650,13 @@ class almacenMovimientos extends alkesGlobal
 
     function validaCantidadPartida($indiceDelArreglo, $form, $cantidadIntentada)
     {
-        registroLog('validaCantidadPartida', 'Validando cantidad de partida', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos'],'cantidadIntentada' => $cantidadIntentada]);
+        registroLog('validaCantidadPartida', 'Validando cantidad de partida', [
+            'indice' => $indiceDelArreglo,
+            'cantidadIntentada' => $cantidadIntentada
+        ]);
+
+        // Referencia directa a la partida en sesión
+        $partida = &$_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo];
 
         if (preg_match('/^\d{1,12}(\.\d{1,4})?$/', $cantidadIntentada)) {
             // La cantidad es válida
@@ -653,43 +664,66 @@ class almacenMovimientos extends alkesGlobal
             $naturalezaConcepto = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
             
             if ($naturalezaConcepto == 'Salida') {
-                $existenciaRealActual = $database->get("almacenes_productos", "existencia", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
+                $existenciaRealActual = $database->get("almacenes_productos", "existencia", ["id" => $partida['idalmacenes_productos']]);
                 
                 // Validar que no exceda la existencia del almacén seleccionado
                 if ($cantidadIntentada > $existenciaRealActual and !getParametro('inventario_negativo')) {
-                    registroLog('validaCantidadPartida', 'Cantidad excede existencia en almacén', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos'],'cantidadIntentada' => $cantidadIntentada,'existenciaRealActual' => $existenciaRealActual]);
+                    registroLog('validaCantidadPartida', 'Cantidad excede existencia en almacén', [
+                        'idalmacenes_productos' => $partida['idalmacenes_productos'],
+                        'cantidadIntentada' => $cantidadIntentada,
+                        'existenciaRealActual' => $existenciaRealActual
+                    ]);
+                    
                     $this->resetCantidadPartidaYLotes($indiceDelArreglo);
-                    $mensajeLotes=getParametro('lotes')?", incluyendo sus lotes o series (en caso de tenerlos)":"";
+                    $mensajeLotes = getParametro('lotes') ? ", incluyendo sus lotes o series (en caso de tenerlos)" : "";
+                    
                     $this->alerta(
                         "Cantidad inválida",
                         "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida$mensajeLotes, han sido reiniciadas a 0.",
                         "error"
                     );
+                    
                     $this->generarTablaLotes($indiceDelArreglo);
                     $this->generarTablaLotesConsulta($indiceDelArreglo);
-                }
-                else
-                {
-                    $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad']=$cantidadIntentada;
+                    
+                    // Actualizar solo el input específico usando el índice
+                    $this->response->script("
+                        $('input[data-indice=\"".$indiceDelArreglo."\"]').val('0');
+                    ");
+                    
+                    return $this->response;
                 }
             }
-            else
-            {
-                $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad']=$cantidadIntentada;
-            }
+            
+            // Actualizar la cantidad en sesión
+            $partida['cantidad'] = $cantidadIntentada;
+            
+            // Actualizar solo el input específico usando el índice
+            $this->response->script("
+                $('input[data-indice=\"".$indiceDelArreglo."\"]').val('".$cantidadIntentada."');
+            ");
         } else {
             // La cantidad es inválida (no cumple con el formato de 12 dígitos enteros y 4 decimales)
-            registroLog('validaCantidadPartida', 'Formato de cantidad inválido', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos'],'cantidadIntentada' => $cantidadIntentada]);
+            registroLog('validaCantidadPartida', 'Formato de cantidad inválido', [
+                'idalmacenes_productos' => $partida['idalmacenes_productos'],
+                'cantidadIntentada' => $cantidadIntentada
+            ]);
+            
             $this->resetCantidadPartidaYLotes($indiceDelArreglo);
-            $mensajeLotes=getParametro('lotes')?", incluyendo sus lotes o series (en caso de tenerlos)":"";
+            $mensajeLotes = getParametro('lotes') ? ", incluyendo sus lotes o series (en caso de tenerlos)" : "";
+            
             $this->alerta(
                 "Formato de cantidad inválido",
                 "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida$mensajeLotes, han sido reiniciadas a 0.",
                 "error"
             );
+            
+            // Actualizar solo el input específico usando el índice
+            $this->response->script("
+                $('input[data-indice=\"".$indiceDelArreglo."\"]').val('0');
+            ");
         }
-        // Muestra la tabla de partidas actualizada
-        $this->tablaPartidas();
+        
         return $this->response;
     }
 
