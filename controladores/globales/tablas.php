@@ -72,6 +72,8 @@ $baseWhere = $tabla[0]['condicion_principal'];
 $where = $baseWhere;
 $where = str_replace('{empresa}', "idempresa=" . addslashes($_SESSION['idempresa']), $where);
 $where = str_replace('{sucursal}', "idsucursal=" . addslashes($_SESSION['idsucursal']), $where);
+$where = str_replace('{condicionSocios}', "idsucursal=" . addslashes($_GET['idsucursal']), $where);
+$where = str_replace('{condicionNivelSocios}', "(nivel = 'Empresa' OR (nivel = 'Sucursal' AND idsucursal = " . addslashes($_SESSION['idsucursal']) . "))", $where);
 $where = str_replace('{almacen}', "idalmacen=" . addslashes($_GET['idalmacen']), $where);
 
 // Añadir la condición del filtro
