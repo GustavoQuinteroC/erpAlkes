@@ -1244,28 +1244,19 @@ function getCfdiColonia($codigoPostal)
     return $options;
 }
 
-function getSubcuentas($idsocio)
+function getConceptosCuentas($naturaleza, $tipo)
 {
     global $database;
-
-    $registros = $database->select("socios_subcuentas", [
-        "[>]socios" => ["idsocio_hijo" => "id"]
-    ], [
-        "socios_subcuentas.id",
-        "socios.clave",
-        "socios.nombre_comercial",
-    ], [
-        "socios_subcuentas.idsocio_padre" => $idsocio,
-        "socios_subcuentas.estado" => 'Activo',
-        "ORDER" => ["socios.clave" => "ASC"]
+    $registros = $database->select("cuentas_conceptos", "*", [
+        "naturaleza" => $naturaleza,
+        "tipo" => $tipo,
+        "ORDER" => ["concepto" => "ASC"]
     ]);
-    
     $options = '';
     if (!empty($registros)) {
         $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
-            // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['clave']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['concepto']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -1667,13 +1658,109 @@ function getSocios() {
         $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
             // Verificar si el símbolo está vacío o es null
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['rfc']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['clave']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
     }
     return $options;
 }
+
+function getClientes() {
+    // Acceder a la variable global de la base de datos
+    global $database;
+
+    // Realizar la consulta con las condiciones adicionales
+    $registros = $database->select("socios", "*", [
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activo",
+        "tipo" => ["Cliente", "Ambos"], // Filtrar por tipo Cliente o Ambos
+        "ORDER" => ["nombre_comercial" => "ASC"],
+        "OR" => [
+            "nivel" => "Empresa",
+            "AND" => [
+                "nivel" => "Sucursal",
+                "idsucursal" => $_SESSION['idsucursal']
+            ]
+        ]
+    ]);
+
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['clave']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+function getProveedores() {
+    // Acceder a la variable global de la base de datos
+    global $database;
+
+    // Realizar la consulta con las condiciones adicionales
+    $registros = $database->select("socios", "*", [
+        "idempresa" => $_SESSION['idempresa'],
+        "estado" => "Activo",
+        "tipo" => ["Proveedor", "Ambos"], // Filtrar por tipo Cliente o Ambos
+        "ORDER" => ["nombre_comercial" => "ASC"],
+        "OR" => [
+            "nivel" => "Empresa",
+            "AND" => [
+                "nivel" => "Sucursal",
+                "idsucursal" => $_SESSION['idsucursal']
+            ]
+        ]
+    ]);
+
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['clave']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
+
+function getSubcuentas($idsocio)
+{
+    global $database;
+
+    $registros = $database->select("socios_subcuentas", [
+        "[>]socios" => ["idsocio_hijo" => "id"]
+    ], [
+        "socios_subcuentas.id",
+        "socios.clave",
+        "socios.nombre_comercial",
+    ], [
+        "socios_subcuentas.idsocio_padre" => $idsocio,
+        "socios_subcuentas.estado" => 'Activo',
+        "ORDER" => ["socios.clave" => "ASC"]
+    ]);
+    
+    $options = '';
+    if (!empty($registros)) {
+        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['clave']) . " - " . htmlspecialchars($registro['nombre_comercial']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+    return $options;
+}
+
 
 function validarExistenciaSalida($partidas) 
 {
