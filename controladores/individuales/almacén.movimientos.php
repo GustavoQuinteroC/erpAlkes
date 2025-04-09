@@ -210,7 +210,7 @@ class almacenMovimientos extends alkesGlobal
     function modalSeleccionarSocio()
     {
         registroLog('modalSeleccionarSocio', 'Abriendo modal para seleccionar socio', []);
-        $this->modalSeleccionServerSide('global', 'socios', '', 0, 'Activos', 'Modal', 'JaxonalmacenMovimientos.cargarSocio', false, '', 'Selecciona Un Socio');
+        $this->modalSeleccionServerSide('global', 'socios', 'ambos', 0, 'Activos', 'Modal', 'JaxonalmacenMovimientos.cargarSocio', false, '', 'Selecciona Un Socio');
         return $this->response;
     }
 
@@ -289,7 +289,7 @@ class almacenMovimientos extends alkesGlobal
 
         // Llamar a la función modalSeleccion para mostrar la modal
         $this->modalSeleccion(
-            "Seleccionar Subcuenta2",
+            "Seleccionar Subcuenta",
             $columnas,
             $data,
             "JaxonalmacenMovimientos.cargarSubcuenta",

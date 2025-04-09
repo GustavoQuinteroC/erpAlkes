@@ -302,7 +302,7 @@ if (file_exists($pathControlador)) {
                                                 style="width:100%">
                                                 <thead>
                                                     <tr>
-                                                        <th>Renglon</th>
+                                                        <th>Partida</th>
                                                         <th>Código de Barras</th>
                                                         <th>Nombre</th>
                                                         <th>Descripción</th>
