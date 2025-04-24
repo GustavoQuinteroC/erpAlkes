@@ -31,7 +31,7 @@ class almacenMovimientos extends alkesGlobal
                 </button>
             ");
             $this->response->append("botonera-contenedor", "innerHTML", "
-                <button class='btn btn-danger btn-sm' type='button' id='btncancelar' name='btncancelar' onclick='JaxonalmacenMovimientos.modalConfirmacionCancelarMovimiento();'>
+                <button class='btn btn-danger btn-sm' type='button' id='btncancelar' name='btncancelar' onclick='JaxonalmacenMovimientos.modalConfirmacionCancelar();'>
                     <i class='bi bi-x-circle'></i> Cancelar
                 </button>
             ");
@@ -47,6 +47,7 @@ class almacenMovimientos extends alkesGlobal
             registroLog('inializarFormulario', 'Iniciando un registro nuevo', []);
             $this->response->assign('fechahora', 'value', date('Y-m-d\TH:i'));
             $this->response->assign('btncancelar', 'disabled', 'disabled');
+            $this->response->assign('btnimprimir', 'disabled', 'disabled');
         }
         else
         {
@@ -376,9 +377,9 @@ class almacenMovimientos extends alkesGlobal
         return $this->response;
     }
 
-    function modalConfirmacionCancelarMovimiento()
+    function modalConfirmacionCancelar()
     {
-        registroLog('modalConfirmacionCancelarMovimiento', 'Mostrando modal de confirmación para cancelar el movimiento', ["getId" => $_GET['id']]);
+        registroLog('modalConfirmacionCancelar', 'Mostrando modal de confirmación para cancelar el movimiento', ["getId" => $_GET['id']]);
         $this->alertaConfirmacion(
             "¿CANCELAR?", 
             "Se cancelará el movimiento y, en caso de estar activo, se creará un movimiento de cancelación. ¿Desea continuar?", 
@@ -1357,12 +1358,12 @@ class almacenMovimientos extends alkesGlobal
 
             if ($naturaleza == 'Entrada') {
                 registroLog('validar', 'Naturaleza del movimiento: Entrada', ['idconcepto' => $form['idconcepto']]);
-                $this->guardar($form, $accion);
+                $this->modalPreGuardar($form, $accion);
             } elseif ($naturaleza == 'Salida') {
                 registroLog('validar', 'Naturaleza del movimiento: Salida', ['idconcepto' => $form['idconcepto']]);
                 if (getParametro('inventario_negativo')) {
                     registroLog('validar', 'Inventario negativo permitido', []);
-                    $this->guardar($form, $accion);
+                    $this->modalPreGuardar($form, $accion);
                 } else {
                     $validacionInventario = validarExistenciaSalida($_SESSION['partidas' . $_GET['rand']]);
 
@@ -1379,12 +1380,39 @@ class almacenMovimientos extends alkesGlobal
 
                     // Si pasa la validación del inventario, continuar con el guardado
                     registroLog('validar', 'Validación de existencia exitosa', []);
-                    $this->guardar($form, $accion);
+                    $this->modalPreGuardar($form, $accion);
                 }
             }
         }
         return $this->response;
     }
+
+    function modalPreGuardar($form, $accion)
+    {
+        registroLog('modalPreGuardar', 'Entrando a la funcion', []);
+
+        if ($accion == 'procesar') {
+            registroLog('modalPreGuardar', 'Mostrando modal alerta de confirmación para procesar el movimiento', []);
+
+            // Codificar el array PHP como JSON para que pueda ser interpretado en JavaScript
+            $formJson = json_encode($form);
+
+            // Escapar comillas dobles para que no rompan el string en JavaScript
+            $formJsonEscapado = str_replace('"', '\"', $formJson);
+
+            // Mostrar el mensaje de confirmación
+            $this->alertaConfirmacion(
+                "¿PROCESAR?",
+                "Se procesará el movimiento actual, alterando el inventario del almacén y los productos seleccionados. ¿Desea continuar?",
+                "warning",
+                "JaxonalmacenMovimientos.guardar(JSON.parse(\"$formJsonEscapado\"), \"$accion\");"
+            );
+        }
+
+        return $this->response;
+    }
+
+
 
     function guardar($formulario, $accion)
     {

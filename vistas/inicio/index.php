@@ -79,7 +79,13 @@ if (file_exists($pathControlador)) {
                                                     <li>Poner hipervinculos en los index, por ejemplo en una
                                                         tabla que traiga cliente poner un hyper vinculo a
                                                         consultar ese cliente</li>
+                                                    <li>Ver que cuando una transaccion falla regrese el folio usado y en
+                                                        caso de que no hacer una funcion para regresar el folio</li>
                                                     <li>Hacer historial de cambios en todos los documentos y modulos
+                                                    </li>
+                                                    <li>Modal Confirmacion en donde se necesite
+                                                    </li>
+                                                    <li>botones de acciones con funcion de validar permiso
                                                     </li>
                                                 </ul>
                                             </li>

@@ -15,7 +15,7 @@ class ventasFacturas extends alkesGlobal
 
     function modalSeleccionarSocio()
     {
-        $this->modalSeleccionServerSide('global', 'socios', '', 0, 'Activos', 'Modal', 'JaxonventasFacturas.cargarSocio', false, '', 'Selecciona Un Socio');
+        $this->modalSeleccionServerSide('ventas', 'clientes', '', 0, 'Activos', 'Modal', 'JaxonventasFacturas.cargarSocio', false, '', 'Selecciona Un Socio');
         return $this->response;
     }
 
