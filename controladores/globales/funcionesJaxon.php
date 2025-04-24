@@ -267,7 +267,9 @@ class alkesGlobal
     {
         // Crear el HTML de la ventana modal
         $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalFormularioLabel">';
-        $html .= '<div class="modal-dialog">';
+        $tamanoModal = count($campos) > 6 ? 'modal-lg' : '';
+        $html .= '<div class="modal-dialog ' . $tamanoModal . '">';
+
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
         $html .= '<h5 class="modal-title" id="modalFormularioLabel">' . $titulo . '</h5>';
@@ -277,8 +279,15 @@ class alkesGlobal
         $html .= '<!-- Aquí van los campos para la modal -->';
         $html .= '<form id="formModalFormulario">';
 
+        $usarDosColumnas = count($campos) > 6;
+
+        if ($usarDosColumnas) {
+            $html .= '<div class="row">';
+        }
+
         foreach ($campos as $campo) {
-            $html .= '<div class="mb-3">';
+            $columna = $usarDosColumnas ? 'col-md-6' : '';
+            $html .= '<div class="mb-3 ' . $columna . '">';
             $html .= '<label for="' . $campo['id'] . '" class="form-label">' . $campo['label'] . '</label>';
 
             $readOnly = isset($campo['readOnly']) && $campo['readOnly'] ? ' readonly' : '';
@@ -288,43 +297,44 @@ class alkesGlobal
                 case 'textarea':
                     $html .= '<textarea class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $readOnly . '>' . $campo['value'] . '</textarea>';
                     break;
+
                 case 'select':
-                    // Abrimos el select
                     $html .= '<select class="form-select" id="' . $campo['id'] . '" name="' . $campo['id'] . '"' . $disabled . '>';
-                    
-                    // Aquí tomamos las opciones del campo y agregamos la lógica para seleccionar la opción
+
                     $options = $campo['options'];
-                    // Reemplazamos el value seleccionado por el atributo selected
-                    // Utilizamos una expresión regular para hacerlo dinámicamente
                     $options = preg_replace_callback(
-                        '/<option\s+value="([^"]+)"/', 
-                        function($matches) use ($campo) {
-                            // Si el value coincide con el valor seleccionado, añadimos el atributo selected
+                        '/<option\s+value="([^"]+)"/',
+                        function ($matches) use ($campo) {
                             return $matches[0] . ($matches[1] == $campo['value'] ? ' selected' : '');
                         },
                         $options
                     );
-                    
-                    $html .= $options; // Imprimimos las opciones ya modificadas
+
+                    $html .= $options;
                     $html .= '</select>';
                     break;
+
                 default:
-                    $html .= '<input type="' . $campo['type'] . '" class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '" value="' . $campo['value'] . '"' . $readOnly . '>';
+                    $html .= '<input type="' . $campo['type'] . '" class="form-control" id="' . $campo['id'] . '" name="' . $campo['id'] . '" value="' . $campo['value'] . '"' . $readOnly . $disabled . '>';
                     break;
             }
 
             $html .= '</div>';
         }
 
+        if ($usarDosColumnas) {
+            $html .= '</div>'; // Cierre de .row
+        }
+
         $html .= '</form>';
-        $html .= '</div>';
+        $html .= '</div>'; // Cierre de modal-body
         $html .= '<div class="modal-footer">';
         $html .= '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>';
         $html .= '<button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="' . $funcionCallBack . '(jaxon.getFormValues(\'formModalFormulario\')' . $parametrosAdicionales . ');">Guardar</button>';
         $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</div>';
-        $html .= '</div>';
+        $html .= '</div>'; // Cierre de modal-content
+        $html .= '</div>'; // Cierre de modal-dialog
+        $html .= '</div>'; // Cierre de modal
 
         // Remover cualquier modal previo
         $this->response->remove('modalFormulario');
@@ -337,16 +347,17 @@ class alkesGlobal
 
         //Eliminar el elemento si es que se cierra
         $this->response->script('
-        if (!$("#modalFormulario").data("evento-registrado")) {
-            $("#modalFormulario").on("hidden.bs.modal", function () {
-                $(this).remove();
-            });
-            $("#modalFormulario").data("evento-registrado", true);
-        }
+            if (!$("#modalFormulario").data("evento-registrado")) {
+                $("#modalFormulario").on("hidden.bs.modal", function () {
+                    $(this).remove();
+                });
+                $("#modalFormulario").data("evento-registrado", true);
+            }
         ');
 
         return $this->response;
     }
+
 
 
     public function alerta($titulo, $mensaje, $icono, $elementoEnfocar = null, $boton = true, $timer = false, $redireccion = null)
