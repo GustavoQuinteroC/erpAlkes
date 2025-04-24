@@ -931,7 +931,7 @@ function getCfdiMoneda()
 {
     global $database;
     $registros = $database->select("cfdi_moneda", "*", [
-        "ORDER" => ["id" => "ASC"]
+        "ORDER" => ["c_moneda" => "ASC"]
     ]);
     $options = '';
     if (!empty($registros)) {
