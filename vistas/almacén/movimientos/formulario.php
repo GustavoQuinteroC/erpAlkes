@@ -86,7 +86,8 @@ if (file_exists($pathControlador)) {
                                                                     onchange="JaxonalmacenMovimientos.cargarSocio({ seleccion: this.value });">
                                                                     <?php echo getSocios(); ?>
                                                                 </select>
-                                                                <button class="btn btn-outline-secondary" type="button" id="botonBuscarSocio" name="botonBuscarSocio"
+                                                                <button class="btn btn-outline-secondary" type="button"
+                                                                    id="botonBuscarSocio" name="botonBuscarSocio"
                                                                     title="Buscar socio"
                                                                     onclick="JaxonalmacenMovimientos.modalSeleccionarSocio();">
                                                                     <i class="bi bi-search"></i>
@@ -106,8 +107,9 @@ if (file_exists($pathControlador)) {
                                                                     class="form-select select2-field"
                                                                     onchange="JaxonalmacenMovimientos.cargarSubcuenta({ seleccion: this.value }, document.getElementById('idsocio').value);">
                                                                 </select>
-                                                                <button class="btn btn-outline-secondary" type="button" id="botonBuscarSubcuenta" name="botonBuscarSubcuenta"
-                                                                    title="Buscar subcuenta"
+                                                                <button class="btn btn-outline-secondary" type="button"
+                                                                    id="botonBuscarSubcuenta"
+                                                                    name="botonBuscarSubcuenta" title="Buscar subcuenta"
                                                                     onclick="JaxonalmacenMovimientos.modalSeleccionarSubcuenta(document.getElementById('idsocio').value);">
                                                                     <i class="bi bi-search"></i>
                                                                 </button>
@@ -297,25 +299,27 @@ if (file_exists($pathControlador)) {
                                             </div>
                                         </div>
                                         <div class="card-body">
-                                            <!-- Tabla con DataTables (inicialmente vacía) -->
-                                            <table id="tablaPartidas" class="table table-striped table-hover display"
-                                                style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Partida</th>
-                                                        <th>Código de Barras</th>
-                                                        <th>Nombre</th>
-                                                        <th>Descripción</th>
-                                                        <th>Unidad</th>
-                                                        <th>Existencia</th>
-                                                        <th>Cantidad</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Las filas se llenarán dinámicamente -->
-                                                </tbody>
-                                            </table>
+                                            <div class="table-responsive">
+                                                <!-- Tabla con DataTables (inicialmente vacía) -->
+                                                <table id="tablaPartidas"
+                                                    class="table table-striped table-hover display" style="width:100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Partida</th>
+                                                            <th>Código de Barras</th>
+                                                            <th>Nombre</th>
+                                                            <th>Descripción</th>
+                                                            <th>Unidad</th>
+                                                            <th>Existencia</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Las filas se llenarán dinámicamente -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -342,7 +346,8 @@ if (file_exists($pathControlador)) {
                                     desarrollador:</label>
                                 <div class="col-sm-8">
                                     <p id="notas" class="form-text text-muted">
-                                        1- validar existencia cuando se quiere cancelar un movimiento de tipo entrada, ya que al cancelar generaria una salida.
+                                        1- validar existencia cuando se quiere cancelar un movimiento de tipo entrada,
+                                        ya que al cancelar generaria una salida.
                                     </p>
                                 </div>
                             </div>
@@ -365,11 +370,13 @@ if (file_exists($pathControlador)) {
             language: {
                 url: '/plugins/datatables/es-ES.json' // Español
             },
-            responsive: true,
+            responsive: false,
             ordering: true,
             searching: true,
             paging: false,
             info: false,
+            autoWidth: false,
+            scrollX: false,
             lengthChange: false
         });
     </script>

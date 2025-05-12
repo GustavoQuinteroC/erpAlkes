@@ -67,8 +67,9 @@ if (file_exists($pathControlador)) {
                                                             <div class="input-group">
                                                                 <span class="input-group-text"><i
                                                                         class="bi bi-key"></i></span>
-                                                                <input type="text" class="form-control" id="clave" readOnly
-                                                                    name="clave" placeholder="Clave (esta sera autogenerada)">
+                                                                <input type="text" class="form-control" id="clave"
+                                                                    readOnly name="clave"
+                                                                    placeholder="Clave (esta sera autogenerada)">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -240,7 +241,8 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-people"></i></span>
                                                                 <select id="tipo" name="tipo" class="form-select">
                                                                     <option value="Cliente">Cliente</option>
-                                                                    <option value="Ambos">Proveedor y cliente (ambos)</option>
+                                                                    <option value="Ambos">Proveedor y cliente (ambos)
+                                                                    </option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -429,7 +431,8 @@ if (file_exists($pathControlador)) {
                                                                         class="bi bi-mailbox"></i></span>
                                                                 <input type="text" class="form-control"
                                                                     id="codigo_postal" name="codigo_postal"
-                                                                    placeholder="Código Postal" onchange="JaxonventasClientes.ajustesCodigoPostal(this.value);">
+                                                                    placeholder="Código Postal"
+                                                                    onchange="JaxonventasClientes.ajustesCodigoPostal(this.value);">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -565,22 +568,24 @@ if (file_exists($pathControlador)) {
                                             </div>
                                         </div>
                                         <div class="card-body">
-                                            <!-- Tabla con DataTables (inicialmente vacía) -->
-                                            <table id="tablaPartidas" class="table table-striped table-hover display"
-                                                style="width:100%">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Clave</th>
-                                                        <th>Nombre comercial</th>
-                                                        <th>Estado</th>
-                                                        <th>Vencimiento</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Las filas se llenarán dinámicamente -->
-                                                </tbody>
-                                            </table>
+                                            <div class="table-responsive">
+                                                <!-- Tabla con DataTables (inicialmente vacía) -->
+                                                <table id="tablaPartidas"
+                                                    class="table table-striped table-hover display" style="width:100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Clave</th>
+                                                            <th>Nombre comercial</th>
+                                                            <th>Estado</th>
+                                                            <th>Vencimiento</th>
+                                                            <th>Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Las filas se llenarán dinámicamente -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -620,11 +625,13 @@ if (file_exists($pathControlador)) {
             language: {
                 url: '/plugins/datatables/es-ES.json' // Español
             },
-            responsive: true,
+            responsive: false,
             ordering: true,
             searching: true,
             paging: false,
             info: false,
+            autoWidth: false,
+            scrollX: false,
             lengthChange: false
         });
     </script>
