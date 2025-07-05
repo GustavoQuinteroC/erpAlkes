@@ -83,12 +83,22 @@ class ventasClientes extends alkesGlobal
                 $this->tablaSubcuentas();
             }
         }
-        $rand = $_GET['rand']; // Obtener el valor dinámico
-        $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' id='btnguardar' name='btnguardar' type='button' onclick='JaxonventasClientes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
-                <i class='bi bi-floppy'></i> Guardar
-            </button>
-        ");
+        // Obtén la ruta actual dividida en segmentos
+        $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
+
+        // Calcular nombres de módulos semidinámicamente
+        $modulo = $ruta[(count($ruta) - 2)];
+        $submodulo = $ruta[(count($ruta) - 1)];
+        $subsubmodulo = null;
+
+        if (validaPermisoEditarModulo($modulo, $submodulo, $subsubmodulo)) {
+            $rand = $_GET['rand']; // Obtener el valor dinámico
+            $this->response->append("botonera-contenedor", "innerHTML", "
+                <button class='btn btn-primary btn-sm' id='btnguardar' name='btnguardar' type='button' onclick='JaxonventasClientes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+                    <i class='bi bi-floppy'></i> Guardar
+                </button>
+            ");
+        }
         return $this->response;
     }
 
@@ -170,11 +180,11 @@ class ventasClientes extends alkesGlobal
 
                 // Botón dinámico según el estado
                 $botonAccion = ($subcuenta['estado'] == 'Activo') ?
-                    "<button type='button' class='btn btn-sm btn-danger' title='Desactivar' 
+                    "<button type='button' class='btn btn-sm btn-danger' title='Desactivar'
                         onclick='JaxonventasClientes.desactivarSubcuenta($index)'>
                         <i class='bi bi-x-circle'></i>
                     </button>" :
-                    "<button type='button' class='btn btn-sm btn-success' title='Activar' 
+                    "<button type='button' class='btn btn-sm btn-success' title='Activar'
                         onclick='JaxonventasClientes.activarSubcuenta($index)'>
                         <i class='bi bi-check-circle'></i>
                     </button>";
@@ -380,7 +390,7 @@ class ventasClientes extends alkesGlobal
     {
         global $database;
         $this->response->assign("btnguardar", "disabled", "disabled"); // Deshabilitar boton de guardar para evitar que el usuario de click varias veces
-        
+
         // Campos que se insertarán o actualizarán
         $datos = [
             'idsucursal' => $_SESSION['idsucursal'] ?? 0,

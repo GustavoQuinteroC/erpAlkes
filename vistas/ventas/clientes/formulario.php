@@ -550,7 +550,7 @@ if (file_exists($pathControlador)) {
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
                                             <h3 class="card-title">Listado de subcuentas</h3>
                                             <div class="card-tools d-flex align-items-center gap-2">
-                                                <button tabindex="400" id="addSubcuenta" name="addSubcuenta"
+                                                <button id="addSubcuenta" name="addSubcuenta"
                                                     class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
                                                     onclick="JaxonventasClientes.modalSeleccionarSubcuentas();"
                                                     type="button">
