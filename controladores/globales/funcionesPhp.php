@@ -1971,7 +1971,7 @@ function moduloRequiereAutorizacion($modulo, $submodulo = null, $subsubmodulo = 
 
     // Obtener ID del módulo principal
     $idModulo = $database->get("modulos", "id", [
-        "nombre" => $modulo,
+        "nombre"   => $modulo,
         "padre_id" => null
     ]);
 
@@ -1980,7 +1980,7 @@ function moduloRequiereAutorizacion($modulo, $submodulo = null, $subsubmodulo = 
     // Si hay submódulo, buscar su ID (hijo del módulo principal)
     if ($submodulo) {
         $idModulo = $database->get("modulos", "id", [
-            "nombre" => $submodulo,
+            "nombre"   => $submodulo,
             "padre_id" => $idModulo
         ]);
 
@@ -1990,7 +1990,7 @@ function moduloRequiereAutorizacion($modulo, $submodulo = null, $subsubmodulo = 
     // Si hay subsubmódulo, buscar su ID (hijo del submódulo)
     if ($subsubmodulo) {
         $idModulo = $database->get("modulos", "id", [
-            "nombre" => $subsubmodulo,
+            "nombre"   => $subsubmodulo,
             "padre_id" => $idModulo
         ]);
 
@@ -2000,7 +2000,7 @@ function moduloRequiereAutorizacion($modulo, $submodulo = null, $subsubmodulo = 
     // Obtener si requiere autorización para esta empresa y módulo
     $requiere = $database->get("modulos_empresas_autorizaciones", "requiere_autorizacion", [
         "id_empresa" => $_SESSION['idempresa'],
-        "id_modulo" => $idModulo
+        "id_modulo"  => $idModulo
     ]);
 
     return $requiere;
