@@ -1965,6 +1965,46 @@ function validaPermisoEditarModulo($modulo, $submodulo = null, $subsubmodulo = n
     return $permiso;
 }
 
+function moduloRequiereAutorizacion($modulo, $submodulo = null, $subsubmodulo = null)
+{
+    global $database;
+
+    // Obtener ID del módulo principal
+    $idModulo = $database->get("modulos", "id", [
+        "nombre" => $modulo,
+        "padre_id" => null
+    ]);
+
+    if (!$idModulo) return false;
+
+    // Si hay submódulo, buscar su ID (hijo del módulo principal)
+    if ($submodulo) {
+        $idModulo = $database->get("modulos", "id", [
+            "nombre" => $submodulo,
+            "padre_id" => $idModulo
+        ]);
+
+        if (!$idModulo) return false;
+    }
+
+    // Si hay subsubmódulo, buscar su ID (hijo del submódulo)
+    if ($subsubmodulo) {
+        $idModulo = $database->get("modulos", "id", [
+            "nombre" => $subsubmodulo,
+            "padre_id" => $idModulo
+        ]);
+
+        if (!$idModulo) return false;
+    }
+
+    // Obtener si requiere autorización para esta empresa y módulo
+    $requiere = $database->get("modulos_empresas_autorizaciones", "requiere_autorizacion", [
+        "id_empresa" => $_SESSION['idempresa'],
+        "id_modulo" => $idModulo
+    ]);
+
+    return $requiere;
+}
 
 
 
