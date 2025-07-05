@@ -43,7 +43,7 @@ if (file_exists($pathControlador)) {
                                 <div class="col-12">
                                     <div class="card mb-4">
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
-                                            <h3 class="card-title">Información de la Cuenta de Cargo</h3>
+                                            <h3 class="card-title">Información de la Cuenta Por Cobrar</h3>
                                             <div class="card-tools">
                                                 <button type="button" class="btn btn-tool <?= getTextColor(); ?>"
                                                     data-lte-toggle="card-collapse" title="Collapse">
@@ -309,7 +309,7 @@ if (file_exists($pathControlador)) {
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
                                             <h3 class="card-title">Abonos a la cuenta</h3>
                                             <div class="card-tools d-flex align-items-center gap-2">
-                                                <button tabindex="400" id="addPartidas" name="addPartidas"
+                                                <button id="addPartidas" name="addPartidas"
                                                     class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
                                                     onclick="JaxonventasCxc.modalAgregarAbono(jaxon.getFormValues('formulario<?= $_GET['rand'] ?>'));"
                                                     type="button">

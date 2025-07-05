@@ -106,20 +106,20 @@ class ventasCxc extends alkesGlobal
                         // No se debe permitir agregar partidas en estado Borrador
                         $this->response->assign('addPartidas', 'disabled', 'disabled');
                         break;
-                
+
                     case 'Activa':
                         // Solo addPartidas habilitado
                         $this->response->assign('btnborrador', 'disabled', 'disabled');
                         $this->response->assign('btnprocesar', 'disabled', 'disabled');
                         break;
-                
+
                     case 'Inactiva':
                     case 'Vencida':
                         $this->response->assign('btnborrador', 'disabled', 'disabled');
                         $this->response->assign('btnprocesar', 'disabled', 'disabled');
                         $this->response->assign('addPartidas', 'disabled', 'disabled');
                         break;
-                
+
                     case 'Pagada':
                     case 'Cancelada':
                         $this->response->assign('btnborrador', 'disabled', 'disabled');
@@ -128,17 +128,17 @@ class ventasCxc extends alkesGlobal
                         $this->response->assign('addPartidas', 'disabled', 'disabled');
                         break;
                 }
-                
+
                 // En todos los estados menos 'Borrador', se bloquea edición
                 if ($cuenta_cargo['estado'] != 'Borrador') {
                     $this->response->assign('botonBuscarSocio', 'disabled', 'disabled');
                     $this->response->assign('botonBuscarSubcuenta', 'disabled', 'disabled');
-                
+
                     // Solo desactiva addPartidas si el estado NO es 'Activa'
                     if ($cuenta_cargo['estado'] != 'Activa') {
                         $this->response->assign('addPartidas', 'disabled', 'disabled');
                     }
-                
+
                     $this->response->assign('fecha', 'readOnly', 'readOnly');
                     $this->response->assign('fecha_vencimiento', 'readOnly', 'readOnly');
                     $this->response->assign('documento', 'readOnly', 'readOnly');
@@ -148,7 +148,7 @@ class ventasCxc extends alkesGlobal
                     $this->response->assign('banco', 'readOnly', 'readOnly');
                     $this->response->assign('cuenta_bancaria', 'readOnly', 'readOnly');
                     $this->response->assign('notas', 'readOnly', 'readOnly');
-                
+
                     $this->deshabilitaSelect('idsocio');
                     $this->deshabilitaSelect('idsubcuenta');
                     $this->deshabilitaSelect('idconcepto');
@@ -348,7 +348,7 @@ class ventasCxc extends alkesGlobal
         ];
 
         // Título del modal
-        $titulo = 'Agregar nuevo abono (cuenta padre '.$form['folio'].')';
+        $titulo = 'Agregar nuevo abono (cuenta padre ' . $form['folio'] . ')';
 
         $parametrosAdicionales = ", jaxon.getFormValues('formulario" . $_GET['rand'] . "')";
         // Callback que se ejecutará al guardar
@@ -378,19 +378,16 @@ class ventasCxc extends alkesGlobal
         ];
 
         $resultado = validar_global($formModal, $reglas);
-        if($resultado !== true) {
+        if ($resultado !== true) {
             registroLog('validarAbono', 'Error en validación de campos: ' . $resultado['campo'], []);
             $this->alerta("Error de validación", $resultado['error'], "warning", $resultado['campo']);
-        }
-        elseif(strtotime($formModal['fecha']) > strtotime(date('Y-m-d'))) {
+        } elseif (strtotime($formModal['fecha']) > strtotime(date('Y-m-d'))) {
             registroLog('validarAbono', 'La fecha es mayor que hoy', []);
             $this->alerta("Fecha inválida", "La fecha no puede ser mayor a hoy", "warning", "fecha");
-        }
-        elseif (($formModal['tipo_cambio'] * $formModal['monto']) > $formGlobal['saldo']) {
+        } elseif (($formModal['tipo_cambio'] * $formModal['monto']) > $formGlobal['saldo']) {
             registroLog('validarAbono', 'El monto del abono supera el saldo de la cuenta padre', []);
             $this->alerta("Monto inválido", "El monto del abono no puede superar al saldo de la cuenta padre", "warning", "saldo");
-        }
-        else{
+        } else {
             registroLog('validarAbono', 'Validación exitosa', []);
             $this->registrarAbono($formModal);
         }
@@ -442,8 +439,8 @@ class ventasCxc extends alkesGlobal
                 false,
                 $_SERVER['REQUEST_URI'] // Esto recarga la misma página
             );
-            
-            
+
+
 
             $database->pdo->commit();
         } catch (PDOException $e) {
@@ -509,16 +506,16 @@ class ventasCxc extends alkesGlobal
                     break;
             }
 
-            $estadoConEstilo = "<span class='$claseEstado'>".htmlspecialchars($partida['estado'])."</span>";
+            $estadoConEstilo = "<span class='$claseEstado'>" . htmlspecialchars($partida['estado']) . "</span>";
 
 
             // Acciones (botones)
             $botones = "
-                <button type='button' class='btn btn-sm btn-danger' title='Eliminar' 
+                <button type='button' class='btn btn-sm btn-danger' title='Eliminar'
                     onclick='JaxonventasCxc.modalPreCancelarAbono({$partida['id']})'>
                     <i class='bi bi-x-circle'></i>
                 </button>
-                <button type='button' class='btn btn-sm btn-info' title='Agregar nota' 
+                <button type='button' class='btn btn-sm btn-info' title='Agregar nota'
                     onclick='JaxonventasCxc.abrirNotaAbono({$partida['id']})'>
                     <i class='bi bi-sticky'></i>
                 </button>";
@@ -654,7 +651,7 @@ class ventasCxc extends alkesGlobal
         registroLog('validar', 'Validando formulario', ['accion' => $accion]);
 
         // Definir las reglas de validación
-        $reglas = [            
+        $reglas = [
             'fecha' => ['obligatorio' => true, 'tipo' => 'date'],
             'fecha_vencimiento' => ['obligatorio' => true, 'tipo' => 'date'],
             'idsocio' => ['obligatorio' => true, 'tipo' => 'int', 'min_val' => 1],
@@ -686,17 +683,14 @@ class ventasCxc extends alkesGlobal
             );
             return $this->response;
         } else {
-            if($form['importe']!=$form['saldo'])
-            {
+            if ($form['importe'] != $form['saldo']) {
                 $this->alerta(
                     "Error en la validación",
                     "El importe y el saldo deben de ser iguales",
                     "error",
                     "saldo"
                 );
-            }
-            else
-            {
+            } else {
                 $this->modalPreGuardar($form, $accion);
             }
         }
@@ -738,7 +732,7 @@ class ventasCxc extends alkesGlobal
         $database->pdo->beginTransaction();
 
         try {
-            $idCxc = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $idCxc = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
             // Determinar el folio solo si es un nuevo registro
             if ($idCxc == 0) {
@@ -753,29 +747,29 @@ class ventasCxc extends alkesGlobal
             // Preparar los datos para insertar o actualizar
 
             $data = [
-                'idempresa'         => isset($_SESSION['idempresa']) ? (int)$_SESSION['idempresa'] : 0,
-                'idsucursal'        => isset($_SESSION['idsucursal']) ? (int)$_SESSION['idsucursal'] : 0,
-                'idcreador'         => isset($_SESSION['idusuario']) ? (int)$_SESSION['idusuario'] : 0,
-                'idvendedor'        => isset($form['idvendedor']) ? (int)$form['idvendedor'] : 0,
-                'idc_moneda'        => isset($form['idc_moneda']) ? (int)$form['idc_moneda'] : 0,
-                'idconcepto'        => isset($form['idconcepto']) ? (int)$form['idconcepto'] : 0,
-                'idsocio'           => isset($form['idsocio']) ? (int)$form['idsocio'] : 0,
-                'idsubcuenta'       => isset($form['idsubcuenta']) ? (int)$form['idsubcuenta'] : 0,
-                'idc_metodopago'    => isset($form['idc_metodopago']) ? (int)$form['idc_metodopago'] : 0,
-                'folio'             => isset($folio) ? $folio : '', // Puedes generar el folio antes o pasarlo aquí
-                'estado'            => ($accion == 'borrador') ? 'Borrador' : 'Activa',
-                'fecha'             => isset($form['fecha']) ? $form['fecha'] : '0000-00-00',
-                'fecha_vencimiento'=> isset($form['fecha_vencimiento']) ? $form['fecha_vencimiento'] : '0000-00-00',
-                'documento'         => isset($form['documento']) ? $form['documento'] : '',
-                'referencia'        => isset($form['referencia']) ? $form['referencia'] : '',
-                'idtablaref'        => isset($form['idtablaref']) ? (int)$form['idtablaref'] : 0,
-                'importe'           => isset($form['importe']) ? (float)$form['importe'] : 0.00,
-                'saldo'             => isset($form['saldo']) ? (float)$form['saldo'] : 0.00,
-                'banco'             => isset($form['banco']) ? $form['banco'] : '',
-                'cuenta_bancaria'   => isset($form['cuenta_bancaria']) ? $form['cuenta_bancaria'] : '',
-                'notas'             => isset($form['notas']) ? $form['notas'] : ''
+                'idempresa' => isset($_SESSION['idempresa']) ? (int) $_SESSION['idempresa'] : 0,
+                'idsucursal' => isset($_SESSION['idsucursal']) ? (int) $_SESSION['idsucursal'] : 0,
+                'idcreador' => isset($_SESSION['idusuario']) ? (int) $_SESSION['idusuario'] : 0,
+                'idvendedor' => isset($form['idvendedor']) ? (int) $form['idvendedor'] : 0,
+                'idc_moneda' => isset($form['idc_moneda']) ? (int) $form['idc_moneda'] : 0,
+                'idconcepto' => isset($form['idconcepto']) ? (int) $form['idconcepto'] : 0,
+                'idsocio' => isset($form['idsocio']) ? (int) $form['idsocio'] : 0,
+                'idsubcuenta' => isset($form['idsubcuenta']) ? (int) $form['idsubcuenta'] : 0,
+                'idc_metodopago' => isset($form['idc_metodopago']) ? (int) $form['idc_metodopago'] : 0,
+                'folio' => isset($folio) ? $folio : '', // Puedes generar el folio antes o pasarlo aquí
+                'estado' => ($accion == 'borrador') ? 'Borrador' : 'Activa',
+                'fecha' => isset($form['fecha']) ? $form['fecha'] : '0000-00-00',
+                'fecha_vencimiento' => isset($form['fecha_vencimiento']) ? $form['fecha_vencimiento'] : '0000-00-00',
+                'documento' => isset($form['documento']) ? $form['documento'] : '',
+                'referencia' => isset($form['referencia']) ? $form['referencia'] : '',
+                'idtablaref' => isset($form['idtablaref']) ? (int) $form['idtablaref'] : 0,
+                'importe' => isset($form['importe']) ? (float) $form['importe'] : 0.00,
+                'saldo' => isset($form['saldo']) ? (float) $form['saldo'] : 0.00,
+                'banco' => isset($form['banco']) ? $form['banco'] : '',
+                'cuenta_bancaria' => isset($form['cuenta_bancaria']) ? $form['cuenta_bancaria'] : '',
+                'notas' => isset($form['notas']) ? $form['notas'] : ''
             ];
-            
+
 
             if ($accion == 'borrador') {
                 if ($idCxc == 0) {
@@ -966,7 +960,7 @@ class ventasCxc extends alkesGlobal
 
         return $this->response;
     }
-    
+
 }
 
 $jaxon = jaxon();
