@@ -41,12 +41,22 @@ class almacenAlmacenes extends alkesGlobal
                 $this->cargarProductosConsulta();
             }
         }
-        $rand = $_GET['rand']; // Obtener el valor dinámico
-        $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenAlmacenes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
-                <i class='bi bi-floppy'></i> Guardar
-            </button>
-        ");
+        // Obtén la ruta actual dividida en segmentos
+        $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
+
+        // Calcular nombres de módulos semidinámicamente
+        $modulo = $ruta[(count($ruta) - 2)];
+        $submodulo = $ruta[(count($ruta) - 1)];
+        $subsubmodulo = null;
+
+        if (validaPermisoEditarModulo($modulo, $submodulo, $subsubmodulo)) {
+            $rand = $_GET['rand']; // Obtener el valor dinámico
+            $this->response->append("botonera-contenedor", "innerHTML", "
+                <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenAlmacenes.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+                    <i class='bi bi-floppy'></i> Guardar
+                </button>
+            ");
+        }
         return $this->response;
     }
 

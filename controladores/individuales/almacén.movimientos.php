@@ -1,6 +1,6 @@
 <?php
 // controlador.php
-require_once (__DIR__ .'/../globales/funcionesJaxon.php');
+require_once(__DIR__ . '/../globales/funcionesJaxon.php');
 use function Jaxon\jaxon;
 use Jaxon\Jaxon;
 use Medoo\Medoo;
@@ -18,8 +18,7 @@ class almacenMovimientos extends alkesGlobal
         $modulo = $ruta[(count($ruta) - 2)];
         $submodulo = $ruta[(count($ruta) - 1)];
         $subsubmodulo = null;
-        if(validaPermisoEditarModulo($modulo, $submodulo, $subsubmodulo))
-        {
+        if (validaPermisoEditarModulo($modulo, $submodulo, $subsubmodulo)) {
             $this->response->append("botonera-contenedor", "innerHTML", "
                 <button class='btn btn-primary btn-sm' type='button' id='btnborrador' name='btnborrador' onclick='JaxonalmacenMovimientos.validar(jaxon.getFormValues(\"formulario{$rand}\"), \"borrador\");'>
                     <i class='bi bi-floppy'></i> Borrador
@@ -36,21 +35,18 @@ class almacenMovimientos extends alkesGlobal
                 </button>
             ");
         }
-        
+
         $this->response->append("botonera-contenedor", "innerHTML", "
             <button class='btn btn-secondary btn-sm' type='button' id='btnimprimir' name='btnimprimir' onclick='JaxonalmacenMovimientos.imprimir();'>
                 <i class='bi bi-printer'></i> Imprimir
             </button>
         ");
-        if($_GET['id']==0)
-        {
+        if ($_GET['id'] == 0) {
             registroLog('inializarFormulario', 'Iniciando un registro nuevo', []);
             $this->response->assign('fechahora', 'value', date('Y-m-d\TH:i'));
             $this->response->assign('btncancelar', 'disabled', 'disabled');
             $this->response->assign('btnimprimir', 'disabled', 'disabled');
-        }
-        else
-        {
+        } else {
             registroLog('inializarFormulario', 'Consultando un movimiento ya registrado', []);
             if (!validarEmpresaPorRegistro("almacenes_movimientos", $_GET['id'])) {
                 registroLog('inializarFormulario', 'Registro no pertenece a la empresa', []);
@@ -101,8 +97,7 @@ class almacenMovimientos extends alkesGlobal
                 $this->cargarPartidasConsulta($_GET['id']);
                 $this->deshabilitaAlmacen();
                 $this->deshabilitaConcepto();
-                if($movimiento['estado']!='Borrador')
-                {
+                if ($movimiento['estado'] != 'Borrador') {
                     $this->response->assign('botonBuscarSocio', 'disabled', 'disabled');
                     $this->response->assign('botonBuscarSubcuenta', 'disabled', 'disabled');
                     $this->response->assign('cambiarConcepto', 'disabled', 'disabled');
@@ -110,7 +105,7 @@ class almacenMovimientos extends alkesGlobal
                     $this->response->assign('addPartidas', 'disabled', 'disabled');
                     $this->response->assign('btnborrador', 'disabled', 'disabled');
                     $this->response->assign('btnprocesar', 'disabled', 'disabled');
-                    
+
                     $this->response->assign('fechahora', 'readOnly', 'readOnly');
                     $this->response->assign('documento', 'readOnly', 'readOnly');
                     $this->response->assign('referencia', 'readOnly', 'readOnly');
@@ -121,8 +116,7 @@ class almacenMovimientos extends alkesGlobal
                     $this->deshabilitaSelect('iddireccion_origen');
                     $this->deshabilitaSelect('iddireccion_destino');
                 }
-                if($movimiento['estado']=='Cancelado')
-                {
+                if ($movimiento['estado'] == 'Cancelado') {
                     $this->response->assign('btncancelar', 'disabled', 'disabled');
                 }
             }
@@ -157,12 +151,12 @@ class almacenMovimientos extends alkesGlobal
 
             // Crear la estructura de la partida
             $partidaSesion = [
-                'iddb'                  => $partida['id'],
+                'iddb' => $partida['id'],
                 'idalmacenes_productos' => $partida['idalmacenes_productos'], // Cambiado de idalmacenes_productos a idproducto
-                'cantidad'              => $partida['cantidad'],
-                'estado'                => $partida['estado'],
-                'notas'                 => $partida['notas'],
-                'lotes'                 => []
+                'cantidad' => $partida['cantidad'],
+                'estado' => $partida['estado'],
+                'notas' => $partida['notas'],
+                'lotes' => []
             ];
 
             // Obtener los lotes asociados a la partida
@@ -174,22 +168,22 @@ class almacenMovimientos extends alkesGlobal
 
                 if ($naturalezaMovimiento == 'Entrada') {
                     $partidaSesion['lotes'][] = [
-                        'iddb'        => $lote['id'],
-                        'lote'        => $lote['lote'],
-                        'serie'       => $lote['serie'],
-                        'pedimento'   => $lote['pedimento'],
+                        'iddb' => $lote['id'],
+                        'lote' => $lote['lote'],
+                        'serie' => $lote['serie'],
+                        'pedimento' => $lote['pedimento'],
                         'fabricacion' => $lote['fabricacion'],
-                        'caducidad'   => $lote['caducidad'],
-                        'cantidad'    => $lote['cantidad'],
-                        'estado'      => $lote['estado']
+                        'caducidad' => $lote['caducidad'],
+                        'cantidad' => $lote['cantidad'],
+                        'estado' => $lote['estado']
                     ];
                     registroLog('cargarPartidasConsulta', 'Lote agregado (Entrada)', ['idlote' => $lote['id'], 'lote' => $lote['lote'], 'serie' => $lote['serie']]);
                 } elseif ($naturalezaMovimiento == 'Salida') {
                     $partidaSesion['lotes'][] = [
-                        'iddb'    => $lote['id'],
+                        'iddb' => $lote['id'],
                         'iddbapl' => $lote['idalmacen_producto_lote'],
                         'cantidad' => $lote['cantidad'],
-                        'estado'  => $lote['estado']
+                        'estado' => $lote['estado']
                     ];
                     registroLog('cargarPartidasConsulta', 'Lote agregado (Salida)', ['idlote' => $lote['id'], 'iddbapl' => $lote['idalmacen_producto_lote']]);
                 }
@@ -285,7 +279,7 @@ class almacenMovimientos extends alkesGlobal
                 $subcuenta['nombre_comercial'],
                 $subcuenta['estado'],
                 date('Y-m-d', strtotime($subcuenta['fecha_vencimiento'])), // Solo la fecha
-                );
+            );
         }
 
         // Llamar a la función modalSeleccion para mostrar la modal
@@ -304,7 +298,7 @@ class almacenMovimientos extends alkesGlobal
 
     function cargarSubcuenta($form, $idsocioPrincipal)
     {
-        registroLog('cargarSubcuenta', 'Cargando subcuenta seleccionada', ['subcuentaSeleccionada' => $form['seleccion'],'idsocioPrincipal' => $idsocioPrincipal]);
+        registroLog('cargarSubcuenta', 'Cargando subcuenta seleccionada', ['subcuentaSeleccionada' => $form['seleccion'], 'idsocioPrincipal' => $idsocioPrincipal]);
         $this->response->script('
             // Desactivar temporalmente el evento onchange para los selects que tienen onchange y necesiten un change (select2)
             document.getElementById("idsubcuenta").onchange = null;
@@ -334,15 +328,15 @@ class almacenMovimientos extends alkesGlobal
         $municipio = $database->get("cfdi_municipio", "*", ["id" => $direccion['idc_municipio']]);
         $estado = $database->get("cfdi_estado", "*", ["id" => $direccion['idc_estado']]);
 
-        registroLog('cambiarDireccion', 'Cambiando dirección', ['idDireccion' => $idDireccion,'tipoDireccion' => $tipoDireccion]);
+        registroLog('cambiarDireccion', 'Cambiando dirección', ['idDireccion' => $idDireccion, 'tipoDireccion' => $tipoDireccion]);
 
-        $html=$direccion['calle']
-                ." ".$direccion['no_exterior']
-                ." ".$direccion['no_interior']
-                .", ".$colonia['nombre']
-                .", ".$direccion['cp']
-                .", ".$municipio['descripcion']
-                .", ".$estado['nombre_estado'];
+        $html = $direccion['calle']
+            . " " . $direccion['no_exterior']
+            . " " . $direccion['no_interior']
+            . ", " . $colonia['nombre']
+            . ", " . $direccion['cp']
+            . ", " . $municipio['descripcion']
+            . ", " . $estado['nombre_estado'];
         $this->response->assign("detalleDireccion_$tipoDireccion", "value", $html);
         return $this->response;
     }
@@ -381,9 +375,9 @@ class almacenMovimientos extends alkesGlobal
     {
         registroLog('modalConfirmacionCancelar', 'Mostrando modal de confirmación para cancelar el movimiento', ["getId" => $_GET['id']]);
         $this->alertaConfirmacion(
-            "¿CANCELAR?", 
-            "Se cancelará el movimiento y, en caso de estar activo, se creará un movimiento de cancelación. ¿Desea continuar?", 
-            "warning", 
+            "¿CANCELAR?",
+            "Se cancelará el movimiento y, en caso de estar activo, se creará un movimiento de cancelación. ¿Desea continuar?",
+            "warning",
             "JaxonalmacenMovimientos.cancelarMovimiento(jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"));"
         );
         return $this->response;
@@ -451,29 +445,21 @@ class almacenMovimientos extends alkesGlobal
 
     function modalSeleccionarProductos($form)
     {
-        registroLog('modalSeleccionarProductos', 'Abriendo modal para seleccionar productos', ['idconcepto' => $form['idconcepto'],'idalmacen' => $form['idalmacen']]);
+        registroLog('modalSeleccionarProductos', 'Abriendo modal para seleccionar productos', ['idconcepto' => $form['idconcepto'], 'idalmacen' => $form['idalmacen']]);
 
-        if(empty($form['idconcepto']))
-        {
+        if (empty($form['idconcepto'])) {
             registroLog('modalSeleccionarProductos', 'Concepto no seleccionado', []);
             $this->alerta("Invalido", "Primero elije un concepto", "error", "idconcepto");
-        }
-        elseif(empty($form['idalmacen']))
-        {
+        } elseif (empty($form['idalmacen'])) {
             registroLog('modalSeleccionarProductos', 'Almacén no seleccionado', []);
             $this->alerta("Invalido", "Primero elije un almacén", "error", "idalmacen");
-        }
-        else
-        {
+        } else {
             global $database;
             $naturaleza = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
-            if($naturaleza=='Entrada')
-            {
+            if ($naturaleza == 'Entrada') {
                 $this->modalSeleccionServerSide('almacén', 'inventario', '', $form['idalmacen'], 'Principal', 'Modal', 'JaxonalmacenMovimientos.addProductos', true, '', 'Seleccionar Productos');
-            }
-            elseif($naturaleza=='Salida')
-            {
-                $filtro= getParametro('inventario_negativo')?'Principal':'Con Existencia';
+            } elseif ($naturaleza == 'Salida') {
+                $filtro = getParametro('inventario_negativo') ? 'Principal' : 'Con Existencia';
                 $this->modalSeleccionServerSide('almacén', 'inventario', '', $form['idalmacen'], $filtro, 'Modal', 'JaxonalmacenMovimientos.addProductos', true, '', 'Seleccionar Productos');
             }
         }
@@ -557,30 +543,30 @@ class almacenMovimientos extends alkesGlobal
 
                 // Determinar contenido del input y botones según editable
                 if ($editable) {
-                    $inputCantidad = "<input type='number' 
-                        id='cantidad[".$index."]'
-                        name='cantidad[".$index."]'
-                        class='form-control cantidad-input' 
-                        value='" . htmlspecialchars($partida['cantidad']) . "' 
-                        data-indice='".$index."'
-                        min='0' 
-                        onfocus='JaxonalmacenMovimientos.validaSiTieneLote($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"))' 
+                    $inputCantidad = "<input type='number'
+                        id='cantidad[" . $index . "]'
+                        name='cantidad[" . $index . "]'
+                        class='form-control cantidad-input'
+                        value='" . htmlspecialchars($partida['cantidad']) . "'
+                        data-indice='" . $index . "'
+                        min='0'
+                        onfocus='JaxonalmacenMovimientos.validaSiTieneLote($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"))'
                         onchange='JaxonalmacenMovimientos.validaCantidadPartida($index, jaxon.getFormValues(\"formulario" . htmlspecialchars($_GET['rand']) . "\"), this.value)'>";
-                    
+
                     $botones = "
-                        <button type='button' class='btn btn-sm btn-danger' title='Eliminar' 
+                        <button type='button' class='btn btn-sm btn-danger' title='Eliminar'
                             onclick='JaxonalmacenMovimientos.desactivarPartida($index)'>
                             <i class='bi bi-x-circle'></i>
                         </button>
-                        <button type='button' class='btn btn-sm btn-info' title='Agregar nota' 
+                        <button type='button' class='btn btn-sm btn-info' title='Agregar nota'
                             onclick='JaxonalmacenMovimientos.abrirNotaPartida($index)'>
                             <i class='bi bi-sticky'></i>
                         </button>";
                 } else {
                     $inputCantidad = htmlspecialchars($partida['cantidad']);
-                    
+
                     $botones = "
-                        <button type='button' class='btn btn-sm btn-info' title='Agregar nota' 
+                        <button type='button' class='btn btn-sm btn-info' title='Agregar nota'
                             onclick='JaxonalmacenMovimientos.abrirNotaPartida($index)'>
                             <i class='bi bi-sticky'></i>
                         </button>";
@@ -633,7 +619,7 @@ class almacenMovimientos extends alkesGlobal
         $titulo = 'Notas de la partida';
 
         // Callback que se ejecutará al guardar
-        $funcionCallBack = 'JaxonalmacenMovimientos.guardarNotaPartida'; // Nombre de la función JavaScript
+        $funcionCallBack = 'JaxonalmacenMovimientos.guardarNotaPartida'; // Nombre de la función
 
         // Llamar a la función modalFormulario
         $this->modalFormulario($campos, $titulo, $funcionCallBack);
@@ -644,7 +630,7 @@ class almacenMovimientos extends alkesGlobal
 
     function guardarNotaPartida($form)
     {
-        $_SESSION['partidas' . $_GET['rand']][$form['indiceDelArreglo']]['notas']=$form['notas'];
+        $_SESSION['partidas' . $_GET['rand']][$form['indiceDelArreglo']]['notas'] = $form['notas'];
         // Retornar la respuesta Jaxon
         return $this->response;
     }
@@ -663,10 +649,10 @@ class almacenMovimientos extends alkesGlobal
             // La cantidad es válida
             global $database;
             $naturalezaConcepto = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
-            
+
             if ($naturalezaConcepto == 'Salida') {
                 $existenciaRealActual = $database->get("almacenes_productos", "existencia", ["id" => $partida['idalmacenes_productos']]);
-                
+
                 // Validar que no exceda la existencia del almacén seleccionado
                 if ($cantidadIntentada > $existenciaRealActual and !getParametro('inventario_negativo')) {
                     registroLog('validaCantidadPartida', 'Cantidad excede existencia en almacén', [
@@ -674,34 +660,34 @@ class almacenMovimientos extends alkesGlobal
                         'cantidadIntentada' => $cantidadIntentada,
                         'existenciaRealActual' => $existenciaRealActual
                     ]);
-                    
+
                     $this->resetCantidadPartidaYLotes($indiceDelArreglo);
                     $mensajeLotes = getParametro('lotes') ? ", incluyendo sus lotes o series (en caso de tenerlos)" : "";
-                    
+
                     $this->alerta(
                         "Cantidad inválida",
                         "La cantidad ingresada excede la existencia actual en el almacén seleccionado. Todas las cantidades de esta partida$mensajeLotes, han sido reiniciadas a 0.",
                         "error"
                     );
-                    
+
                     $this->generarTablaLotes($indiceDelArreglo);
                     $this->generarTablaLotesConsulta($indiceDelArreglo);
-                    
+
                     // Actualizar solo el input específico usando el índice
                     $this->response->script("
-                        $('input[data-indice=\"".$indiceDelArreglo."\"]').val('0');
+                        $('input[data-indice=\"" . $indiceDelArreglo . "\"]').val('0');
                     ");
-                    
+
                     return $this->response;
                 }
             }
-            
+
             // Actualizar la cantidad en sesión
             $partida['cantidad'] = $cantidadIntentada;
-            
+
             // Actualizar solo el input específico usando el índice
             $this->response->script("
-                $('input[data-indice=\"".$indiceDelArreglo."\"]').val('".$cantidadIntentada."');
+                $('input[data-indice=\"" . $indiceDelArreglo . "\"]').val('" . $cantidadIntentada . "');
             ");
         } else {
             // La cantidad es inválida (no cumple con el formato de 12 dígitos enteros y 4 decimales)
@@ -709,22 +695,22 @@ class almacenMovimientos extends alkesGlobal
                 'idalmacenes_productos' => $partida['idalmacenes_productos'],
                 'cantidadIntentada' => $cantidadIntentada
             ]);
-            
+
             $this->resetCantidadPartidaYLotes($indiceDelArreglo);
             $mensajeLotes = getParametro('lotes') ? ", incluyendo sus lotes o series (en caso de tenerlos)" : "";
-            
+
             $this->alerta(
                 "Formato de cantidad inválido",
                 "La cantidad ingresada no es válida. Solo se permiten hasta 12 dígitos enteros y 4 decimales. Todas las cantidades de esta partida$mensajeLotes, han sido reiniciadas a 0.",
                 "error"
             );
-            
+
             // Actualizar solo el input específico usando el índice
             $this->response->script("
-                $('input[data-indice=\"".$indiceDelArreglo."\"]').val('0');
+                $('input[data-indice=\"" . $indiceDelArreglo . "\"]').val('0');
             ");
         }
-        
+
         return $this->response;
     }
 
@@ -734,7 +720,7 @@ class almacenMovimientos extends alkesGlobal
 
         // Poner la cantidad de la partida en 0
         $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['cantidad'] = 0;
-        
+
         // Poner las cantidades de todos los lotes o series en 0
         if (isset($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes']) && is_array($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'])) {
             foreach ($_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['lotes'] as &$lote) {
@@ -764,17 +750,13 @@ class almacenMovimientos extends alkesGlobal
         global $database;
         $almacenes_producto = $database->get("almacenes_productos", "*", ["id" => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
         $producto = $database->get("productos", "*", ["id" => $almacenes_producto['idproducto']]);
-        if($producto['lote_serie']=='Sí')
-        {
-            registroLog('validaSiTieneLote', 'Producto requiere selección de lotes', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos'],'idProducto' => $producto['id']]);
+        if ($producto['lote_serie'] == 'Sí') {
+            registroLog('validaSiTieneLote', 'Producto requiere selección de lotes', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos'], 'idProducto' => $producto['id']]);
 
             $naturalezaConcepto = $database->get("almacenes_movimientos_conceptos", "naturaleza", ["id" => $form['idconcepto']]);
-            if($naturalezaConcepto=='Salida')
-            {
+            if ($naturalezaConcepto == 'Salida') {
                 $this->modalSeleccionLotesConsulta($indiceDelArreglo);
-            }
-            elseif($naturalezaConcepto=='Entrada')
-            {
+            } elseif ($naturalezaConcepto == 'Entrada') {
                 $this->modalSeleccionLotes($indiceDelArreglo);
             }
         }
@@ -786,7 +768,7 @@ class almacenMovimientos extends alkesGlobal
         registroLog('modalSeleccionLotesConsulta', 'Abriendo modal para selección de lotes (consulta)', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
 
         // Crear el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalSeleccionLotesConsulta" tabindex="-1" aria-labelledby="modalSeleccionLotesConsultaLabel">';
+        $html = '<div class="modal fade" id="modalSeleccionLotesConsulta" aria-labelledby="modalSeleccionLotesConsultaLabel">';
         $html .= '<div class="modal-dialog modal-xl" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . ' d-flex justify-content-between align-items-center">';
@@ -808,7 +790,7 @@ class almacenMovimientos extends alkesGlobal
         $html .= '</tr>';
         $html .= '</thead>';
         $html .= '<tbody id="tablaLotesConsultaBody">';
-        
+
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
@@ -849,13 +831,13 @@ class almacenMovimientos extends alkesGlobal
         registroLog('modalSeleccionLotes', 'Abriendo modal para selección de lotes', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos']]);
 
         // Crear el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalSeleccionLotes" tabindex="-1" aria-labelledby="modalSeleccionLotesLabel">';
+        $html = '<div class="modal fade" id="modalSeleccionLotes" aria-labelledby="modalSeleccionLotesLabel">';
         $html .= '<div class="modal-dialog modal-xl" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . ' d-flex justify-content-between align-items-center">';
         $html .= '<h5 class="modal-title" id="modalSeleccionLotesLabel">Selección de Lotes</h5>';
         $html .= '<div class="d-flex align-items-center gap-2">';
-        $html .= '<button tabindex="400" id="addLote" name="addLote" class="btn btn-sm border ' . getTextColor() . ' bg-transparent" onclick="JaxonalmacenMovimientos.addFilaLote(' . $indiceDelArreglo . ');" type="button">';
+        $html .= '<button id="addLote" name="addLote" class="btn btn-sm border ' . getTextColor() . ' bg-transparent" onclick="JaxonalmacenMovimientos.addFilaLote(' . $indiceDelArreglo . ');" type="button">';
         $html .= '<span class="bi bi-plus-lg me-1"></span> Agregar';
         $html .= '</button>';
         $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
@@ -876,7 +858,7 @@ class almacenMovimientos extends alkesGlobal
         $html .= '</tr>';
         $html .= '</thead>';
         $html .= '<tbody id="tablaLotesBody">';
-        
+
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
@@ -926,7 +908,7 @@ class almacenMovimientos extends alkesGlobal
         // Construir la consulta para obtener los lotes existentes
         $criteriosConsulta = [
             "idproducto" => $almacenProducto['idproducto'],
-            "idalmacen"  => $almacenProducto['idalmacen']
+            "idalmacen" => $almacenProducto['idalmacen']
         ];
         // Determinar si se permite inventario negativo
         if (!getParametro('inventario_negativo')) {
@@ -1050,21 +1032,21 @@ class almacenMovimientos extends alkesGlobal
 
                     $almacenes_productos_lote = $database->get("almacenes_productos_lotes", "*", [
                         "idproducto" => $almacenes_producto['idproducto'],
-                        "idalmacen"  => $almacenes_producto['idalmacen'],
-                        "lote"       => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'],
-                        "serie"      => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie']
+                        "idalmacen" => $almacenes_producto['idalmacen'],
+                        "lote" => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'],
+                        "serie" => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie']
                     ]);
 
                     if ($almacenes_productos_lote) {
                         $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote] = [
-                            'iddb'        => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['iddb'],  // El ID real del lote en la base de datos
-                            'lote'        => $almacenes_productos_lote['lote'],
-                            'serie'       => $almacenes_productos_lote['serie'],
-                            'pedimento'   => $almacenes_productos_lote['pedimento'],
+                            'iddb' => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['iddb'],  // El ID real del lote en la base de datos
+                            'lote' => $almacenes_productos_lote['lote'],
+                            'serie' => $almacenes_productos_lote['serie'],
+                            'pedimento' => $almacenes_productos_lote['pedimento'],
                             'fabricacion' => $almacenes_productos_lote['fabricacion'],
-                            'caducidad'   => $almacenes_productos_lote['caducidad'],
-                            'cantidad'    => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'],
-                            'estado'      => 'Activo'  // Mantiene el estado como "Activo"
+                            'caducidad' => $almacenes_productos_lote['caducidad'],
+                            'cantidad' => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['cantidad'],
+                            'estado' => 'Activo'  // Mantiene el estado como "Activo"
                         ];
                         $this->alerta("Lote y/o serie encontrados", "Se han llenado automáticamente los campos restantes", "success", null, false, true);
                     }
@@ -1097,7 +1079,7 @@ class almacenMovimientos extends alkesGlobal
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['lote'] = '';
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['serie'] = '';
                     $_SESSION['partidas' . $_GET['rand']][$indicePartida]['lotes'][$indiceLote]['pedimento'] = '';
-                    
+
                     registroLog('validaDatosLote', 'Combinación de lote-serie-fabricación-caducidad repetida', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indicePartida]['idalmacenes_productos'], 'indiceLote' => $indiceLote]);
                     return [
                         'error' => true,
@@ -1287,8 +1269,8 @@ class almacenMovimientos extends alkesGlobal
         if (!empty($errores)) {
             registroLog('validarLotesAlCerrarModal', 'Errores de validación encontrados', ['errores' => $errores]);
             $this->alerta(
-                "Errores de validación", 
-                implode("<br>", $errores), 
+                "Errores de validación",
+                implode("<br>", $errores),
                 "error"
             );
         }
@@ -1308,7 +1290,7 @@ class almacenMovimientos extends alkesGlobal
 
             // Sumar las cantidades de todos los lotes activos
             $cantidadTotal = array_reduce($lotes, function ($carry, $lote) {
-                return $carry + ($lote['estado'] == 'Activo' ? (int)$lote['cantidad'] : 0);
+                return $carry + ($lote['estado'] == 'Activo' ? (int) $lote['cantidad'] : 0);
             }, 0);
 
             registroLog('ajusteCantidad', 'Cantidad total calculada', ['idalmacenes_productos' => $_SESSION['partidas' . $_GET['rand']][$indiceDelArreglo]['idalmacenes_productos'], 'cantidadTotal' => $cantidadTotal]);
@@ -1424,7 +1406,7 @@ class almacenMovimientos extends alkesGlobal
         $database->pdo->beginTransaction();
 
         try {
-            $idMovimiento = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $idMovimiento = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
             // Determinar el folio solo si es un nuevo registro
             if ($idMovimiento == 0) {
@@ -1985,7 +1967,7 @@ class almacenMovimientos extends alkesGlobal
                 "estado" => "Cancelado",
                 "fecha_cancelacion" => date('Y-m-d H:i:s')
             ], ['id' => $idMovimiento]);
-            
+
             return ["mensaje" => "Movimiento en borrador cancelado correctamente"];
         }
 
@@ -2063,10 +2045,10 @@ class almacenMovimientos extends alkesGlobal
             if ($concepto['naturaleza'] == "Entrada") {
                 // Obtener los productos del movimiento original
                 $productos = $database->select("almacenes_movimientos_productos", "*", [
-                    "idmovimiento" => $idMovimiento, 
+                    "idmovimiento" => $idMovimiento,
                     "estado" => "Activo"
                 ]);
-            
+
                 //validar si la empresa puede manejar inventarios negativos
                 if(!getParametro('inventario_negativo'))
                 {
@@ -2107,7 +2089,7 @@ class almacenMovimientos extends alkesGlobal
                         return $this->response;
                     }
                 }
-                
+
                 // Crear un nuevo movimiento de "Salida" para cancelar la entrada
                 $idNuevoMovimiento = $database->insert("almacenes_movimientos", [
                     'idempresa' => $movimiento['idempresa'],
@@ -2128,7 +2110,7 @@ class almacenMovimientos extends alkesGlobal
                     'fecha_procesado' => date('Y-m-d H:i:s'),
                     'fecha_cancelacion' => '0000-00-00 00:00:00',
                 ]);
-            
+
                 foreach ($productos as $producto) {
                     $idNuevoProducto = $database->insert("almacenes_movimientos_productos", [
                         'idmovimiento' => $idNuevoMovimiento,
@@ -2160,14 +2142,14 @@ class almacenMovimientos extends alkesGlobal
                         }
                     }
                 }
-            
+
                 // Marcar el movimiento original como cancelado
                 $database->update('almacenes_movimientos', [
                     "estado" => "Cancelado",
                     "fecha_cancelacion" => date('Y-m-d H:i:s')
                 ], ['id' => $idMovimiento]);
             }
-            
+
         }
         return $this->response;
     }
@@ -2178,7 +2160,7 @@ class almacenMovimientos extends alkesGlobal
         // Verificar si hay partidas en la sesión
         if (isset($_SESSION['partidas' . $_GET['rand']]) && is_array($_SESSION['partidas' . $_GET['rand']])) {
             foreach ($_SESSION['partidas' . $_GET['rand']] as $indicePartida => $partida) {
-                
+
                 // Omitir si la partida es nueva (iddb == 0) y no tiene cantidad o está inactiva
                 if ($partida['iddb'] == 0 && ($partida['cantidad'] == 0 || $partida['estado'] == 'Inactivo')) {
                     continue;
@@ -2335,7 +2317,7 @@ class almacenMovimientos extends alkesGlobal
         }
         return $this->response;
     }*/
-    
+
 }
 
 $jaxon = jaxon();

@@ -281,7 +281,7 @@ if (file_exists($pathControlador)) {
                                         <div class="card-header text-bg-<?= getEnfasis(); ?>">
                                             <h3 class="card-title">Productos agregados</h3>
                                             <div class="card-tools d-flex align-items-center gap-2">
-                                                <button tabindex="400" id="addPartidas" name="addPartidas"
+                                                <button id="addPartidas" name="addPartidas"
                                                     class="btn btn-sm border <?= getTextColor(); ?> bg-transparent"
                                                     onclick="JaxonalmacenMovimientos.modalSeleccionarProductos(jaxon.getFormValues('formulario<?= $_GET['rand'] ?>'));"
                                                     type="button">

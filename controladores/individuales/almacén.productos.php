@@ -57,13 +57,22 @@ class almacenProductos extends alkesGlobal
 
             $this->cargarImpuestosConsulta();
         }
+        // Obtén la ruta actual dividida en segmentos
+        $ruta = explode(DIRECTORY_SEPARATOR, getcwd());
 
-        $rand = $_GET['rand']; // Obtener el valor dinámico
-        $this->response->append("botonera-contenedor", "innerHTML", "
-            <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
-                <i class='bi bi-floppy'></i> Guardar
-            </button>
-        ");
+        // Calcular nombres de módulos semidinámicamente
+        $modulo = $ruta[(count($ruta) - 2)];
+        $submodulo = $ruta[(count($ruta) - 1)];
+        $subsubmodulo = null;
+
+        if (validaPermisoEditarModulo($modulo, $submodulo, $subsubmodulo)) {
+            $rand = $_GET['rand']; // Obtener el valor dinámico
+            $this->response->append("botonera-contenedor", "innerHTML", "
+                <button class='btn btn-primary btn-sm' type='button' id='btnguardar' name='btnguardar' onclick='JaxonalmacenProductos.validar(jaxon.getFormValues(\"formulario{$rand}\"));'>
+                    <i class='bi bi-floppy'></i> Guardar
+                </button>
+            ");
+        }
 
         return $this->response;
     }
@@ -507,7 +516,7 @@ class almacenProductos extends alkesGlobal
             $resultadoValidacionRepetidoCodigoBarras = verificaRegistroRepetido("empresa", "productos", "codigo_barras", $form['codigo_barras'], $_GET['id']);
             if ($resultadoValidacionRepetidoCodigoBarras) {
                 // El registro está repetido, mostrar un error
-                $this->alerta('Error', 'Ya existe existe un producto con este codigo de barras', 'error', 'codigo_barras', true, false);
+                $this->alerta('Error', 'Ya existe un producto con este codigo de barras', 'error', 'codigo_barras', true, false);
                 return $this->response;
             } else {
                 $resultadoValidacionRepetidoNombre = verificaRegistroRepetido("empresa", "productos", "nombre", $form['nombre'], $_GET['id']);
