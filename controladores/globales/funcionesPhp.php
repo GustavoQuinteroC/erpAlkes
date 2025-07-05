@@ -3,7 +3,7 @@
 #CODIGO FUENTE DE FUNCIONES PHP GLOBALES PARA EL SISTEMA
 #INICIO DE VERSION 07/JUNIO/2024
 #GUSTAVO QUINTERO
-#ALKES - 
+#ALKES -
 ##########################################################################
 use Medoo\Medoo;
 use Dotenv\Dotenv;
@@ -193,17 +193,25 @@ function encabezado()
 
     // Consultar datos del usuario desde la base de datos.
     $usuarioId = $_SESSION['idusuario'];
-    $usuario = $database->get("usuarios", ["nombre", "departamento", "ingreso", "backgrounds"], ["id" => $usuarioId]);
+    // Obtener datos del usuario y el nombre del departamento
+    $usuario = $database->select("usuarios", [
+        "[>]departamentos" => ["iddepartamento" => "id"]
+    ], [
+        "usuarios.nombre",
+        "departamentos.nombre(departamento)",
+        "usuarios.ingreso",
+        "usuarios.backgrounds"
+    ], [
+        "usuarios.id" => $usuarioId
+    ]);
 
-    // Verificar si la consulta devolvió resultados.
-    if (!$usuario) {
+    if (!$usuario || count($usuario) == 0) {
         return '<p>Error: Usuario no encontrado en la base de datos.</p>';
     }
 
+    $usuario = $usuario[0]; // El resultado es un array de resultados, tomamos el primero
     $nombreUsuario = htmlspecialchars($usuario['nombre']);
     $departamento = htmlspecialchars($usuario['departamento'] ?? 'Sin departamento');
-
-    // Determinar el icono según el tema del usuario.
     $tema = $usuario['backgrounds'] ?? 'light';
     $iconoTema = $tema === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
 
@@ -227,20 +235,20 @@ function encabezado()
     <nav class="app-header navbar navbar-expand bg-body">
         <div class="container-fluid">
             <ul class="navbar-nav">
-                <li class="nav-item"> 
-                    <a class="nav-link" data-lte-toggle="sidebar" role="button"> 
-                        <i class="bi bi-list"></i> 
-                    </a> 
+                <li class="nav-item">
+                    <a class="nav-link" data-lte-toggle="sidebar" role="button">
+                        <i class="bi bi-list"></i>
+                    </a>
                 </li>
-                <li class="nav-item d-none d-md-block"> 
-                    <a href="https://alkes.xyz/soporte" class="nav-link">Soporte</a> 
+                <li class="nav-item d-none d-md-block">
+                    <a href="https://alkes.xyz/soporte" class="nav-link">Soporte</a>
                 </li>
-                <li class="nav-item d-none d-md-block"> 
-                    <a href="https://alkes.xyz/aprende" class="nav-link">Aprende</a> 
+                <li class="nav-item d-none d-md-block">
+                    <a href="https://alkes.xyz/aprende" class="nav-link">Aprende</a>
                 </li>
-            </ul> 
+            </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown"> 
+                <li class="nav-item dropdown">
                     <!-- Botón de selección de tema -->
                     <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="' . $iconoTema . '" id="iconoTema"></i>
@@ -259,7 +267,7 @@ function encabezado()
                     </ul>
                 </li>
                 <!-- Icono para cambiar colores -->
-                <li class="nav-item dropdown"> 
+                <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-brush" id="iconoColor"></i> <!-- Icono de pincel -->
                     </a>
@@ -308,30 +316,30 @@ function encabezado()
                     </ul>
                 </li>
                 <!-- Botón de pantalla completa -->
-                <li class="nav-item"> 
-                    <a class="nav-link" data-lte-toggle="fullscreen"> 
-                        <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i> 
-                        <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i> 
-                    </a> 
-                </li> 
-                <!--begin::User Menu Dropdown-->
-                <li class="nav-item dropdown user-menu"> 
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown"> 
-                        <img src="/src/assets/img/users/' . $usuarioId . '.jpg" class="user-image rounded-circle shadow" alt="User Image"> 
-                        <span class="d-none d-md-inline">' . $nombreUsuario . '</span> 
+                <li class="nav-item">
+                    <a class="nav-link" data-lte-toggle="fullscreen">
+                        <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                        <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end"> 
+                </li>
+                <!--begin::User Menu Dropdown-->
+                <li class="nav-item dropdown user-menu">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <img src="/src/assets/img/users/' . $usuarioId . '.jpg" class="user-image rounded-circle shadow" alt="User Image">
+                        <span class="d-none d-md-inline">' . $nombreUsuario . '</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                         <!--begin::User Image-->
-                        <li class="user-header text-bg-' . getEnfasis() . '"> 
+                        <li class="user-header text-bg-' . getEnfasis() . '">
                             <img src="/src/assets/img/users/' . $usuarioId . '.jpg" class="rounded-circle shadow" alt="User Image">
                             <p>
                                 ' . $nombreUsuario . ' - ' . $departamento . '
                                 <small>Miembro desde ' . $fechaIngreso . '</small>
                             </p>
-                        </li> 
-                        <li class="user-footer"> 
-                            <button class="btn btn-primary btn-flat" type="button" onclick="xajax_mi_perfil();">Mi perfil</button> 
-                            <button class="btn btn-danger btn-flat float-end" type="button" onclick="JaxonalkesGlobal.unionCerrarSesion();">Cerrar sesión</button> 
+                        </li>
+                        <li class="user-footer">
+                            <button class="btn btn-primary btn-flat" type="button" onclick="xajax_mi_perfil();">Mi perfil</button>
+                            <button class="btn btn-danger btn-flat float-end" type="button" onclick="JaxonalkesGlobal.unionCerrarSesion();">Cerrar sesión</button>
                         </li> <!--end::Menu Footer-->
                     </ul>
                 </li>
@@ -347,7 +355,6 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
 {
     global $database;
 
-    // Obtener los módulos disponibles para el usuario (con sus permisos)
     $resultado = $database->select(
         "modulos",
         [
@@ -363,7 +370,10 @@ function menuLateral($moduloActivo = null, $submoduloActivo = null, $subsubmodul
         ],
         [
             "usuarios_modulos.idusuario" => $_SESSION['idusuario'],
-            "usuarios_modulos.ver" => 1
+            "usuarios_modulos.ver" => 1,
+            "ORDER" => [
+                "modulos.orden" => "ASC"
+            ]
         ]
     );
 
@@ -455,6 +465,8 @@ function scriptsHtml()
 {
     $html = "<!-- jQuery -->
     <script src=\"/plugins/jquery/jquery.min.js\"></script>
+    <link rel=\"stylesheet\" href=\"/plugins/jquery-ui/jquery-ui.css\">
+    <script src=\"/plugins/jquery-ui/jquery-ui.min.js\"></script>
     <!-- Bootstrap 4 -->
     <script src=\"/plugins/bootstrap/js/bootstrap.bundle.min.js\"></script>
     <!-- DataTables  & Plugins -->
@@ -996,6 +1008,34 @@ function getSucursales()
     return $options;
 }
 
+function getDepartamentos()
+{
+    global $database;
+    $registros = $database->select(
+        "departamentos",
+        ["id", "nombre"],
+        [
+            "idempresa" => $_SESSION['idempresa'],
+            "estado" => "Activo"
+        ],
+        [
+            "ORDER" => ["nombre" => "ASC"]
+        ]
+    );
+
+    $options = '<option value="" . disabled>Elije una opción...</option>';
+    if (!empty($registros)) {
+        foreach ($registros as $registro) {
+            // Verificar si el símbolo está vacío o es null
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . htmlspecialchars($registro['nombre']) . '</option>';
+        }
+    } else {
+        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+    }
+
+    return $options;
+}
+
 function getUsuarios()
 {
     global $database;
@@ -1122,9 +1162,9 @@ function getCfdiUsoCfdi($idregimen = null)
     if (!empty($registros)) {
         $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
-                        htmlspecialchars($registro['c_usocfdi']) . " - " . 
-                        htmlspecialchars($registro['descripcion']) . '</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' .
+                htmlspecialchars($registro['c_usocfdi']) . " - " .
+                htmlspecialchars($registro['descripcion']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -1198,8 +1238,8 @@ function getCfdiMunicipio($idestado)
     if (!empty($registros)) {
         $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
-                        htmlspecialchars($registro['descripcion']) .'</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' .
+                htmlspecialchars($registro['descripcion']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -1231,8 +1271,8 @@ function getCfdiColonia($codigoPostal)
     if (!empty($registros)) {
         $options = '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
-            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' . 
-                        htmlspecialchars($registro['nombre']) .'</option>';
+            $options .= '<option value="' . htmlspecialchars($registro['id']) . '">' .
+                htmlspecialchars($registro['nombre']) . '</option>';
         }
     } else {
         $options .= '<option value="" disabled>No hay opciones disponibles</option>';
@@ -1419,7 +1459,7 @@ function verificaRegistroRepetido($nivel, $tabla, $columna, $dato, $idb = 0)
 function getConsecutivo($pertenece)
 {
     global $database; // Instancia global de Medoo
-    
+
     // Consultar el consecutivo correspondiente a la pertenencia, sucursal y empresa
     $info_siguiente = $database->select("consecutivos", [
         "id",
@@ -1456,7 +1496,8 @@ function getConsecutivo($pertenece)
     return $consecutivoFormado;
 }
 
-function getParametro($parametro) {
+function getParametro($parametro)
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1468,7 +1509,8 @@ function getParametro($parametro) {
     return $resultado;
 }
 
-function getAlmacenesMovimientosConceptos() {
+function getAlmacenesMovimientosConceptos()
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1488,7 +1530,8 @@ function getAlmacenesMovimientosConceptos() {
     return $options;
 }
 
-function getAlmacenesPorSucursal() {
+function getAlmacenesPorSucursal()
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1511,7 +1554,8 @@ function getAlmacenesPorSucursal() {
     return $options;
 }
 
-function getAlmacenesPorEmpresa() {
+function getAlmacenesPorEmpresa()
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1533,13 +1577,14 @@ function getAlmacenesPorEmpresa() {
     return $options;
 }
 
-function getDirecciones($idsocio = null, $idsociosubcuenta = null) {
+function getDirecciones($idsocio = null, $idsociosubcuenta = null)
+{
     global $database; // Asume que $database es una instancia de Medoo
 
     // Inicializar un array para almacenar los resultados combinados
     $registros = [];
 
-    // Consulta para direcciones de socios
+    /* —————————————— 1. SOCIO —————————————— */
     if ($idsocio !== null) {
         $registrosSocio = $database->select("direcciones", [
             "id",
@@ -1553,14 +1598,13 @@ function getDirecciones($idsocio = null, $idsociosubcuenta = null) {
             "ORDER" => ["id" => "ASC"]
         ]);
 
-        // Agregar el tipo 'Socio' a cada registro
         foreach ($registrosSocio as $registro) {
             $registro['tipo'] = 'Socio';
             $registros[] = $registro;
         }
     }
 
-    // Consulta para direcciones de sucursales
+    /* —————————————— 2. SUCURSAL —————————————— */
     if ($_SESSION['idsucursal'] !== null) {
         $registrosSucursal = $database->select("direcciones", [
             "id",
@@ -1574,26 +1618,22 @@ function getDirecciones($idsocio = null, $idsociosubcuenta = null) {
             "ORDER" => ["id" => "ASC"]
         ]);
 
-        // Agregar el tipo 'Sucursal' a cada registro
         foreach ($registrosSucursal as $registro) {
             $registro['tipo'] = 'Sucursal';
             $registros[] = $registro;
         }
     }
 
-    // Consulta para direcciones de subcuentas (socios hijos)
+    /* —————————————— 3. SUBCUENTA —————————————— */
     if ($idsociosubcuenta !== null) {
         // Obtener el idsocio_hijo de la subcuenta
-        $subcuenta = $database->select("socios_subcuentas", [
-            "idsocio_hijo"
-        ], [
+        $subcuenta = $database->select("socios_subcuentas", ["idsocio_hijo"], [
             "id" => $idsociosubcuenta
         ]);
-        // Si se encuentra un resultado
+
         if (!empty($subcuenta)) {
             $idsocio_hijo = $subcuenta[0]['idsocio_hijo'];
 
-            // Obtener las direcciones de la subcuenta (socios hijos)
             $registrosSubcuenta = $database->select("direcciones", [
                 "id",
                 "nombre",
@@ -1601,12 +1641,11 @@ function getDirecciones($idsocio = null, $idsociosubcuenta = null) {
             ], [
                 "idempresa" => $_SESSION['idempresa'],
                 "estado" => "Activa",
-                "idsocio" => $idsocio_hijo, // Usar el idsocio_hijo
+                "idsocio" => $idsocio_hijo,
                 "idsucursal" => 0,
                 "ORDER" => ["id" => "ASC"]
             ]);
 
-            // Agregar el tipo 'Subcuenta' a cada registro
             foreach ($registrosSubcuenta as $registro) {
                 $registro['tipo'] = 'Subcuenta';
                 $registros[] = $registro;
@@ -1614,26 +1653,34 @@ function getDirecciones($idsocio = null, $idsociosubcuenta = null) {
         }
     }
 
-    // Construir las opciones del select
+    /* —————————————— 4. CONSTRUIR <select> —————————————— */
     $options = '';
+
     if (!empty($registros)) {
-        $options = '<option value="" selected disabled>Elije una opción...</option>';
+        $options .= '<option value="" selected disabled>Elije una opción...</option>';
         foreach ($registros as $registro) {
-            $tipo = $registro['tipo'];
-            $nombre = htmlspecialchars($registro['nombre']);
-            $cp = htmlspecialchars($registro['cp']);
-            $id = htmlspecialchars($registro['id']);
-            $options .= '<option value="' . $id . '">' . $tipo . ' - ' . $nombre . ' (' . $cp . ')</option>';
+            $options .= sprintf(
+                '<option value="%d">%s - %s (%s)</option>',
+                htmlspecialchars($registro['id']),
+                $registro['tipo'],
+                htmlspecialchars($registro['nombre']),
+                htmlspecialchars($registro['cp'])
+            );
         }
     } else {
-        $options .= '<option value="" disabled>No hay opciones disponibles</option>';
+        $options .= '<option value="" selected disabled>No hay opciones disponibles</option>';
     }
+
+    /* ——— 5. OPCIÓN “OTRA…” ——— */
+    $options .= '<option value="0">Otra...</option>';
 
     return $options;
 }
 
 
-function getSocios() {
+
+function getSocios()
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1663,7 +1710,8 @@ function getSocios() {
     return $options;
 }
 
-function getClientes() {
+function getClientes()
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1696,7 +1744,8 @@ function getClientes() {
 }
 
 
-function getProveedores() {
+function getProveedores()
+{
     // Acceder a la variable global de la base de datos
     global $database;
 
@@ -1744,7 +1793,7 @@ function getSubcuentas($idsocio)
         "socios_subcuentas.estado" => 'Activo',
         "ORDER" => ["socios.clave" => "ASC"]
     ]);
-    
+
     $options = '';
     if (!empty($registros)) {
         $options = '<option value="" selected disabled>Elije una opción...</option>';
@@ -1759,7 +1808,7 @@ function getSubcuentas($idsocio)
 }
 
 
-function validarExistenciaSalida($partidas) 
+function validarExistenciaSalida($partidas)
 {
     global $database;
     $errores = [];

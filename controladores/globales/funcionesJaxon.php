@@ -3,10 +3,10 @@
 #CODIGO FUENTE DE FUNCIONES JAXON GLOBALES PARA EL SISTEMA
 #INICIO DE VERSION 07/JUNIO/2024
 #GUSTAVO QUINTERO
-#ALKES - 
+#ALKES -
 ##########################################################################
-require_once(__DIR__ ."/../../vendor/autoload.php");
-require_once(__DIR__ ."/funcionesPhp.php");
+require_once(__DIR__ . "/../../vendor/autoload.php");
+require_once(__DIR__ . "/funcionesPhp.php");
 
 
 use function Jaxon\jaxon;
@@ -14,7 +14,7 @@ use Jaxon\Jaxon;
 use Medoo\Medoo;
 
 // Inicializa Jaxon
-$url_base = $_SERVER['HTTP_X_FORWARDED_PROTO']."://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$url_base = $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $jaxon = jaxon();
 $jaxon->setOption('core.request.uri', $url_base);
 
@@ -83,7 +83,7 @@ class alkesGlobal
     {
         $filtros = filtrosTablas($modulo, $submodulo, $subsubmodulo);
         $html = '';
-    
+
         // Construcción específica para la vista normal
         $html .= '<ul class="nav nav-tabs">';
         foreach ($filtros as $filtro) {
@@ -93,25 +93,25 @@ class alkesGlobal
         }
         $html .= '</ul>';
         $this->response->assign("filtros", "innerHTML", $html);
-    
+
         $html = '<table id="tablaListado" class="table table-striped table-hover display" style="width:100%">';
-    
+
         // Añadir las columnas de la tabla y cerrar etiquetas necesarias
         $columnas = columnasTablas($modulo, $submodulo, $subsubmodulo, $uso);
         $orden = ordenTablas($modulo, $submodulo, $subsubmodulo, $uso);
         $html .= '<thead><tr>' . $columnas . '</tr></thead></table>';
-    
+
         $this->response->assign("tabla", "innerHTML", $html);
-    
+
         // Configuración de DataTable con parámetros comunes
         $ajaxUrl = '/controladores/globales/tablas.php?modulo=' . $modulo . '&submodulo=' . $submodulo . '&subsubmodulo=' . $subsubmodulo . '&filtro=' . $filtroSeleccionado . '&uso=' . $uso;
         $pageLength = 10;
         $lengthMenu = '[[10, 20, 50, 100, 500, 10000, 100000], [10, 20, 50, 100, 500, 10000, 100000]]';
-    
+
         // Construir $dom y $botonera
         $dom = 'dom: "<\'top d-flex justify-content-between align-items-center\' <\'left\'l> <\'center\'B> <\'right\'f>>rtip",';
         $botonera = 'buttons: ["copy", "excel", "print", "colvis"],';
-    
+
         // Script para inicializar DataTable
         $this->response->script("\n        if ($.fn.DataTable.isDataTable('#tablaListado')) {\n            $('#tablaListado').DataTable().destroy();\n        }\n        $('#tablaListado').DataTable({\n            ajax: '$ajaxUrl',\n            responsive: true,\n            processing: true,\n            serverSide: true,\n            pageLength: $pageLength,\n            lengthMenu: $lengthMenu,\n            info: true,  // Aquí desactivamos la visualización de la información de los registros\n            $dom\n            $botonera\n            language: {\n                url: \"/plugins/datatables/es-ES.json\"\n            },\n            order: [[" . $orden['indice'] . ", '" . $orden['orden'] . "']]\n        });\n    ");
 
@@ -124,7 +124,7 @@ class alkesGlobal
                 $this->response->script('$("li[id=\"" + "' . $nombre . '" + "\"]").removeClass("active"); $("li[id=\"" + "' . $nombre . '" + "\"] a").removeClass("active");');
             }
         }
-    
+
         return $this->response;
     }
 
@@ -177,13 +177,13 @@ class alkesGlobal
         return $this->response;
     }
 
-    function modalSeleccionServerSide($modulo, $submodulo, $subsubmodulo, $idalmacen=0, $filtroSeleccionado = '', $uso = '', $funcionCallBack = '', $multiple = false, $parametrosAdicionales = '', $tituloModal = '')
+    function modalSeleccionServerSide($modulo, $submodulo, $subsubmodulo, $idalmacen = 0, $filtroSeleccionado = '', $uso = '', $funcionCallBack = '', $multiple = false, $parametrosAdicionales = '', $tituloModal = '')
     {
         $filtros = filtrosTablas($modulo, $submodulo, $subsubmodulo);
         $html = '';
 
         // Construcción específica para el modal
-        $html .= '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel">';
+        $html .= '<div class="modal fade" id="modalSeleccion" role="dialog" aria-labelledby="modalSeleccionLabel">';
         $html .= '<div class="modal-dialog modal-xl" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
@@ -192,7 +192,7 @@ class alkesGlobal
         $html .= '<div class="modal-body">';
         $html .= '<form id="formModalSeleccion">';
         $html .= '<table id="tablaModalSeleccion" class="table table-striped table-hover display" style="width:100%">';
-        
+
         // Añadir las columnas de la tabla y cerrar etiquetas necesarias
         $columnas = columnasTablas($modulo, $submodulo, $subsubmodulo, $uso);
         $orden = ordenTablas($modulo, $submodulo, $subsubmodulo, $uso);
@@ -245,7 +245,7 @@ class alkesGlobal
                 language: {
                     url: \"/plugins/datatables/es-ES.json\"
                 },
-                order: [[".$orden['indice'].", '".$orden['orden']."']],
+                order: [[" . $orden['indice'] . ", '" . $orden['orden'] . "']],
                 $columnDefs
             });
         ");
@@ -261,12 +261,12 @@ class alkesGlobal
 
         return $this->response;
     }
-    
+
 
     public function modalFormulario($campos, $titulo, $funcionCallBack, $parametrosAdicionales = '')
     {
         // Crear el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalFormularioLabel">';
+        $html = '<div class="modal fade" id="modalFormulario" aria-labelledby="modalFormularioLabel">';
         $tamanoModal = count($campos) > 6 ? 'modal-lg' : '';
         $html .= '<div class="modal-dialog ' . $tamanoModal . '">';
 
@@ -400,10 +400,10 @@ class alkesGlobal
         $tema = getBackground();
         $backgroundColor = $tema == 'dark' ? '#212529' : '#ffffff'; // Fondo según tema
         $textColor = $tema == 'dark' ? '#ffffff' : '#000000';       // Texto según tema
-    
+
         // Quitar el foco del elemento activo
         $this->response->script('$(document.activeElement).blur();');
-    
+
         // Construir el script de SweetAlert2 con los parámetros proporcionados
         $script = '
             Swal.fire({
@@ -433,20 +433,20 @@ class alkesGlobal
                 }
             });
         ';
-    
+
         // Agregar el script de SweetAlert2 a la response
         $this->response->script($script);
-    
+
         // Devolver la response
         return $this->response;
     }
-    
 
 
-    public function modalSeleccion($titulo, $columnas, $data, $funcionCallBack, $seleccion=true, $multiple = false, $parametrosAdicionales = '')
+
+    public function modalSeleccion($titulo, $columnas, $data, $funcionCallBack, $seleccion = true, $multiple = false, $parametrosAdicionales = '')
     {
         // Construcción del HTML del modal
-        $html = '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel">';
+        $html = '<div class="modal fade" id="modalSeleccion" role="dialog" aria-labelledby="modalSeleccionLabel">';
         $html .= '<div class="modal-dialog modal-xl" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header text-bg-' . getEnfasis() . '">';
@@ -458,9 +458,9 @@ class alkesGlobal
         $html .= '<thead><tr>';
 
         // Agrega los encabezados de las columnas
-    foreach ($columnas as $columna) {
-        $html .= '<th>' . $columna . '</th>';
-    }
+        foreach ($columnas as $columna) {
+            $html .= '<th>' . $columna . '</th>';
+        }
 
         // Agrega una columna extra para la selección si $seleccion es true
         if ($seleccion) {
@@ -503,9 +503,8 @@ class alkesGlobal
         $html .= '</div>';
         $html .= '<div class="modal-footer">';
         $html .= '<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$(\'#modalSeleccion\').modal(\'hide\').remove();">Cancelar</button>';
-        if ($seleccion)
-	    {
-        $html .= '<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="' . $funcionCallBack . '(jaxon.getFormValues(\'formModalSeleccion\')' . $parametrosAdicionales . '); $(\'#modalSeleccion\').modal(\'hide\');">Aceptar</button>';
+        if ($seleccion) {
+            $html .= '<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="' . $funcionCallBack . '(jaxon.getFormValues(\'formModalSeleccion\')' . $parametrosAdicionales . '); $(\'#modalSeleccion\').modal(\'hide\');">Aceptar</button>';
         }
         $html .= '</div>';
         $html .= '</div>';
@@ -534,7 +533,6 @@ class alkesGlobal
         return $this->response;
     }
 
-    
 
 
 
@@ -577,14 +575,15 @@ class alkesGlobal
 
 
 
-    
+
+
 
 
 
     public function modalSeleccion_OLD($titulo, $columnas, $data, $funcionCallBack, $multiple = false, $parametrosAdicionales = '')
     {
         // Crea el HTML de la ventana modal
-        $html = '<div class="modal fade" id="modalSeleccion" tabindex="-1" role="dialog" aria-labelledby="modalSeleccionLabel">';
+        $html = '<div class="modal fade" id="modalSeleccion" role="dialog" aria-labelledby="modalSeleccionLabel">';
         $html .= '<div class="modal-dialog modal-lg" role="document">';
         $html .= '<div class="modal-content">';
         $html .= '<div class="modal-header bg-secondary">';
@@ -651,7 +650,7 @@ class alkesGlobal
         return $this->response;
     }
 
-    
+
     public function deshabilitaSelect($nombreDelSelect)
     {
         $this->response->script("
@@ -730,7 +729,7 @@ class alkesGlobal
 
         return $this->response;
     }
-    
+
 
 }
 
